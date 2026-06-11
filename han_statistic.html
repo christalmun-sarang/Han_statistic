@@ -670,8 +670,8 @@ async function saveSarang() {
 async function saveMonthlyFinance(clinic, month, revItems, expItems, msgId) {
   const totRev = revItems.reduce((s,i)=>s+(i.amount||0),0);
   const totExp = expItems.reduce((s,i)=>s+(i.amount||0),0);
-  const revLastDate = document.getElementById(`${clinic}-rev-lastdate`)?.value || null;
-  const expLastDate = document.getElementById(`${clinic}-exp-lastdate`)?.value || null;
+  const revLastDate = document.getElementById(clinic+'-rev-lastdate')?.value || null;
+  const expLastDate = document.getElementById(clinic+'-exp-lastdate')?.value || null;
   const payload = {
     clinic, year_month: month,
     total_revenue: totRev, total_expense: totExp, net_income: totRev-totExp,
@@ -679,12 +679,35 @@ async function saveMonthlyFinance(clinic, month, revItems, expItems, msgId) {
   };
   loading(true);
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Monthly_finance`, {
-      method:'POST', headers:{...HDR,'Prefer':'resolution=merge-duplicates'}, body:JSON.stringify(payload)
-    });
-    if (!res.ok) { const e=await res.json(); throw new Error(e.message||`HTTP ${res.status}`); }
-    showMsg(msgId,`✓ ${month} 저장 완료!`,true);
-    setStatus(`✓ ${clinic==='han'?'한강':'사랑'} ${month} 저장됨`,'success');
+    // 먼저 해당 월 데이터 존재 여부 확인
+    const chk = await fetch(
+      SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.'+clinic+'&year_month=eq.'+month+'&select=id&limit=1',
+      {headers:HDR}
+    );
+    const existing = await chk.json();
+    const exists = Array.isArray(existing) && existing.length > 0;
+
+    let res;
+    if (exists) {
+      // 이미 있으면 PATCH(업데이트)
+      res = await fetch(
+        SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.'+clinic+'&year_month=eq.'+month,
+        { method:'PATCH', headers:{...HDR,'Prefer':'return=minimal'}, body:JSON.stringify(payload) }
+      );
+    } else {
+      // 없으면 POST(신규)
+      res = await fetch(
+        SUPABASE_URL+'/rest/v1/Monthly_finance',
+        { method:'POST', headers:{...HDR,'Prefer':'return=minimal'}, body:JSON.stringify(payload) }
+      );
+    }
+    if (!res.ok) {
+      let msg = 'HTTP '+res.status;
+      try { const e=await res.json(); msg=e.message||msg; } catch(e2){}
+      throw new Error(msg);
+    }
+    showMsg(msgId,'✓ '+month+' 저장 완료!',true);
+    setStatus('✓ '+(clinic==='han'?'한강':'사랑')+' '+month+' 저장됨','success');
   } catch(e){ showMsg(msgId,'오류: '+e.message,false); setStatus('⚠ '+e.message,'error'); }
   finally { loading(false); }
 }
