@@ -9,32 +9,69 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a18; min-height: 100vh; }
 
-  .header { background: #fff; border-bottom: 0.5px solid #ddddd5; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  /* ── 헤더 & 탭 내비 ── */
+  .header { background: #fff; border-bottom: 0.5px solid #ddddd5; padding: 14px 24px 0; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .header h1 { font-size: 18px; font-weight: 500; }
-  .header .subtitle { font-size: 13px; color: #888780; margin-top: 2px; }
+  .header .subtitle { font-size: 12px; color: #888780; margin-top: 2px; }
+  .tabs { display: flex; gap: 0; }
+  .tab { padding: 10px 24px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: none; color: #888780; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+  .tab:hover { color: #1a1a18; }
+  .tab.active { color: #1a1a18; border-bottom-color: #1a1a18; }
 
-  .status-bar { background: #eaf3de; border-bottom: 0.5px solid #c0dd97; padding: 8px 24px; font-size: 13px; color: #3b6d11; display: flex; align-items: center; gap: 8px; }
-  .status-bar.error { background: #fcebeb; border-color: #f09595; color: #a32d2d; }
-  .status-bar.loading { background: #e6f1fb; border-color: #85b7eb; color: #185fa5; }
+  .status-bar { padding: 7px 24px; font-size: 13px; }
+  .status-bar.success { background: #eaf3de; color: #3b6d11; }
+  .status-bar.error   { background: #fcebeb; color: #a32d2d; }
+  .status-bar.loading { background: #e6f1fb; color: #185fa5; }
 
-  .controls { background: #fff; border-bottom: 0.5px solid #ddddd5; padding: 12px 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  select, button { border: 0.5px solid #b4b2a9; border-radius: 8px; padding: 6px 14px; font-size: 14px; background: #fff; cursor: pointer; color: #1a1a18; }
-  button { background: #1a1a18; color: #fff; border-color: #1a1a18; font-weight: 500; }
+  /* ── 공통 ── */
+  .page { display: none; }
+  .page.active { display: block; }
+  .main { padding: 20px 24px; max-width: 1100px; margin: 0 auto; }
+
+  select, input[type=text], input[type=number], input[type=date] {
+    border: 0.5px solid #b4b2a9; border-radius: 8px; padding: 7px 12px;
+    font-size: 14px; background: #fff; color: #1a1a18; width: 100%;
+  }
+  select:focus, input:focus { outline: 2px solid #185fa5; outline-offset: 1px; }
+  button { border: 0.5px solid #1a1a18; border-radius: 8px; padding: 8px 18px; font-size: 14px; background: #1a1a18; color: #fff; font-weight: 500; cursor: pointer; }
   button:hover { background: #333; }
   button.secondary { background: #fff; color: #1a1a18; border-color: #b4b2a9; }
   button.secondary:hover { background: #f5f5f0; }
-  .label { font-size: 13px; color: #888780; }
+  button.danger { background: #fff; color: #a32d2d; border-color: #f09595; }
+  button.danger:hover { background: #fcebeb; }
 
-  .main { padding: 20px 24px; max-width: 1100px; margin: 0 auto; }
+  /* ── 데이터 입력 페이지 ── */
+  .form-card { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+  .form-card h2 { font-size: 15px; font-weight: 500; margin-bottom: 16px; color: #1a1a18; }
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .form-field label { display: block; font-size: 12px; color: #888780; margin-bottom: 5px; }
+  .form-actions { display: flex; gap: 10px; margin-top: 18px; align-items: center; }
+  .form-msg { font-size: 13px; }
+  .form-msg.ok { color: #3b6d11; }
+  .form-msg.err { color: #a32d2d; }
 
-  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .recent-card { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 20px 24px; }
+  .recent-card h2 { font-size: 15px; font-weight: 500; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: #888780; font-weight: 500; padding: 6px 8px; border-bottom: 0.5px solid #ddddd5; }
+  td { padding: 8px 8px; border-bottom: 0.5px solid #f1efe8; }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:hover td { background: #f5f5f0; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+  .badge-sun { background: #fcebeb; color: #a32d2d; }
+
+  /* ── 통계 페이지 ── */
+  .controls { background: #fff; border-bottom: 0.5px solid #ddddd5; padding: 10px 24px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .ctrl-label { font-size: 13px; color: #888780; }
+  .controls select { width: auto; }
+
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px; margin-bottom: 20px; }
   .metric-card { background: #f1efe8; border-radius: 8px; padding: 14px 16px; }
-  .metric-card .label { font-size: 12px; color: #888780; margin-bottom: 4px; }
-  .metric-card .value { font-size: 22px; font-weight: 500; color: #1a1a18; }
-  .metric-card .sub { font-size: 12px; color: #888780; margin-top: 2px; }
-  .metric-card .delta { font-size: 12px; margin-top: 3px; }
-  .delta.up { color: #3b6d11; }
-  .delta.down { color: #a32d2d; }
+  .metric-card .mlabel { font-size: 12px; color: #888780; margin-bottom: 4px; }
+  .metric-card .mvalue { font-size: 22px; font-weight: 500; }
+  .metric-card .msub { font-size: 12px; color: #888780; margin-top: 2px; }
 
   .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
   @media (max-width: 700px) { .chart-grid { grid-template-columns: 1fr; } }
@@ -44,17 +81,6 @@
 
   .table-card { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
   .table-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 14px; color: #444441; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; color: #888780; font-weight: 500; padding: 6px 8px; border-bottom: 0.5px solid #ddddd5; }
-  td { padding: 8px 8px; border-bottom: 0.5px solid #f1efe8; }
-  tr:last-child td { border-bottom: none; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  tr:hover td { background: #f5f5f0; }
-
-  .upload-section { background: #fff; border: 0.5px solid #ddddd5; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-  .upload-section h3 { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
-  .sql-block { background: #f5f5f0; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 12px; line-height: 1.6; color: #444441; overflow-x: auto; white-space: pre; margin-bottom: 12px; border: 0.5px solid #ddddd5; }
-  .copy-btn { font-size: 12px; padding: 4px 12px; }
 
   #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85); align-items: center; justify-content: center; z-index: 100; flex-direction: column; gap: 12px; }
   #loading-overlay.visible { display: flex; }
@@ -66,403 +92,728 @@
 
 <div id="loading-overlay">
   <div class="spinner"></div>
-  <span style="font-size:14px;color:#888780;">데이터 불러오는 중...</span>
+  <span style="font-size:14px;color:#888780;">처리 중...</span>
 </div>
 
+<!-- ── 헤더 ── -->
 <div class="header">
-  <div>
-    <h1>🏥 병원 가계 통계</h1>
-    <div class="subtitle">Han_statics · Supabase</div>
+  <div class="header-top">
+    <div>
+      <h1>🏥 병원 가계 통계</h1>
+      <div class="subtitle">Han_statics · Supabase</div>
+    </div>
   </div>
-  <button class="secondary" onclick="refreshData()">↻ 새로고침</button>
+  <div class="tabs">
+    <button class="tab active" onclick="showPage('input')">데이터 입력</button>
+    <button class="tab" onclick="showPage('stats')">병원 통계</button>
+    <button class="tab" onclick="showPage('income')">수입지출</button>
+  </div>
 </div>
 
-<div id="status-bar" class="status-bar loading">⏳ Supabase 연결 중...</div>
+<div id="status-bar" class="status-bar loading">⏳ 연결 중...</div>
 
-<div class="controls">
-  <span class="label">기간:</span>
-  <select id="view-type" onchange="updateView()">
-    <option value="monthly">월별</option>
-    <option value="yearly">연도별</option>
-    <option value="daily">일별 (최근 30일)</option>
-  </select>
-  <select id="year-select" onchange="updateView()">
-    <option value="2026">2026</option>
-    <option value="2025" selected>2025</option>
-    <option value="2024">2024</option>
-    <option value="2023">2023</option>
-    <option value="2022">2022</option>
-    <option value="2021">2021</option>
-    <option value="2020">2020</option>
-    <option value="2019">2019</option>
-    <option value="2018">2018</option>
-    <option value="2017">2017</option>
-    <option value="2016">2016</option>
-  </select>
-  <button onclick="updateView()">조회</button>
+<!-- ════════════════════════════════════
+     페이지 1 : 데이터 입력
+════════════════════════════════════ -->
+<div id="page-input" class="page active">
+  <div class="main">
+
+    <div class="form-card">
+      <h2>일별 데이터 입력</h2>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>날짜 *</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="form-field">
+          <label>요일</label>
+          <input type="text" id="f-dow" placeholder="자동입력" readonly style="background:#f5f5f0;color:#888780;">
+        </div>
+        <div class="form-field">
+          <label>총 환자수</label>
+          <input type="number" id="f-total" min="0" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>초진</label>
+          <input type="number" id="f-new" min="0" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>재진</label>
+          <input type="number" id="f-return" min="0" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>일매출 (원)</label>
+          <input type="number" id="f-revenue" min="0" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>현금 (원)</label>
+          <input type="number" id="f-cash" min="0" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>카드 (원)</label>
+          <input type="number" id="f-card" min="0" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>청구액 (원)</label>
+          <input type="number" id="f-claim" min="0" placeholder="0">
+        </div>
+        <div class="form-field">
+          <label>입금액 (원)</label>
+          <input type="number" id="f-deposit" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button onclick="saveData()">저장</button>
+        <button class="secondary" onclick="clearForm()">초기화</button>
+        <span id="form-msg" class="form-msg"></span>
+      </div>
+    </div>
+
+    <div class="recent-card">
+      <h2>최근 입력 데이터 <span style="font-size:12px;font-weight:400;color:#888780;">(최근 20일)</span></h2>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>날짜</th><th>요일</th>
+              <th class="num">환자</th><th class="num">초진</th><th class="num">재진</th>
+              <th class="num">매출</th><th class="num">현금</th><th class="num">카드</th>
+              <th class="num">청구액</th><th class="num">입금액</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="recent-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<div class="main">
-  <div class="metric-grid" id="metrics">
-    <div class="metric-card"><div class="label">총 매출</div><div class="value" id="m-revenue">-</div><div class="sub" id="m-revenue-sub"></div></div>
-    <div class="metric-card"><div class="label">총 환자수</div><div class="value" id="m-patients">-</div><div class="sub" id="m-patients-sub"></div></div>
-    <div class="metric-card"><div class="label">일평균 매출</div><div class="value" id="m-avg-revenue">-</div></div>
-    <div class="metric-card"><div class="label">일평균 환자수</div><div class="value" id="m-avg-patients">-</div></div>
-    <div class="metric-card"><div class="label">초진 환자</div><div class="value" id="m-new">-</div></div>
-    <div class="metric-card"><div class="label">청구액 합계</div><div class="value" id="m-claim">-</div></div>
+<!-- ════════════════════════════════════
+     페이지 2 : 병원 통계
+════════════════════════════════════ -->
+<div id="page-stats" class="page">
+  <div class="controls">
+    <span class="ctrl-label">기간:</span>
+    <select id="view-type" onchange="updateView()">
+      <option value="monthly">월별</option>
+      <option value="yearly">연도별</option>
+      <option value="daily">일별 (최근 30일)</option>
+    </select>
+    <select id="year-select" onchange="updateView()">
+      <option value="2026">2026</option>
+      <option value="2025" selected>2025</option>
+      <option value="2024">2024</option>
+      <option value="2023">2023</option>
+      <option value="2022">2022</option>
+      <option value="2021">2021</option>
+      <option value="2020">2020</option>
+      <option value="2019">2019</option>
+      <option value="2018">2018</option>
+      <option value="2017">2017</option>
+      <option value="2016">2016</option>
+    </select>
+    <button onclick="updateView()">조회</button>
+    <button class="secondary" onclick="refreshStats()">↻ 새로고침</button>
   </div>
 
-  <div class="chart-grid">
-    <div class="chart-card wide">
-      <h3 id="revenue-chart-title">월별 매출</h3>
-      <div style="position:relative; height:260px;">
-        <canvas id="revenueChart" role="img" aria-label="매출 추이 차트">매출 데이터 차트</canvas>
+  <div class="main">
+    <div class="metric-grid">
+      <div class="metric-card"><div class="mlabel">총 매출</div><div class="mvalue" id="m-revenue">-</div><div class="msub" id="m-revenue-sub"></div></div>
+      <div class="metric-card"><div class="mlabel">총 환자수</div><div class="mvalue" id="m-patients">-</div><div class="msub" id="m-patients-sub"></div></div>
+      <div class="metric-card"><div class="mlabel">일평균 매출</div><div class="mvalue" id="m-avg-revenue">-</div></div>
+      <div class="metric-card"><div class="mlabel">일평균 환자수</div><div class="mvalue" id="m-avg-patients">-</div></div>
+      <div class="metric-card"><div class="mlabel">초진 환자</div><div class="mvalue" id="m-new">-</div></div>
+      <div class="metric-card"><div class="mlabel">청구액 합계</div><div class="mvalue" id="m-claim">-</div></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card wide">
+        <h3 id="revenue-chart-title">월별 매출</h3>
+        <div style="position:relative;height:260px;">
+          <canvas id="revenueChart" role="img" aria-label="매출 추이 차트">매출 데이터</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 id="patient-chart-title">월별 환자수</h3>
+        <div style="position:relative;height:220px;">
+          <canvas id="patientChart" role="img" aria-label="환자수 추이 차트">환자수 데이터</canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>결제 수단 비율</h3>
+        <div style="position:relative;height:220px;">
+          <canvas id="paymentChart" role="img" aria-label="결제 수단 비율">결제수단 비율</canvas>
+        </div>
       </div>
     </div>
-    <div class="chart-card">
-      <h3 id="patient-chart-title">월별 환자수</h3>
-      <div style="position:relative; height:220px;">
-        <canvas id="patientChart" role="img" aria-label="환자수 추이 차트">환자수 데이터 차트</canvas>
-      </div>
-    </div>
-    <div class="chart-card">
-      <h3>결제 수단 비율</h3>
-      <div style="position:relative; height:220px;">
-        <canvas id="paymentChart" role="img" aria-label="결제 수단 비율 차트">결제수단 비율</canvas>
+
+    <div class="table-card">
+      <h3 id="table-title">상세 데이터</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr id="table-head"></tr></thead>
+          <tbody id="table-body"></tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="table-card">
-    <h3 id="table-title">상세 데이터</h3>
-    <div style="overflow-x:auto;">
-      <table id="data-table">
-        <thead><tr id="table-head"></tr></thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
+<!-- ════════════════════════════════════
+     페이지 3 : 수입지출
+════════════════════════════════════ -->
+<div id="page-income" class="page">
+  <div class="controls">
+    <span class="ctrl-label">병원:</span>
+    <select id="ie-clinic" onchange="ieUpdateView()">
+      <option value="both">한강 + 사랑 (합계)</option>
+      <option value="han">한강의원</option>
+      <option value="sarang">사랑의원</option>
+    </select>
+    <span class="ctrl-label">기간:</span>
+    <select id="ie-range" onchange="ieUpdateView()">
+      <option value="all">전체</option>
+      <option value="5y">최근 5년</option>
+      <option value="3y">최근 3년</option>
+      <option value="1y">최근 1년</option>
+    </select>
+    <button onclick="ieUpdateView()">조회</button>
+    <button class="secondary" onclick="ieLoad()">↻ 새로고침</button>
   </div>
 
-  <div class="upload-section">
-    <h3>📥 데이터 업로드 가이드</h3>
-    <p style="font-size:13px;color:#888780;margin-bottom:12px;">아래 SQL을 Supabase SQL Editor에서 먼저 실행하세요 (테이블 컬럼 추가)</p>
-    <div class="sql-block" id="sql-display">ALTER TABLE "Han_statics"
-  ADD COLUMN IF NOT EXISTS date DATE,
-  ADD COLUMN IF NOT EXISTS day_of_week TEXT,
-  ADD COLUMN IF NOT EXISTS total_patients INTEGER,
-  ADD COLUMN IF NOT EXISTS new_patients INTEGER,
-  ADD COLUMN IF NOT EXISTS return_patients INTEGER,
-  ADD COLUMN IF NOT EXISTS daily_revenue BIGINT,
-  ADD COLUMN IF NOT EXISTS cash INTEGER,
-  ADD COLUMN IF NOT EXISTS card INTEGER,
-  ADD COLUMN IF NOT EXISTS insurance_claim BIGINT,
-  ADD COLUMN IF NOT EXISTS deposit INTEGER;
+  <div class="main">
+    <!-- 요약 메트릭 -->
+    <div class="metric-grid" id="ie-metrics">
+      <div class="metric-card"><div class="mlabel">총 매출 합계</div><div class="mvalue" id="ie-m-revenue">-</div></div>
+      <div class="metric-card"><div class="mlabel">총 지출 합계</div><div class="mvalue" id="ie-m-expense">-</div></div>
+      <div class="metric-card"><div class="mlabel">총 실수입</div><div class="mvalue" id="ie-m-net">-</div></div>
+      <div class="metric-card"><div class="mlabel">월평균 실수입</div><div class="mvalue" id="ie-m-avg">-</div></div>
+      <div class="metric-card"><div class="mlabel">수익률 (실수입/매출)</div><div class="mvalue" id="ie-m-rate">-</div></div>
+      <div class="metric-card"><div class="mlabel">조회 기간</div><div class="mvalue" id="ie-m-period" style="font-size:14px;">-</div></div>
+    </div>
 
-ALTER TABLE "Han_statics"
-  ADD CONSTRAINT han_statics_date_unique UNIQUE (date);
+    <!-- 차트 -->
+    <div class="chart-grid">
+      <div class="chart-card wide">
+        <h3 id="ie-rev-title">월별 매출 / 지출 / 실수입</h3>
+        <div style="position:relative;height:280px;"><canvas id="ieRevenueChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>연도별 실수입 합계</h3>
+        <div style="position:relative;height:230px;"><canvas id="ieYearChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>매출 대비 지출 비율 (연도별)</h3>
+        <div style="position:relative;height:230px;"><canvas id="ieRatioChart"></canvas></div>
+      </div>
+    </div>
 
-CREATE INDEX IF NOT EXISTS idx_han_statics_date ON "Han_statics" (date);</div>
-    <button class="secondary copy-btn" onclick="copySQL()">SQL 복사</button>
-    <p style="font-size:13px;color:#888780;margin-top:12px;">그 후 아래 Python 스크립트로 CSV 데이터를 업로드하세요.</p>
-    <div class="sql-block">import pandas as pd, json, requests
-
-SUPABASE_URL = "https://algfzvbqxxvcaunlsrxd.supabase.co"
-SUPABASE_KEY = "YOUR_SERVICE_ROLE_KEY"  # Supabase > Settings > API
-
-df = pd.read_csv("병원가계통계앱개발자료_-_기초자료.csv")
-# ... (아래 Python 파일 참조)</div>
+    <!-- 테이블 -->
+    <div class="table-card">
+      <h3>월별 수입지출 상세</h3>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr id="ie-table-head"></tr></thead>
+          <tbody id="ie-table-body"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
 const SUPABASE_URL = 'https://algfzvbqxxvcaunlsrxd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZ2Z6dmJxeHh2Y2F1bmxzcnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MDM5MDQsImV4cCI6MjA5NDQ3OTkwNH0.lD9pIFoSw2lYY23zDMFbfeGvI0p_kcih61rScSh5a3s';
+const HDR = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
+const DOW = ['일','월','화','수','목','금','토'];
 
-let revenueChart, patientChart, paymentChart;
-let allData = [];
+let revenueChart, patientChart, paymentChart, allData = [];
 
-async function fetchData(year) {
-  const start = `${year}-01-01`;
-  const end = `${year}-12-31`;
-  const url = `${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${start}&date=lte.${end}&order=date.asc&limit=400`;
-  const res = await fetch(url, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
+/* ── 탭 전환 ── */
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'stats') updateView();
+  if (name === 'input') loadRecent();
+  if (name === 'income') { if (!ieData.length) ieLoad(); else ieUpdateView(); }
 }
 
-async function fetchAllYears() {
-  const url = `${SUPABASE_URL}/rest/v1/Han_statics?select=date,daily_revenue,total_patients,new_patients,cash,card,insurance_claim&order=date.asc&limit=5000`;
-  const res = await fetch(url, {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return await res.json();
+/* ── 요일 자동 입력 ── */
+document.getElementById('f-date').addEventListener('change', function() {
+  if (!this.value) { document.getElementById('f-dow').value = ''; return; }
+  const d = new Date(this.value);
+  document.getElementById('f-dow').value = DOW[d.getDay()];
+});
+
+/* ── 오늘 날짜 기본값 ── */
+(function() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth()+1).padStart(2,'0');
+  const d = String(today.getDate()).padStart(2,'0');
+  document.getElementById('f-date').value = `${y}-${m}-${d}`;
+  document.getElementById('f-dow').value = DOW[today.getDay()];
+})();
+
+/* ── 저장 ── */
+async function saveData() {
+  const dateVal = document.getElementById('f-date').value;
+  if (!dateVal) { showMsg('날짜를 입력하세요.', false); return; }
+
+  const dow = document.getElementById('f-dow').value;
+  const payload = {
+    date: dateVal,
+    day_of_week: dow || null,
+    total_patients: numOrNull('f-total'),
+    new_patients:   numOrNull('f-new'),
+    return_patients:numOrNull('f-return'),
+    daily_revenue:  numOrNull('f-revenue'),
+    cash:           numOrNull('f-cash'),
+    card:           numOrNull('f-card'),
+    insurance_claim:numOrNull('f-claim'),
+    deposit:        numOrNull('f-deposit'),
+  };
+
+  // 일요일이면 수치 null 처리
+  if (dow === '일') {
+    ['total_patients','new_patients','return_patients','daily_revenue','cash','card','insurance_claim','deposit']
+      .forEach(k => payload[k] = null);
+  }
+
+  document.getElementById('loading-overlay').classList.add('visible');
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/Han_statics`, {
+      method: 'POST',
+      headers: { ...HDR, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    showMsg('✓ 저장 완료!', true);
+    setStatus(`✓ ${dateVal} 데이터 저장됨`, 'success');
+    loadRecent();
+  } catch(e) {
+    showMsg('오류: ' + e.message, false);
+    setStatus('⚠ 저장 실패: ' + e.message, 'error');
+  } finally {
+    document.getElementById('loading-overlay').classList.remove('visible');
+  }
 }
 
+function numOrNull(id) {
+  const v = document.getElementById(id).value.trim();
+  return v === '' ? null : parseInt(v, 10);
+}
+function showMsg(msg, ok) {
+  const el = document.getElementById('form-msg');
+  el.textContent = msg;
+  el.className = 'form-msg ' + (ok ? 'ok' : 'err');
+  setTimeout(() => el.textContent = '', 4000);
+}
+function clearForm() {
+  ['f-total','f-new','f-return','f-revenue','f-cash','f-card','f-claim','f-deposit']
+    .forEach(id => document.getElementById(id).value = '');
+  document.getElementById('form-msg').textContent = '';
+}
+
+/* ── 최근 데이터 조회 ── */
+async function loadRecent() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/Han_statics?select=*&order=date.desc&limit=20`,
+      { headers: HDR }
+    );
+    const data = await res.json();
+    const tbody = document.getElementById('recent-tbody');
+    if (!Array.isArray(data) || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#888780;padding:20px;">데이터 없음</td></tr>';
+      setStatus('연결됨 · 데이터 없음', 'success');
+      return;
+    }
+    tbody.innerHTML = data.map(r => `<tr>
+      <td>${r.date || ''}</td>
+      <td>${r.day_of_week === '일' ? '<span class="badge badge-sun">일</span>' : (r.day_of_week || '')}</td>
+      <td class="num">${r.total_patients ?? '-'}</td>
+      <td class="num">${r.new_patients ?? '-'}</td>
+      <td class="num">${r.return_patients ?? '-'}</td>
+      <td class="num">${r.daily_revenue != null ? r.daily_revenue.toLocaleString() : '-'}</td>
+      <td class="num">${r.cash != null ? r.cash.toLocaleString() : '-'}</td>
+      <td class="num">${r.card != null ? r.card.toLocaleString() : '-'}</td>
+      <td class="num">${r.insurance_claim != null ? r.insurance_claim.toLocaleString() : '-'}</td>
+      <td class="num">${r.deposit != null ? r.deposit.toLocaleString() : '-'}</td>
+      <td><button class="danger" style="padding:3px 10px;font-size:12px;" onclick="deleteRow('${r.date}')">삭제</button></td>
+    </tr>`).join('');
+    setStatus(`✓ 연결됨 · 최근 ${data.length}건`, 'success');
+  } catch(e) {
+    setStatus('⚠ 오류: ' + e.message, 'error');
+  }
+}
+
+/* ── 삭제 ── */
+async function deleteRow(date) {
+  if (!confirm(`${date} 데이터를 삭제할까요?`)) return;
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/Han_statics?date=eq.${date}`,
+      { method: 'DELETE', headers: HDR }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    setStatus(`✓ ${date} 삭제됨`, 'success');
+    loadRecent();
+  } catch(e) {
+    setStatus('⚠ 삭제 실패: ' + e.message, 'error');
+  }
+}
+
+/* ══════════════════════════════
+   통계 페이지
+══════════════════════════════ */
 function fmt(n) {
-  if (n === null || n === undefined) return '-';
+  if (n == null) return '-';
   if (n >= 100000000) return (n/100000000).toFixed(1) + '억';
-  if (n >= 10000) return (n/10000).toFixed(0) + '만';
+  if (n >= 10000) return Math.round(n/10000) + '만';
   return n.toLocaleString();
 }
-function fmtFull(n) {
-  if (!n) return '-';
-  return n.toLocaleString() + '원';
+
+async function fetchYear(year) {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${year}-01-01&date=lte.${year}-12-31&order=date.asc&limit=400`,
+    { headers: HDR }
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+async function fetchAll() {
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/Han_statics?select=date,daily_revenue,total_patients,new_patients,cash,card,insurance_claim&order=date.asc&limit=5000`,
+    { headers: HDR }
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
 
-function aggregateMonthly(data) {
-  const months = {};
+function aggMonthly(data) {
+  const m = {};
   for (const r of data) {
     if (!r.date) continue;
-    const m = r.date.slice(0, 7);
-    if (!months[m]) months[m] = { revenue: 0, patients: 0, new_patients: 0, cash: 0, card: 0, claim: 0, days: 0 };
-    months[m].revenue += r.daily_revenue || 0;
-    months[m].patients += r.total_patients || 0;
-    months[m].new_patients += r.new_patients || 0;
-    months[m].cash += r.cash || 0;
-    months[m].card += r.card || 0;
-    months[m].claim += r.insurance_claim || 0;
-    if (r.daily_revenue > 0) months[m].days++;
+    const k = r.date.slice(0,7);
+    if (!m[k]) m[k] = {revenue:0,patients:0,new_p:0,cash:0,card:0,claim:0,days:0};
+    m[k].revenue += r.daily_revenue||0; m[k].patients += r.total_patients||0;
+    m[k].new_p += r.new_patients||0; m[k].cash += r.cash||0;
+    m[k].card += r.card||0; m[k].claim += r.insurance_claim||0;
+    if (r.daily_revenue > 0) m[k].days++;
   }
-  return Object.entries(months).sort((a,b) => a[0] > b[0] ? 1 : -1);
+  return Object.entries(m).sort((a,b) => a[0]>b[0]?1:-1);
 }
-
-function aggregateYearly(data) {
-  const years = {};
+function aggYearly(data) {
+  const y = {};
   for (const r of data) {
     if (!r.date) continue;
-    const y = r.date.slice(0, 4);
-    if (!years[y]) years[y] = { revenue: 0, patients: 0, new_patients: 0, cash: 0, card: 0, claim: 0, days: 0 };
-    years[y].revenue += r.daily_revenue || 0;
-    years[y].patients += r.total_patients || 0;
-    years[y].new_patients += r.new_patients || 0;
-    years[y].cash += r.cash || 0;
-    years[y].card += r.card || 0;
-    years[y].claim += r.insurance_claim || 0;
-    if (r.daily_revenue > 0) years[y].days++;
+    const k = r.date.slice(0,4);
+    if (!y[k]) y[k] = {revenue:0,patients:0,new_p:0,cash:0,card:0,claim:0,days:0};
+    y[k].revenue += r.daily_revenue||0; y[k].patients += r.total_patients||0;
+    y[k].new_p += r.new_patients||0; y[k].cash += r.cash||0;
+    y[k].card += r.card||0; y[k].claim += r.insurance_claim||0;
+    if (r.daily_revenue > 0) y[k].days++;
   }
-  return Object.entries(years).sort((a,b) => a[0] > b[0] ? 1 : -1);
+  return Object.entries(y).sort((a,b) => a[0]>b[0]?1:-1);
 }
 
-function updateMetrics(data) {
-  const totalRev = data.reduce((s, r) => s + (r.daily_revenue || 0), 0);
-  const totalPat = data.reduce((s, r) => s + (r.total_patients || 0), 0);
-  const totalNew = data.reduce((s, r) => s + (r.new_patients || 0), 0);
-  const totalClaim = data.reduce((s, r) => s + (r.insurance_claim || 0), 0);
-  const workDays = data.filter(r => r.daily_revenue > 0).length;
-
-  document.getElementById('m-revenue').textContent = fmt(totalRev);
-  document.getElementById('m-revenue-sub').textContent = fmtFull(totalRev);
-  document.getElementById('m-patients').textContent = totalPat.toLocaleString() + '명';
-  document.getElementById('m-patients-sub').textContent = `진료일 ${workDays}일`;
-  document.getElementById('m-avg-revenue').textContent = workDays ? fmt(Math.round(totalRev / workDays)) : '-';
-  document.getElementById('m-avg-patients').textContent = workDays ? Math.round(totalPat / workDays) + '명' : '-';
-  document.getElementById('m-new').textContent = totalNew.toLocaleString() + '명';
-  document.getElementById('m-claim').textContent = fmt(totalClaim);
+function setMetrics(data) {
+  const rev = data.reduce((s,r)=>s+(r.daily_revenue||0),0);
+  const pat = data.reduce((s,r)=>s+(r.total_patients||0),0);
+  const nw  = data.reduce((s,r)=>s+(r.new_patients||0),0);
+  const clm = data.reduce((s,r)=>s+(r.insurance_claim||0),0);
+  const wd  = data.filter(r=>r.daily_revenue>0).length;
+  document.getElementById('m-revenue').textContent = fmt(rev);
+  document.getElementById('m-revenue-sub').textContent = rev.toLocaleString()+'원';
+  document.getElementById('m-patients').textContent = pat.toLocaleString()+'명';
+  document.getElementById('m-patients-sub').textContent = `진료일 ${wd}일`;
+  document.getElementById('m-avg-revenue').textContent = wd ? fmt(Math.round(rev/wd)) : '-';
+  document.getElementById('m-avg-patients').textContent = wd ? Math.round(pat/wd)+'명' : '-';
+  document.getElementById('m-new').textContent = nw.toLocaleString()+'명';
+  document.getElementById('m-claim').textContent = fmt(clm);
 }
 
-function destroyChart(chart) { if (chart) chart.destroy(); }
+function dc(c) { if(c) c.destroy(); }
 
-function drawRevenueChart(labels, revenues, title) {
-  destroyChart(revenueChart);
-  document.getElementById('revenue-chart-title').textContent = title;
-  revenueChart = new Chart(document.getElementById('revenueChart'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: '매출',
-        data: revenues.map(v => Math.round(v / 10000)),
-        backgroundColor: '#185fa5',
-        borderRadius: 4,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { autoSkip: false, maxRotation: 45, font: { size: 11 } } },
-        y: { ticks: { callback: v => v + '만' } }
-      }
-    }
+function drawBar(labels, data, titleId, title, canvasId) {
+  dc(revenueChart);
+  document.getElementById(titleId).textContent = title;
+  revenueChart = new Chart(document.getElementById(canvasId), {
+    type:'bar', data:{ labels, datasets:[{ data:data.map(v=>Math.round(v/10000)), backgroundColor:'#185fa5', borderRadius:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{ticks:{autoSkip:false,maxRotation:45,font:{size:11}}}, y:{ticks:{callback:v=>v+'만'}} } }
   });
 }
-
-function drawPatientChart(labels, patients, title) {
-  destroyChart(patientChart);
-  document.getElementById('patient-chart-title').textContent = title;
-  patientChart = new Chart(document.getElementById('patientChart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: '환자수',
-        data: patients,
-        borderColor: '#3b6d11',
-        backgroundColor: 'rgba(59,109,17,0.08)',
-        borderWidth: 2,
-        pointRadius: 3,
-        fill: true,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { x: { ticks: { autoSkip: true, maxTicksLimit: 12, font: { size: 11 } } } }
-    }
+function drawLine(labels, data, titleId, title, canvasId) {
+  dc(patientChart);
+  document.getElementById(titleId).textContent = title;
+  patientChart = new Chart(document.getElementById(canvasId), {
+    type:'line', data:{ labels, datasets:[{ data, borderColor:'#3b6d11', backgroundColor:'rgba(59,109,17,0.08)', borderWidth:2, pointRadius:3, fill:true, tension:0.3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:11}}} } }
   });
 }
-
-function drawPaymentChart(cash, card, claim) {
-  destroyChart(paymentChart);
+function drawDonut(cash, card, claim) {
+  dc(paymentChart);
   paymentChart = new Chart(document.getElementById('paymentChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ['현금', '카드', '건보청구'],
-      datasets: [{
-        data: [Math.round(cash/10000), Math.round(card/10000), Math.round(claim/10000)],
-        backgroundColor: ['#378add', '#3b6d11', '#ba7517'],
-        borderWidth: 0,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 10 } },
-        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toLocaleString() + '만원' } }
-      }
-    }
+    type:'doughnut',
+    data:{ labels:['현금','카드','건보청구'], datasets:[{ data:[Math.round(cash/10000),Math.round(card/10000),Math.round(claim/10000)], backgroundColor:['#378add','#3b6d11','#ba7517'], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom',labels:{font:{size:12},padding:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed.toLocaleString()+'만원'}} } }
   });
 }
 
 function renderMonthlyTable(rows) {
   document.getElementById('table-title').textContent = '월별 상세';
   document.getElementById('table-head').innerHTML = `<th>월</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">진료일</th>`;
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = rows.map(([m, d]) => `<tr>
-    <td>${m}</td>
-    <td class="num">${d.revenue.toLocaleString()}</td>
-    <td class="num">${d.patients.toLocaleString()}</td>
-    <td class="num">${d.new_patients.toLocaleString()}</td>
-    <td class="num">${d.cash.toLocaleString()}</td>
-    <td class="num">${d.card.toLocaleString()}</td>
-    <td class="num">${d.claim.toLocaleString()}</td>
-    <td class="num">${d.days}</td>
+  document.getElementById('table-body').innerHTML = rows.map(([m,d])=>`<tr>
+    <td>${m}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td>
+    <td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.cash.toLocaleString()}</td>
+    <td class="num">${d.card.toLocaleString()}</td><td class="num">${d.claim.toLocaleString()}</td><td class="num">${d.days}</td>
   </tr>`).join('');
 }
-
 function renderYearlyTable(rows) {
   document.getElementById('table-title').textContent = '연도별 상세';
   document.getElementById('table-head').innerHTML = `<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = rows.map(([y, d]) => `<tr>
-    <td>${y}</td>
-    <td class="num">${d.revenue.toLocaleString()}</td>
-    <td class="num">${d.patients.toLocaleString()}</td>
-    <td class="num">${d.new_patients.toLocaleString()}</td>
-    <td class="num">${d.days ? Math.round(d.revenue/d.days).toLocaleString() : '-'}</td>
-    <td class="num">${d.days ? Math.round(d.patients/d.days) : '-'}</td>
-    <td class="num">${d.days}</td>
+  document.getElementById('table-body').innerHTML = rows.map(([y,d])=>`<tr>
+    <td>${y}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td>
+    <td class="num">${d.new_p.toLocaleString()}</td>
+    <td class="num">${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td>
+    <td class="num">${d.days?Math.round(d.patients/d.days):'-'}</td><td class="num">${d.days}</td>
   </tr>`).join('');
 }
-
 function renderDailyTable(data) {
   document.getElementById('table-title').textContent = '일별 상세 (최근 30일)';
-  const recent = [...data].sort((a,b) => b.date > a.date ? 1 : -1).slice(0, 30);
+  const rows = [...data].sort((a,b)=>b.date>a.date?1:-1).slice(0,30);
   document.getElementById('table-head').innerHTML = `<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th>`;
-  const tbody = document.getElementById('table-body');
-  tbody.innerHTML = recent.map(r => `<tr>
+  document.getElementById('table-body').innerHTML = rows.map(r=>`<tr>
     <td>${r.date}</td>
-    <td>${r.day_of_week || ''}</td>
-    <td class="num">${(r.daily_revenue||0).toLocaleString()}</td>
-    <td class="num">${r.total_patients || 0}</td>
-    <td class="num">${r.new_patients || 0}</td>
-    <td class="num">${(r.cash||0).toLocaleString()}</td>
-    <td class="num">${(r.card||0).toLocaleString()}</td>
-    <td class="num">${(r.insurance_claim||0).toLocaleString()}</td>
+    <td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
+    <td class="num">${(r.daily_revenue||0).toLocaleString()}</td><td class="num">${r.total_patients||0}</td>
+    <td class="num">${r.new_patients||0}</td><td class="num">${(r.cash||0).toLocaleString()}</td>
+    <td class="num">${(r.card||0).toLocaleString()}</td><td class="num">${(r.insurance_claim||0).toLocaleString()}</td>
   </tr>`).join('');
 }
 
-function setStatus(msg, type = 'success') {
+function setStatus(msg, type='success') {
   const el = document.getElementById('status-bar');
-  el.className = `status-bar ${type}`;
+  el.className = 'status-bar ' + type;
   el.textContent = msg;
 }
 
 async function updateView() {
-  const viewType = document.getElementById('view-type').value;
-  const year = document.getElementById('year-select').value;
+  const vt = document.getElementById('view-type').value;
+  const yr = document.getElementById('year-select').value;
   document.getElementById('loading-overlay').classList.add('visible');
-
   try {
     let data;
-    if (viewType === 'yearly') {
-      data = allData.length ? allData : await fetchAllYears();
+    if (vt === 'yearly') {
+      data = allData.length ? allData : await fetchAll();
       if (!allData.length) allData = data;
-      const rows = aggregateYearly(data);
-      const labels = rows.map(([y]) => y);
-      const revenues = rows.map(([, d]) => d.revenue);
-      const patients = rows.map(([, d]) => d.patients);
-      const totCash = rows.reduce((s, [, d]) => s + d.cash, 0);
-      const totCard = rows.reduce((s, [, d]) => s + d.card, 0);
-      const totClaim = rows.reduce((s, [, d]) => s + d.claim, 0);
-      updateMetrics(data);
-      drawRevenueChart(labels, revenues, '연도별 매출');
-      drawPatientChart(labels, patients, '연도별 환자수');
-      drawPaymentChart(totCash, totCard, totClaim);
+      const rows = aggYearly(data);
+      const labels = rows.map(([y])=>y);
+      setMetrics(data);
+      drawBar(labels, rows.map(([,d])=>d.revenue), 'revenue-chart-title', '연도별 매출', 'revenueChart');
+      drawLine(labels, rows.map(([,d])=>d.patients), 'patient-chart-title', '연도별 환자수', 'patientChart');
+      drawDonut(rows.reduce((s,[,d])=>s+d.cash,0), rows.reduce((s,[,d])=>s+d.card,0), rows.reduce((s,[,d])=>s+d.claim,0));
       renderYearlyTable(rows);
-    } else if (viewType === 'monthly') {
-      data = await fetchData(year);
-      const rows = aggregateMonthly(data);
-      const labels = rows.map(([m]) => m.slice(5) + '월');
-      const revenues = rows.map(([, d]) => d.revenue);
-      const patients = rows.map(([, d]) => d.patients);
-      const totCash = rows.reduce((s, [, d]) => s + d.cash, 0);
-      const totCard = rows.reduce((s, [, d]) => s + d.card, 0);
-      const totClaim = rows.reduce((s, [, d]) => s + d.claim, 0);
-      updateMetrics(data);
-      drawRevenueChart(labels, revenues, `${year}년 월별 매출`);
-      drawPatientChart(labels, patients, `${year}년 월별 환자수`);
-      drawPaymentChart(totCash, totCard, totClaim);
+    } else if (vt === 'monthly') {
+      data = await fetchYear(yr);
+      const rows = aggMonthly(data);
+      setMetrics(data);
+      drawBar(rows.map(([m])=>m.slice(5)+'월'), rows.map(([,d])=>d.revenue), 'revenue-chart-title', `${yr}년 월별 매출`, 'revenueChart');
+      drawLine(rows.map(([m])=>m.slice(5)+'월'), rows.map(([,d])=>d.patients), 'patient-chart-title', `${yr}년 월별 환자수`, 'patientChart');
+      drawDonut(rows.reduce((s,[,d])=>s+d.cash,0), rows.reduce((s,[,d])=>s+d.card,0), rows.reduce((s,[,d])=>s+d.claim,0));
       renderMonthlyTable(rows);
     } else {
-      data = await fetchData(year);
-      updateMetrics(data);
-      const sorted = [...data].filter(r => r.daily_revenue > 0).sort((a,b) => a.date > b.date ? 1 : -1);
-      const labels = sorted.slice(-30).map(r => r.date.slice(5));
-      const revenues = sorted.slice(-30).map(r => r.daily_revenue || 0);
-      const patients = sorted.slice(-30).map(r => r.total_patients || 0);
-      const totCash = data.reduce((s, r) => s + (r.cash||0), 0);
-      const totCard = data.reduce((s, r) => s + (r.card||0), 0);
-      const totClaim = data.reduce((s, r) => s + (r.insurance_claim||0), 0);
-      drawRevenueChart(labels, revenues, `${year}년 일별 매출 (최근 30일)`);
-      drawPatientChart(labels, patients, `${year}년 일별 환자수`);
-      drawPaymentChart(totCash, totCard, totClaim);
+      data = await fetchYear(yr);
+      setMetrics(data);
+      const sorted = [...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);
+      drawBar(sorted.slice(-30).map(r=>r.date.slice(5)), sorted.slice(-30).map(r=>r.daily_revenue||0), 'revenue-chart-title', `${yr}년 일별 매출`, 'revenueChart');
+      drawLine(sorted.slice(-30).map(r=>r.date.slice(5)), sorted.slice(-30).map(r=>r.total_patients||0), 'patient-chart-title', `${yr}년 일별 환자수`, 'patientChart');
+      drawDonut(data.reduce((s,r)=>s+(r.cash||0),0), data.reduce((s,r)=>s+(r.card||0),0), data.reduce((s,r)=>s+(r.insurance_claim||0),0));
       renderDailyTable(data);
     }
     setStatus(`✓ 데이터 로드 완료 · ${data.length}개 레코드`, 'success');
-  } catch (err) {
-    setStatus(`⚠ 오류: ${err.message} — 데이터가 아직 업로드되지 않았을 수 있습니다`, 'error');
-    console.error(err);
+  } catch(e) {
+    setStatus('⚠ 오류: ' + e.message, 'error');
   } finally {
     document.getElementById('loading-overlay').classList.remove('visible');
   }
 }
 
-async function refreshData() {
-  allData = [];
-  await updateView();
+function refreshStats() { allData = []; updateView(); }
+
+/* 초기 로드 */
+loadRecent();
+
+/* ══════════════════════════════════════════
+   수입지출 페이지
+══════════════════════════════════════════ */
+let ieData = [];
+let ieRevChart, ieYearChrt, ieRatioChrt;
+
+async function ieLoad() {
+  setStatus('⏳ 수입지출 데이터 로드 중...', 'loading');
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/Income_Expense?select=*&order=year_month.asc&limit=500`,
+      { headers: HDR }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    ieData = await res.json();
+    ieUpdateView();
+    setStatus(`✓ 수입지출 ${ieData.length}개월 로드됨`, 'success');
+  } catch(e) {
+    setStatus('⚠ 수입지출 오류: ' + e.message, 'error');
+  }
 }
 
-function copySQL() {
-  navigator.clipboard.writeText(document.getElementById('sql-display').textContent);
-  alert('SQL이 클립보드에 복사되었습니다!');
+function ieFilter(data) {
+  const range = document.getElementById('ie-range').value;
+  if (range === 'all') return data;
+  const now = new Date();
+  const cutYear = now.getFullYear() - (range === '1y' ? 1 : range === '3y' ? 3 : 5);
+  const cutMonth = now.getMonth() + 1;
+  const cutStr = `${cutYear}-${String(cutMonth).padStart(2,'0')}`;
+  return data.filter(r => r.year_month >= cutStr);
 }
 
-updateView();
+function ieGetValues(r, clinic) {
+  if (clinic === 'han')    return { rev: r.han_revenue||0, exp: r.han_expense||0, net: r.han_net||0 };
+  if (clinic === 'sarang') return { rev: r.sarang_revenue||0, exp: r.sarang_expense||0, net: r.sarang_net||0 };
+  // both
+  return {
+    rev: (r.han_revenue||0) + (r.sarang_revenue||0),
+    exp: (r.han_expense||0) + (r.sarang_expense||0),
+    net: (r.han_net||0) + (r.sarang_net||0),
+  };
+}
+
+function ieUpdateView() {
+  if (!ieData.length) return;
+  const clinic = document.getElementById('ie-clinic').value;
+  const filtered = ieFilter(ieData);
+  if (!filtered.length) return;
+
+  const labels = filtered.map(r => r.year_month);
+  const revs = filtered.map(r => ieGetValues(r, clinic).rev);
+  const exps = filtered.map(r => ieGetValues(r, clinic).exp);
+  const nets = filtered.map(r => ieGetValues(r, clinic).net);
+
+  // Metrics
+  const totRev = revs.reduce((s,v)=>s+v,0);
+  const totExp = exps.reduce((s,v)=>s+v,0);
+  const totNet = nets.reduce((s,v)=>s+v,0);
+  document.getElementById('ie-m-revenue').textContent = fmt(totRev);
+  document.getElementById('ie-m-expense').textContent = fmt(totExp);
+  document.getElementById('ie-m-net').textContent = fmt(totNet);
+  document.getElementById('ie-m-avg').textContent = fmt(Math.round(totNet / filtered.length));
+  document.getElementById('ie-m-rate').textContent = totRev ? Math.round(totNet/totRev*100)+'%' : '-';
+  document.getElementById('ie-m-period').textContent = `${filtered[0].year_month} ~ ${filtered[filtered.length-1].year_month}`;
+
+  // Monthly chart
+  if (ieRevChart) ieRevChart.destroy();
+  ieRevChart = new Chart(document.getElementById('ieRevenueChart'), {
+    type: 'bar',
+    data: {
+      labels: labels.map(l => l.slice(2)),
+      datasets: [
+        { label: '매출', data: revs.map(v=>Math.round(v/10000)), backgroundColor: 'rgba(24,95,165,0.7)', borderRadius: 2 },
+        { label: '지출', data: exps.map(v=>Math.round(v/10000)), backgroundColor: 'rgba(163,45,45,0.6)', borderRadius: 2 },
+        { label: '실수입', data: nets.map(v=>Math.round(v/10000)), type: 'line', borderColor: '#3b6d11', backgroundColor: 'rgba(59,109,17,0.1)', borderWidth: 2, pointRadius: 2, fill: true, tension: 0.3, yAxisID: 'y' },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top', labels: { font: { size: 12 } } } },
+      scales: {
+        x: { ticks: { autoSkip: true, maxTicksLimit: 24, font: { size: 10 } } },
+        y: { ticks: { callback: v => v+'만' } }
+      }
+    }
+  });
+
+  // Yearly aggregation
+  const yearMap = {};
+  filtered.forEach(r => {
+    const y = r.year_month.slice(0,4);
+    if (!yearMap[y]) yearMap[y] = {rev:0, exp:0, net:0, cnt:0};
+    const vals = ieGetValues(r, clinic);
+    yearMap[y].rev += vals.rev; yearMap[y].exp += vals.exp; yearMap[y].net += vals.net; yearMap[y].cnt++;
+  });
+  const years = Object.keys(yearMap).sort();
+
+  if (ieYearChrt) ieYearChrt.destroy();
+  ieYearChrt = new Chart(document.getElementById('ieYearChart'), {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: [
+        { label: '실수입', data: years.map(y=>Math.round(yearMap[y].net/10000)), backgroundColor: years.map(y=>yearMap[y].net>=0?'rgba(59,109,17,0.75)':'rgba(163,45,45,0.75)'), borderRadius: 4 }
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { ticks: { callback: v => v+'만' } } }
+    }
+  });
+
+  if (ieRatioChrt) ieRatioChrt.destroy();
+  ieRatioChrt = new Chart(document.getElementById('ieRatioChart'), {
+    type: 'line',
+    data: {
+      labels: years,
+      datasets: [
+        { label: '지출비율(%)', data: years.map(y=>yearMap[y].rev?Math.round(yearMap[y].exp/yearMap[y].rev*100):0), borderColor: '#a32d2d', backgroundColor: 'rgba(163,45,45,0.08)', borderWidth: 2, pointRadius: 4, fill: true, tension: 0.3 },
+        { label: '수익률(%)',   data: years.map(y=>yearMap[y].rev?Math.round(yearMap[y].net/yearMap[y].rev*100):0), borderColor: '#3b6d11', backgroundColor: 'rgba(59,109,17,0.08)', borderWidth: 2, pointRadius: 4, fill: true, tension: 0.3 },
+      ]
+    },
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: { y: { ticks: { callback: v => v+'%' } } }
+    }
+  });
+
+  // Table
+  document.getElementById('ie-table-head').innerHTML = clinic === 'both'
+    ? `<th>년월</th><th class="num">한강 매출</th><th class="num">한강 지출</th><th class="num">한강 실수입</th><th class="num">사랑 매출</th><th class="num">사랑 지출</th><th class="num">사랑 실수입</th><th class="num">합계 실수입</th>`
+    : `<th>년월</th><th class="num">매출</th><th class="num">지출</th><th class="num">실수입</th><th class="num">수익률</th>`;
+
+  const sorted = [...filtered].sort((a,b)=>b.year_month>a.year_month?1:-1);
+  document.getElementById('ie-table-body').innerHTML = sorted.map(r => {
+    const vals = ieGetValues(r, clinic);
+    const rate = vals.rev ? Math.round(vals.net/vals.rev*100) : 0;
+    const netStyle = vals.net < 0 ? 'color:#a32d2d' : '';
+    if (clinic === 'both') {
+      const bothNet = (r.han_net||0)+(r.sarang_net||0);
+      return `<tr>
+        <td>${r.year_month}</td>
+        <td class="num">${(r.han_revenue||0).toLocaleString()}</td>
+        <td class="num">${(r.han_expense||0).toLocaleString()}</td>
+        <td class="num" style="${(r.han_net||0)<0?'color:#a32d2d':''}">${(r.han_net||0).toLocaleString()}</td>
+        <td class="num">${(r.sarang_revenue||0).toLocaleString()}</td>
+        <td class="num">${(r.sarang_expense||0).toLocaleString()}</td>
+        <td class="num" style="${(r.sarang_net||0)<0?'color:#a32d2d':''}">${(r.sarang_net||0).toLocaleString()}</td>
+        <td class="num" style="${bothNet<0?'color:#a32d2d':'font-weight:500'}">${bothNet.toLocaleString()}</td>
+      </tr>`;
+    }
+    return `<tr>
+      <td>${r.year_month}</td>
+      <td class="num">${vals.rev.toLocaleString()}</td>
+      <td class="num">${vals.exp.toLocaleString()}</td>
+      <td class="num" style="${netStyle}">${vals.net.toLocaleString()}</td>
+      <td class="num">${rate}%</td>
+    </tr>`;
+  }).join('');
+}
 </script>
 </body>
 </html>
