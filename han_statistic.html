@@ -497,7 +497,11 @@ tr:hover td { background: #f5f5f0; }
           <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
             <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">한강 예비비</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
-              <div>저번달 잔액</div><div style="text-align:right;font-weight:600;color:#1a1a18;" id="han-reserve-prev">-</div>
+              <div style="font-size:12px;color:#888780;">저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
+              <input type="number" id="han-reserve-prev" min="0" placeholder="0"
+                value="0"
+                oninput="prevHanReserve=parseInt(this.value)||0;recalcUsage()"
+                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
             </div>
             <div style="margin-bottom:6px;">
               <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="han-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
@@ -515,7 +519,11 @@ tr:hover td { background: #f5f5f0; }
           <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
             <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">사랑 예비비</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
-              <div>저번달 잔액</div><div style="text-align:right;font-weight:600;color:#1a1a18;" id="sarang-reserve-prev">-</div>
+              <div style="font-size:12px;color:#888780;">저번달 잔액 <span style="color:#185fa5;font-size:10px;">(직접 입력 가능)</span></div>
+              <input type="number" id="sarang-reserve-prev" min="0" placeholder="0"
+                value="0"
+                oninput="prevSarangReserve=parseInt(this.value)||0;recalcUsage()"
+                style="text-align:right;font-weight:600;color:#1a1a18;border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 8px;font-size:13px;width:100%;background:#fff8e1;">
             </div>
             <div style="margin-bottom:6px;">
               <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="sarang-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
@@ -1646,22 +1654,18 @@ function recalcUsage() {
   const hanTotal = prevHanReserve + hanThis;                        // 저번달잔액 + 이번달
   const hanUsed  = hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
   const hanRemain= hanTotal - hanUsed;
-  const hPrevEl  = document.getElementById('han-reserve-prev');
-  const hRemEl   = document.getElementById('han-reserve-remain');
-  if(hPrevEl) hPrevEl.textContent  = fmtW(prevHanReserve);
-  if(hRemEl)  hRemEl.textContent   = fmtW(hanRemain);
-  if(hRemEl)  hRemEl.style.color   = hanRemain >= 0 ? '#185fa5' : '#e04040';
+  const hRemEl = document.getElementById('han-reserve-remain');
+  if(hRemEl)  hRemEl.textContent = fmtW(hanRemain);
+  if(hRemEl)  hRemEl.style.color = hanRemain >= 0 ? '#185fa5' : '#e04040';
 
   // ── 사랑 예비비 독립 계산 ──
   const sarangThis  = parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
   const sarangTotal = prevSarangReserve + sarangThis;
   const sarangUsed  = sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
   const sarangRemain= sarangTotal - sarangUsed;
-  const sPrevEl     = document.getElementById('sarang-reserve-prev');
-  const sRemEl      = document.getElementById('sarang-reserve-remain');
-  if(sPrevEl) sPrevEl.textContent  = fmtW(prevSarangReserve);
-  if(sRemEl)  sRemEl.textContent   = fmtW(sarangRemain);
-  if(sRemEl)  sRemEl.style.color   = sarangRemain >= 0 ? '#185fa5' : '#e04040';
+  const sRemEl = document.getElementById('sarang-reserve-remain');
+  if(sRemEl)  sRemEl.textContent = fmtW(sarangRemain);
+  if(sRemEl)  sRemEl.style.color = sarangRemain >= 0 ? '#185fa5' : '#e04040';
 
   // ── 예비비합 = 한강잔액 + 사랑잔액 ──
   const totalRemain = hanRemain + sarangRemain;
@@ -1838,9 +1842,13 @@ async function loadAssetMonth(){
       prevMissionTotal = 0; prevHanReserve = 0; prevSarangReserve = 0;
     }
 
-    // 이전달 표시 라벨
+    // 이전달 표시 라벨 + input 필드에 값 채우기
     const labelEl = document.getElementById('prev-month-label');
     if(labelEl) labelEl.textContent = `📌 ${prevM} 누적 기준 → 선교헌금 ${fmtW(prevMissionTotal)}, 한강예비비잔액 ${fmtW(prevHanReserve)}, 사랑예비비잔액 ${fmtW(prevSarangReserve)}`;
+    const hPrevInput = document.getElementById('han-reserve-prev');
+    const sPrevInput = document.getElementById('sarang-reserve-prev');
+    if(hPrevInput) hPrevInput.value = prevHanReserve || 0;
+    if(sPrevInput) sPrevInput.value = prevSarangReserve || 0;
 
     // ② 이번달 데이터 불러오기
     const res = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+month+'&limit=1',{headers:HDR});
@@ -1874,6 +1882,11 @@ async function loadAssetMonth(){
       setN('a-retire-h', rh); setN('a-retire-s', rh);
       setN('a-annuity',  r.annuity_total);
       document.getElementById('a-memo').value = r.memo||'';
+      // 저번달 잔액 input 반영
+      const hPI = document.getElementById('han-reserve-prev');
+      const sPI = document.getElementById('sarang-reserve-prev');
+      if(hPI) hPI.value = prevHanReserve || 0;
+      if(sPI) sPI.value = prevSarangReserve || 0;
       showMsg('asset-msg','✓ '+month+' 불러옴',true);
     } else {
       // 신규월: 이전달 자산값 이어받기
