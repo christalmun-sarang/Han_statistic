@@ -490,21 +490,47 @@ tr:hover td { background: #f5f5f0; }
 
       <!-- 예비비 입력 및 사용 내역 -->
       <div style="margin-top:14px;border-top:0.5px solid #e0ddd4;padding-top:12px;">
-        <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:8px;">🏦 이번달 예비비 입력 <span style="font-weight:400;font-size:12px;color:#888780;">(한강/사랑 각각 → 저번달 합계에 누적)</span></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-          <div>
-            <label style="font-size:12px;color:#888780;display:block;margin-bottom:4px;">한강 예비비 (이번달)</label>
-            <input type="number" id="reserve-han" min="0" placeholder="0" oninput="recalcReserve()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;width:100%;text-align:right;">
+        <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:4px;">🏦 예비비 관리 <span style="font-weight:400;font-size:12px;color:#888780;">(한강/사랑 각각 독립 관리 → 잔액 합산)</span></div>
+        <div style="font-size:11px;color:#3b6d11;background:#eaf3de;border-radius:6px;padding:5px 10px;margin-bottom:12px;">✓ 한강·사랑 매출지출 탭의 <b>예비비</b> 항목 저장 후 불러오기 시 자동 연동됩니다 (녹색 배경)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <!-- 한강 예비비 -->
+          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">한강 예비비</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
+              <div>저번달 잔액</div><div style="text-align:right;font-weight:600;color:#1a1a18;" id="han-reserve-prev">-</div>
+            </div>
+            <div style="margin-bottom:6px;">
+              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="han-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
+              <input type="number" id="reserve-han" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('han-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
+            </div>
+            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
+            <div id="han-reserve-usage-rows"></div>
+            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addHanReserveRow()">+ 사용 추가</button>
+            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#888780;">남은 예비비</span>
+              <b id="han-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
+            </div>
           </div>
-          <div>
-            <label style="font-size:12px;color:#888780;display:block;margin-bottom:4px;">사랑 예비비 (이번달)</label>
-            <input type="number" id="reserve-sarang" min="0" placeholder="0" oninput="recalcReserve()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;width:100%;text-align:right;">
+          <!-- 사랑 예비비 -->
+          <div style="background:#f8fbff;border:0.5px solid #c5daf5;border-radius:10px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;color:#185fa5;margin-bottom:10px;">사랑 예비비</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:#888780;margin-bottom:8px;">
+              <div>저번달 잔액</div><div style="text-align:right;font-weight:600;color:#1a1a18;" id="sarang-reserve-prev">-</div>
+            </div>
+            <div style="margin-bottom:6px;">
+              <label style="font-size:12px;color:#888780;display:block;margin-bottom:3px;">이번달 예비비 <span id="sarang-reserve-auto-badge" style="display:none;font-size:10px;color:#3b6d11;font-weight:600;">● 자동연동</span></label>
+              <input type="number" id="reserve-sarang" min="0" placeholder="0" oninput="recalcReserve();document.getElementById('sarang-reserve-auto-badge').style.display='none';this.style.background=''" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:14px;width:100%;text-align:right;">
+            </div>
+            <div style="font-size:12px;color:#888780;margin-bottom:4px;">예비비 사용금액</div>
+            <div id="sarang-reserve-usage-rows"></div>
+            <button class="add-btn" style="margin-top:4px;font-size:12px;" onclick="addSarangReserveRow()">+ 사용 추가</button>
+            <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid #c5daf5;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:#888780;">남은 예비비</span>
+              <b id="sarang-reserve-remain" style="font-size:16px;color:#185fa5;">-</b>
+            </div>
           </div>
         </div>
-        <div style="font-size:13px;font-weight:600;color:#888780;margin-bottom:8px;">📤 예비비 사용 내역 <span style="font-weight:400;font-size:12px;">(합계에서 차감)</span></div>
-        <div id="reserve-usage-rows"></div>
-        <button class="add-btn" style="margin-top:4px;" onclick="addUsageRow('reserve')">+ 사용 내역 추가</button>
-        <div style="margin-top:8px;font-size:13px;">사용 후 잔액: <b id="reserve-remain" style="color:#185fa5;">-</b></div>
+        <div style="margin-top:10px;text-align:right;font-size:13px;color:#888780;">총 예비비 잔액 (한강+사랑): <b id="reserve-remain" style="color:#185fa5;font-size:15px;">-</b></div>
       </div>
     </div>
 
@@ -1509,17 +1535,15 @@ function renderSavingsRows() {
 }
 function getSavingsTotal() { return savingsRows.reduce((s,r)=>s+(r.total||0),0); }
 
-/* ── 선교헌금/예비비 사용 내역 ── */
+/* ── 선교헌금 사용 내역 ── */
 let missionUsage = []; // [{amount:0, note:''}]
-let reserveUsage = []; // [{amount:0, note:''}]
 
 function addUsageRow(type) {
   if(type==='mission') missionUsage.push({amount:0, note:''});
-  else reserveUsage.push({amount:0, note:''});
   renderUsageRows(type);
 }
 function renderUsageRows(type) {
-  const list = type==='mission' ? missionUsage : reserveUsage;
+  const list = missionUsage;
   const container = document.getElementById(type+'-usage-rows');
   container.innerHTML = '';
   list.forEach((r, idx) => {
@@ -1539,28 +1563,77 @@ function renderUsageRows(type) {
   recalcUsage();
 }
 /* ── 이전달 누적값 (불러오기 시 세팅) ── */
-let prevMissionTotal = 0;  // 저번달 선교헌금 누적합
-let prevReserveTotal = 0;  // 저번달 예비비 누적합
+let prevMissionTotal  = 0;   // 저번달 선교헌금 누적합
+let prevHanReserve    = 0;   // 저번달 한강 예비비 잔액
+let prevSarangReserve = 0;   // 저번달 사랑 예비비 잔액
+
+/* 한강 예비비 사용 내역 */
+let hanReserveUsage    = []; // [{amount,note}]
+let sarangReserveUsage = [];
+
+function addHanReserveRow(data){
+  hanReserveUsage.push(data||{amount:0,note:''});
+  renderHanReserveUsage();
+}
+function addSarangReserveRow(data){
+  sarangReserveUsage.push(data||{amount:0,note:''});
+  renderSarangReserveUsage();
+}
+function renderHanReserveUsage(){
+  const c = document.getElementById('han-reserve-usage-rows');
+  if(!c) return;
+  c.innerHTML='';
+  hanReserveUsage.forEach((r,idx)=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:grid;grid-template-columns:1fr 1.5fr 22px;gap:4px;align-items:center;margin-bottom:4px;';
+    d.innerHTML=`
+      <input type="number" placeholder="금액" value="${r.amount||''}"
+        oninput="hanReserveUsage[${idx}].amount=parseInt(this.value)||0;recalcUsage()"
+        style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;font-size:12px;text-align:right;">
+      <input type="text" placeholder="사용처" value="${r.note||''}"
+        oninput="hanReserveUsage[${idx}].note=this.value"
+        style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;font-size:12px;background:#fafaf8;">
+      <button onclick="hanReserveUsage.splice(${idx},1);renderHanReserveUsage();recalcUsage()" style="background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;padding:0;">✕</button>`;
+    c.appendChild(d);
+  });
+  recalcUsage();
+}
+function renderSarangReserveUsage(){
+  const c = document.getElementById('sarang-reserve-usage-rows');
+  if(!c) return;
+  c.innerHTML='';
+  sarangReserveUsage.forEach((r,idx)=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:grid;grid-template-columns:1fr 1.5fr 22px;gap:4px;align-items:center;margin-bottom:4px;';
+    d.innerHTML=`
+      <input type="number" placeholder="금액" value="${r.amount||''}"
+        oninput="sarangReserveUsage[${idx}].amount=parseInt(this.value)||0;recalcUsage()"
+        style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;font-size:12px;text-align:right;">
+      <input type="text" placeholder="사용처" value="${r.note||''}"
+        oninput="sarangReserveUsage[${idx}].note=this.value"
+        style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;font-size:12px;background:#fafaf8;">
+      <button onclick="sarangReserveUsage.splice(${idx},1);renderSarangReserveUsage();recalcUsage()" style="background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;padding:0;">✕</button>`;
+    c.appendChild(d);
+  });
+  recalcUsage();
+}
 
 function recalcUsage() {
   const incomeTotal = parseInt(document.getElementById('_income_total')?.value||0)||0;
 
   // 이번달 11조 & 선교헌금 계산
-  let thisMission = 0;
-  let thisJo11 = 0;
+  let thisMission = 0, thisJo11 = 0;
   if(incomeTotal > 0) {
     thisJo11    = Math.min(Math.round(incomeTotal*0.07), 1500000);
     const over  = Math.max(0, Math.round(incomeTotal*0.07) - 1500000);
     thisMission = Math.round(incomeTotal*0.03) + 700000 + over;
   }
-
-  // 이번달 값 표시
   const jo11El = document.getElementById('is-jo11');
   const mThisEl = document.getElementById('is-mission-this');
-  if(jo11El)   jo11El.textContent   = incomeTotal > 0 ? fmtW(thisJo11) : '-';
-  if(mThisEl)  mThisEl.textContent  = incomeTotal > 0 ? fmtW(thisMission) : '-';
+  if(jo11El)  jo11El.textContent  = incomeTotal > 0 ? fmtW(thisJo11) : '-';
+  if(mThisEl) mThisEl.textContent = incomeTotal > 0 ? fmtW(thisMission) : '-';
 
-  // 선교헌금합 = 저번달 누적 + 이번달
+  // 선교헌금합 = 저번달 + 이번달
   const missionTotal = prevMissionTotal + thisMission;
   document.getElementById('is-mission').textContent = fmtW(missionTotal);
   const mUsed   = missionUsage.reduce((s,r)=>s+(r.amount||0),0);
@@ -1568,15 +1641,33 @@ function recalcUsage() {
   document.getElementById('mission-remain').textContent = fmtW(mRemain);
   document.getElementById('mission-remain').style.color = mRemain >= 0 ? '#a32d2d' : '#e04040';
 
-  // 예비비합 = 저번달 누적 + 이번달 입력
-  const rH = parseInt(document.getElementById('reserve-han')?.value||0)||0;
-  const rS = parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
-  const reserveTotal = prevReserveTotal + rH + rS;
-  document.getElementById('is-reserve').textContent = fmtW(reserveTotal);
-  const rUsed   = reserveUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const rRemain = reserveTotal - rUsed;
-  document.getElementById('reserve-remain').textContent = fmtW(rRemain);
-  document.getElementById('reserve-remain').style.color = rRemain >= 0 ? '#185fa5' : '#e04040';
+  // ── 한강 예비비 독립 계산 ──
+  const hanThis  = parseInt(document.getElementById('reserve-han')?.value||0)||0;
+  const hanTotal = prevHanReserve + hanThis;                        // 저번달잔액 + 이번달
+  const hanUsed  = hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const hanRemain= hanTotal - hanUsed;
+  const hPrevEl  = document.getElementById('han-reserve-prev');
+  const hRemEl   = document.getElementById('han-reserve-remain');
+  if(hPrevEl) hPrevEl.textContent  = fmtW(prevHanReserve);
+  if(hRemEl)  hRemEl.textContent   = fmtW(hanRemain);
+  if(hRemEl)  hRemEl.style.color   = hanRemain >= 0 ? '#185fa5' : '#e04040';
+
+  // ── 사랑 예비비 독립 계산 ──
+  const sarangThis  = parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
+  const sarangTotal = prevSarangReserve + sarangThis;
+  const sarangUsed  = sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const sarangRemain= sarangTotal - sarangUsed;
+  const sPrevEl     = document.getElementById('sarang-reserve-prev');
+  const sRemEl      = document.getElementById('sarang-reserve-remain');
+  if(sPrevEl) sPrevEl.textContent  = fmtW(prevSarangReserve);
+  if(sRemEl)  sRemEl.textContent   = fmtW(sarangRemain);
+  if(sRemEl)  sRemEl.style.color   = sarangRemain >= 0 ? '#185fa5' : '#e04040';
+
+  // ── 예비비합 = 한강잔액 + 사랑잔액 ──
+  const totalRemain = hanRemain + sarangRemain;
+  document.getElementById('is-reserve').textContent = fmtW(hanTotal + sarangTotal);
+  document.getElementById('reserve-remain').textContent = fmtW(totalRemain);
+  document.getElementById('reserve-remain').style.color = totalRemain >= 0 ? '#185fa5' : '#e04040';
 }
 
 /* ── 예비비 재계산 (oninput 연결용) ── */
@@ -1643,24 +1734,58 @@ function recalcAssets(){
   if(month) document.getElementById('final-save-desc').textContent = `저장하면 Income_Expense 테이블에 ${month} 데이터가 생성됩니다.`;
 }
 
-// 수입 정보 표시
+// 수입 정보 표시 + 한강/사랑 예비비 자동 연동
 async function loadMonthlyIncome(month){
   try{
-    const hanRes = await fetch(SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.han&year_month=eq.'+month+'&select=net_income',{headers:HDR});
-    const sRes   = await fetch(SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.sarang&year_month=eq.'+month+'&select=net_income',{headers:HDR});
-    const hanD   = await hanRes.json();
-    const sarangD= await sRes.json();
-    const hanNet    = hanD.length    ? (hanD[0].net_income||0)    : 0;
+    const hanRes    = await fetch(SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.han&year_month=eq.'+month+'&select=net_income,items',{headers:HDR});
+    const sRes      = await fetch(SUPABASE_URL+'/rest/v1/Monthly_finance?clinic=eq.sarang&year_month=eq.'+month+'&select=net_income,items',{headers:HDR});
+    const hanD      = await hanRes.json();
+    const sarangD   = await sRes.json();
+    const hanNet    = hanD.length    ? (hanD[0].net_income||0) : 0;
     const sarangNet = sarangD.length ? (sarangD[0].net_income||0) : 0;
-    const total  = hanNet + sarangNet;
+    const total     = hanNet + sarangNet;
+
     document.getElementById('is-han').textContent    = fmtW(hanNet);
     document.getElementById('is-sarang').textContent = fmtW(sarangNet);
     document.getElementById('is-total').textContent  = fmtW(total);
+
+    // ── 한강 예비비: Monthly_finance items.exp 중 name==='예비비' 금액 자동 적용 ──
+    const hanReserveEl = document.getElementById('reserve-han');
+    if(hanD.length && hanD[0].items){
+      try{
+        const parsed = typeof hanD[0].items==='string' ? JSON.parse(hanD[0].items) : hanD[0].items;
+        const expItem = (parsed.exp||[]).find(i=>i.name==='예비비');
+        if(expItem && expItem.amount != null){
+          hanReserveEl.value = expItem.amount;
+          hanReserveEl.style.background = '#eaf3de';
+          hanReserveEl.title = '한강 매출지출 예비비 자동연동: '+expItem.amount.toLocaleString()+'원';
+          const badge = document.getElementById('han-reserve-auto-badge');
+          if(badge) badge.style.display = 'inline';
+        }
+      }catch(e2){}
+    }
+
+    // ── 사랑 예비비: Monthly_finance items.exp 중 name==='예비비' 금액 자동 적용 ──
+    const sarangReserveEl = document.getElementById('reserve-sarang');
+    if(sarangD.length && sarangD[0].items){
+      try{
+        const parsed = typeof sarangD[0].items==='string' ? JSON.parse(sarangD[0].items) : sarangD[0].items;
+        const expItem = (parsed.exp||[]).find(i=>i.name==='예비비');
+        if(expItem && expItem.amount != null){
+          sarangReserveEl.value = expItem.amount;
+          sarangReserveEl.style.background = '#eaf3de';
+          sarangReserveEl.title = '사랑 매출지출 예비비 자동연동: '+expItem.amount.toLocaleString()+'원';
+          const badge2 = document.getElementById('sarang-reserve-auto-badge');
+          if(badge2) badge2.style.display = 'inline';
+        }
+      }catch(e2){}
+    }
+
     let hid = document.getElementById('_income_total');
     if(!hid){ hid=document.createElement('input'); hid.type='hidden'; hid.id='_income_total'; document.body.appendChild(hid); }
     hid.value = total;
     recalcAssets();
-  }catch(e){}
+  }catch(e){ console.error('loadMonthlyIncome 오류:',e); }
 }
 
 async function initAssets(){
@@ -1670,7 +1795,8 @@ async function initAssets(){
   renderBankRows();
   renderSavingsRows();
   renderUsageRows('mission');
-  renderUsageRows('reserve');
+  renderHanReserveUsage();
+  renderSarangReserveUsage();
   try {
     const test = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?select=id&limit=1', {headers:HDR});
     if (!test.ok) {
@@ -1695,21 +1821,26 @@ async function loadAssetMonth(){
   const prevM = m2===1?`${y-1}-12`:`${y}-${String(m2-1).padStart(2,'0')}`;
 
   try{
-    // ① 이전달 Household_stats에서 mission_total, reserve_total 가져오기 (누적 베이스)
-    const prevRes = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+prevM+'&select=mission_total,reserve_total&limit=1',{headers:HDR});
+    // ① 이전달 Household_stats에서 누적값 가져오기
+    const prevRes = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+prevM+'&select=mission_total,extra_data&limit=1',{headers:HDR});
     const prevBase = await prevRes.json();
     if(prevBase.length){
       prevMissionTotal = prevBase[0].mission_total || 0;
-      prevReserveTotal = prevBase[0].reserve_total || 0;
-      // 이전달 사용분은 이미 mission_total/reserve_total에 반영된 잔액이므로 그대로 사용
+      // extra_data에서 한강/사랑 예비비 잔액 읽기
+      if(prevBase[0].extra_data){
+        const exPrev = typeof prevBase[0].extra_data==='string' ? JSON.parse(prevBase[0].extra_data) : prevBase[0].extra_data;
+        prevHanReserve    = exPrev.hanReserveRemain    ?? 0;
+        prevSarangReserve = exPrev.sarangReserveRemain ?? 0;
+      } else {
+        prevHanReserve = 0; prevSarangReserve = 0;
+      }
     } else {
-      prevMissionTotal = 0;
-      prevReserveTotal = 0;
+      prevMissionTotal = 0; prevHanReserve = 0; prevSarangReserve = 0;
     }
 
     // 이전달 표시 라벨
     const labelEl = document.getElementById('prev-month-label');
-    if(labelEl) labelEl.textContent = `📌 ${prevM} 누적 기준 → 선교헌금 ${fmtW(prevMissionTotal)}, 예비비 ${fmtW(prevReserveTotal)} (여기에 이번달 값 합산)`;
+    if(labelEl) labelEl.textContent = `📌 ${prevM} 누적 기준 → 선교헌금 ${fmtW(prevMissionTotal)}, 한강예비비잔액 ${fmtW(prevHanReserve)}, 사랑예비비잔액 ${fmtW(prevSarangReserve)}`;
 
     // ② 이번달 데이터 불러오기
     const res = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+month+'&limit=1',{headers:HDR});
@@ -1718,18 +1849,19 @@ async function loadAssetMonth(){
       const r = data[0];
       if(r.extra_data){
         const ex = typeof r.extra_data==='string' ? JSON.parse(r.extra_data) : r.extra_data;
-        bankRows    = ex.bankRows    || [];
-        savingsRows = ex.savingsRows || [];
-        missionUsage= ex.missionUsage|| [];
-        reserveUsage= ex.reserveUsage|| [];
-        if(ex.reserveHan!=null)    document.getElementById('reserve-han').value    = ex.reserveHan;
-        if(ex.reserveSarang!=null) document.getElementById('reserve-sarang').value = ex.reserveSarang;
-        if(ex.stockNote)   document.getElementById('a-stock-note').value   = ex.stockNote;
-        if(ex.depositNote) document.getElementById('a-deposit-note').value = ex.depositNote;
+        bankRows           = ex.bankRows           || [];
+        savingsRows        = ex.savingsRows        || [];
+        missionUsage       = ex.missionUsage       || [];
+        hanReserveUsage    = ex.hanReserveUsage    || [];
+        sarangReserveUsage = ex.sarangReserveUsage || [];
+        if(ex.reserveHan!=null)    { document.getElementById('reserve-han').value = ex.reserveHan; }
+        if(ex.reserveSarang!=null) { document.getElementById('reserve-sarang').value = ex.reserveSarang; }
+        if(ex.stockNote)     document.getElementById('a-stock-note').value     = ex.stockNote;
+        if(ex.depositNote)   document.getElementById('a-deposit-note').value   = ex.depositNote;
         if(ex.guaranteeNote) document.getElementById('a-guarantee-note').value = ex.guaranteeNote;
-        if(ex.annuityNote) document.getElementById('a-annuity-note').value = ex.annuityNote;
+        if(ex.annuityNote)   document.getElementById('a-annuity-note').value   = ex.annuityNote;
       } else {
-        bankRows=[]; savingsRows=[]; missionUsage=[]; reserveUsage=[];
+        bankRows=[]; savingsRows=[]; missionUsage=[]; hanReserveUsage=[]; sarangReserveUsage=[];
         if(r.bank_total) bankRows=[{bank:'통장',amount:r.bank_total,date:''}];
       }
       setN('a-stock',    r.stock_total);
@@ -1747,7 +1879,7 @@ async function loadAssetMonth(){
       // 신규월: 이전달 자산값 이어받기
       const res2 = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?year_month=eq.'+prevM+'&limit=1',{headers:HDR});
       const prev = await res2.json();
-      bankRows=[]; savingsRows=[]; missionUsage=[]; reserveUsage=[];
+      bankRows=[]; savingsRows=[]; missionUsage=[]; hanReserveUsage=[]; sarangReserveUsage=[];
       document.getElementById('reserve-han').value = '';
       document.getElementById('reserve-sarang').value = '';
       if(prev.length){
@@ -1778,7 +1910,8 @@ async function loadAssetMonth(){
     renderBankRows();
     renderSavingsRows();
     renderUsageRows('mission');
-    renderUsageRows('reserve');
+    renderHanReserveUsage();
+    renderSarangReserveUsage();
     recalcAssets();
     await loadMonthlyIncome(month);
   } catch(e){ showMsg('asset-msg','오류: '+e.message,false); }
@@ -1808,15 +1941,23 @@ async function saveAssets(){
   const jo11 = Math.min(Math.round(incTotal*0.07),1500000);
   const over  = Math.max(0,Math.round(incTotal*0.07)-1500000);
   const missionCalc = Math.round(incTotal*0.03)+700000+over;
+  // 누적합 = 저번달 + 이번달
+  const missionTotal = prevMissionTotal + missionCalc;
+  const reserveTotal = (prevHanReserve + rH - hanUsedAmt) + (prevSarangReserve + rS - sarangUsedAmt);
+
+  // 한강/사랑 예비비 잔액 계산 (다음달 저번달잔액으로 사용)
   const rH = parseInt(document.getElementById('reserve-han')?.value||0)||0;
   const rS = parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
-  // 누적합 = 저번달 + 이번달
-  const missionTotal  = prevMissionTotal + missionCalc;
-  const reserveTotal  = prevReserveTotal + rH + rS;
+  const hanUsedAmt    = hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const sarangUsedAmt = sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const hanReserveRemain    = prevHanReserve    + rH - hanUsedAmt;
+  const sarangReserveRemain = prevSarangReserve + rS - sarangUsedAmt;
 
   const extraData = {
-    bankRows, savingsRows, missionUsage, reserveUsage,
+    bankRows, savingsRows, missionUsage,
+    hanReserveUsage, sarangReserveUsage,
     reserveHan: rH, reserveSarang: rS,
+    hanReserveRemain, sarangReserveRemain,
     stockNote:     document.getElementById('a-stock-note')?.value||'',
     depositNote:   document.getElementById('a-deposit-note')?.value||'',
     guaranteeNote: document.getElementById('a-guarantee-note')?.value||'',
@@ -1882,11 +2023,15 @@ async function finalSave(){
   const over      = Math.max(0,Math.round(incTotal*0.07)-1500000);
   const missionThis  = Math.round(incTotal*0.03)+700000+over;
   const missionTotal = prevMissionTotal + missionThis;  // 누적
-  const rH = parseInt(document.getElementById('reserve-han')?.value||0)||0;
-  const rS = parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
-  const reserveTotal = prevReserveTotal + rH + rS;      // 누적
+  const rH2 = parseInt(document.getElementById('reserve-han')?.value||0)||0;
+  const rS2 = parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
+  const hanUsed2    = hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const sarangUsed2 = sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const hanRemain2    = prevHanReserve    + rH2 - hanUsed2;
+  const sarangRemain2 = prevSarangReserve + rS2 - sarangUsed2;
+  const reserveTotal = hanRemain2 + sarangRemain2;      // 잔액 합산
   const mUsed = missionUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const rUsed = reserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const rUsed = hanUsed2 + sarangUsed2;
 
   const iePayload = {
     year_month: month,
@@ -1896,9 +2041,9 @@ async function finalSave(){
     mission_total: missionTotal,
     mission_used:  mUsed,
     mission_remain: missionTotal - mUsed,
-    reserve_total: reserveTotal,
+    reserve_total: hanRemain2 + sarangRemain2,
     reserve_used:  rUsed,
-    reserve_remain: reserveTotal - rUsed,
+    reserve_remain: reserveTotal,
     bank_total:   bank,
     stock_total:  stock,
     savings_total: savings,
