@@ -162,6 +162,14 @@ tr:hover td { background: #f5f5f0; }
   </div>
 </div>
 <div id="status-bar" class="status-bar loading">⏳ 연결 중...</div>
+<div id="asset-controls" class="controls" style="display:none;">
+    <span class="ctrl-label">월:</span>
+    <input type="month" id="asset-month" style="width:160px;border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;">
+    <button onclick="loadAssetMonth()">불러오기</button>
+    <button onclick="saveAssets()">저장</button>
+    <button class="secondary" onclick="loadAssetHistory()">↻ 이력 새로고침</button>
+    <span id="asset-msg" class="form-msg" style="margin-left:8px;"></span>
+</div>
 
 <!-- ════════════════════════════════
      데이터 입력 페이지
@@ -431,16 +439,8 @@ tr:hover td { background: #f5f5f0; }
 <!-- ════════════════════════════════
      가계 통계 페이지
 ════════════════════════════════ -->
-<div id="asset-controls" class="controls" style="display:none;">
-    <span class="ctrl-label">월:</span>
-    <input type="month" id="asset-month" style="width:160px;border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;">
-    <button onclick="loadAssetMonth()">불러오기</button>
-    <button onclick="saveAssets()">저장</button>
-    <button class="secondary" onclick="loadAssetHistory()">↻ 이력 새로고침</button>
-    <span id="asset-msg" class="form-msg" style="margin-left:8px;"></span>
-</div>
 <div id="page-assets" class="page">
-  <div class="main">
+  <div class="main" style="padding-top:20px;">
 
     <!-- A~D 요약 카드 -->
     <div class="asset-abcd">
@@ -1390,12 +1390,23 @@ async function loadMonthlyIncome(month){
 }
 
 async function initAssets(){
-  // 이번달 기본값
   const t = new Date();
   const ym = t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0');
   document.getElementById('asset-month').value = ym;
-  await loadAssetMonth();
-  await loadAssetHistory();
+  // Household_stats 테이블 접근 테스트
+  try {
+    const test = await fetch(SUPABASE_URL+'/rest/v1/Household_stats?select=id&limit=1', {headers:HDR});
+    if (!test.ok) {
+      const err = await test.json().catch(()=>({message:'HTTP '+test.status}));
+      showMsg('asset-msg', '⚠ Household_stats 접근 오류: '+(err.message||test.status), false);
+      setStatus('⚠ Household_stats 테이블을 확인하세요 (RLS 또는 테이블 미생성)', 'error');
+      return;
+    }
+    await loadAssetMonth();
+    await loadAssetHistory();
+  } catch(e) {
+    showMsg('asset-msg', '⚠ 오류: '+e.message, false);
+  }
 }
 
 async function loadAssetMonth(){
