@@ -141,8 +141,8 @@ tr:hover td { background: #f5f5f0; }
   <div class="header-top"><div><h1>🏥 병원 가계 통계</h1><div class="subtitle">Han_statics · Supabase</div></div></div>
   <div class="tabs">
     <button class="tab active" onclick="showPage('input',this)">데이터 입력</button>
-    <button class="tab" onclick="showPage('stats',this)">병원 통계</button>
-    <button class="tab" onclick="showPage('household',this)">가계 통계</button>
+    <button class="tab" onclick="showPage('stats',this)">한강 통계</button>
+    <button class="tab" onclick="showPage('household',this)">한강/사랑 통계</button>
   </div>
 </div>
 <div id="status-bar" class="status-bar loading">⏳ 연결 중...</div>
@@ -314,12 +314,13 @@ tr:hover td { background: #f5f5f0; }
       <option value="daily">일별 (최근 30일)</option>
     </select>
     <select id="year-select">
-      <option value="2026">2026</option><option value="2025" selected>2025</option>
+      <option value="2026" selected>2026</option><option value="2025">2025</option>
       <option value="2024">2024</option><option value="2023">2023</option>
       <option value="2022">2022</option><option value="2021">2021</option>
       <option value="2020">2020</option><option value="2019">2019</option>
       <option value="2018">2018</option><option value="2017">2017</option>
-      <option value="2016">2016</option>
+      <option value="2016">2016</option><option value="2015">2015</option>
+      <option value="2014">2014</option><option value="2013">2013</option>
     </select>
     <button onclick="updateView()">조회</button>
     <button class="secondary" onclick="refreshStats()">↻ 새로고침</button>
@@ -336,7 +337,7 @@ tr:hover td { background: #f5f5f0; }
     <div class="chart-grid">
       <div class="chart-card wide"><h3 id="revenue-chart-title">월별 매출</h3><div style="position:relative;height:260px;"><canvas id="revenueChart"></canvas></div></div>
       <div class="chart-card"><h3 id="patient-chart-title">월별 환자수</h3><div style="position:relative;height:220px;"><canvas id="patientChart"></canvas></div></div>
-      <div class="chart-card"><h3>결제 수단 비율</h3><div style="position:relative;height:220px;"><canvas id="paymentChart"></canvas></div></div>
+      <div class="chart-card"><h3 id="newpt-chart-title">월별 초진 환자수 추이</h3><div style="position:relative;height:220px;"><canvas id="newPatientChart"></canvas></div></div>
     </div>
     <div class="table-card"><h3 id="table-title">상세 데이터</h3><div style="overflow-x:auto;"><table><thead><tr id="table-head"></tr></thead><tbody id="table-body"></tbody></table></div></div>
   </div>
@@ -348,11 +349,12 @@ tr:hover td { background: #f5f5f0; }
 <div id="page-household" class="page">
   <div class="controls">
     <span class="ctrl-label">기간:</span>
-    <select id="hh-year">
-      <option value="2026" selected>2026</option><option value="2025">2025</option>
-      <option value="2024">2024</option><option value="2023">2023</option>
-      <option value="2022">2022</option><option value="2021">2021</option>
-      <option value="2020">2020</option><option value="2019">2019</option>
+    <select id="hh-year-from">
+      <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013" selected>2013</option>
+    </select>
+    <span class="ctrl-label">~</span>
+    <select id="hh-year-to">
+      <option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option>
     </select>
     <button onclick="loadHousehold()">조회</button>
     <button class="secondary" onclick="loadHousehold()">↻ 새로고침</button>
@@ -829,7 +831,7 @@ function renderHistoryTable(tbodyId, data) {
 }
 
 /* ══════════ 병원 통계 ══════════ */
-let revenueChart,patientChart,paymentChart,allData=[];
+let revenueChart,patientChart,newPatientChart,allData=[];
 function fmt(n){if(n==null)return'-';if(n>=100000000)return(n/100000000).toFixed(1)+'억';if(n>=10000)return Math.round(n/10000)+'만';return n.toLocaleString();}
 async function fetchYear(yr){const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${yr}-01-01&date=lte.${yr}-12-31&order=date.asc&limit=400`,{headers:HDR});if(!res.ok)throw new Error(`HTTP ${res.status}`);return res.json();}
 async function fetchAll(){const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?select=date,daily_revenue,total_patients,new_patients,cash,card,insurance_claim&order=date.asc&limit=5000`,{headers:HDR});if(!res.ok)throw new Error(`HTTP ${res.status}`);return res.json();}
@@ -837,9 +839,19 @@ function aggMonthly(data){const m={};for(const r of data){if(!r.date)continue;co
 function aggYearly(data){const y={};for(const r of data){if(!r.date)continue;const k=r.date.slice(0,4);if(!y[k])y[k]={revenue:0,patients:0,new_p:0,cash:0,card:0,claim:0,days:0};y[k].revenue+=r.daily_revenue||0;y[k].patients+=r.total_patients||0;y[k].new_p+=r.new_patients||0;y[k].cash+=r.cash||0;y[k].card+=r.card||0;y[k].claim+=r.insurance_claim||0;if(r.daily_revenue>0)y[k].days++;}return Object.entries(y).sort((a,b)=>a[0]>b[0]?1:-1);}
 function setMetrics(data){const rev=data.reduce((s,r)=>s+(r.daily_revenue||0),0);const pat=data.reduce((s,r)=>s+(r.total_patients||0),0);const nw=data.reduce((s,r)=>s+(r.new_patients||0),0);const clm=data.reduce((s,r)=>s+(r.insurance_claim||0),0);const wd=data.filter(r=>r.daily_revenue>0).length;document.getElementById('m-revenue').textContent=fmt(rev);document.getElementById('m-revenue-sub').textContent=rev.toLocaleString()+'원';document.getElementById('m-patients').textContent=pat.toLocaleString()+'명';document.getElementById('m-patients-sub').textContent=`진료일 ${wd}일`;document.getElementById('m-avg-revenue').textContent=wd?fmt(Math.round(rev/wd)):'-';document.getElementById('m-avg-patients').textContent=wd?Math.round(pat/wd)+'명':'-';document.getElementById('m-new').textContent=nw.toLocaleString()+'명';document.getElementById('m-claim').textContent=fmt(clm);}
 function dc(c){if(c)c.destroy();}
-function drawBar(labels,data,titleId,title,canvasId){dc(revenueChart);document.getElementById(titleId).textContent=title;revenueChart=new Chart(document.getElementById(canvasId),{type:'bar',data:{labels,datasets:[{data:data.map(v=>Math.round(v/10000)),backgroundColor:'#185fa5',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:false,maxRotation:45,font:{size:11}}},y:{ticks:{callback:v=>v+'만'}}}}});}
+function drawBar(labels,data,titleId,title,canvasId){dc(revenueChart);document.getElementById(titleId).textContent=title;revenueChart=new Chart(document.getElementById(canvasId),{type:'bar',data:{labels,datasets:[{data:data.map(v=>Math.round(v/10000)),backgroundColor:'#185fa5',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y).toLocaleString()+'만원'}}},scales:{x:{ticks:{autoSkip:false,maxRotation:45,font:{size:11}}},y:{ticks:{callback:v=>v+'만'}}}}});}
 function drawLine(labels,data,titleId,title,canvasId){dc(patientChart);document.getElementById(titleId).textContent=title;patientChart=new Chart(document.getElementById(canvasId),{type:'line',data:{labels,datasets:[{data,borderColor:'#3b6d11',backgroundColor:'rgba(59,109,17,0.08)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:11}}}}}});}
-function drawDonut(cash,card,claim){dc(paymentChart);paymentChart=new Chart(document.getElementById('paymentChart'),{type:'doughnut',data:{labels:['현금','카드','건보청구'],datasets:[{data:[Math.round(cash/10000),Math.round(card/10000),Math.round(claim/10000)],backgroundColor:['#378add','#3b6d11','#ba7517'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:12},padding:10}},tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed.toLocaleString()+'만원'}}}}});}
+function drawNewPatientChart(labels,data,title){
+  dc(newPatientChart);
+  document.getElementById('newpt-chart-title').textContent=title;
+  newPatientChart=new Chart(document.getElementById('newPatientChart'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'초진환자수',data,backgroundColor:'rgba(186,117,23,0.75)',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{autoSkip:true,maxTicksLimit:14,font:{size:11}}},y:{ticks:{callback:v=>v+'명'}}}}
+  });
+}
 function renderMonthlyTable(rows){document.getElementById('table-title').textContent='월별 상세';document.getElementById('table-head').innerHTML=`<th>월</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([m,d])=>`<tr><td>${m}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.cash.toLocaleString()}</td><td class="num">${d.card.toLocaleString()}</td><td class="num">${d.claim.toLocaleString()}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderYearlyTable(rows){document.getElementById('table-title').textContent='연도별 상세';document.getElementById('table-head').innerHTML=`<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([y,d])=>`<tr><td>${y}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td><td class="num">${d.days?Math.round(d.patients/d.days):'-'}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderDailyTable(data){document.getElementById('table-title').textContent='일별 상세 (최근 30일)';const rows=[...data].sort((a,b)=>b.date>a.date?1:-1).slice(0,30);document.getElementById('table-head').innerHTML=`<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th>`;document.getElementById('table-body').innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td><td class="num">${(r.daily_revenue||0).toLocaleString()}</td><td class="num">${r.total_patients||0}</td><td class="num">${r.new_patients||0}</td><td class="num">${(r.cash||0).toLocaleString()}</td><td class="num">${(r.card||0).toLocaleString()}</td><td class="num">${(r.insurance_claim||0).toLocaleString()}</td></tr>`).join('');}
@@ -850,9 +862,9 @@ async function updateView(){
   loading(true);
   try{
     let data;
-    if(vt==='yearly'){data=allData.length?allData:await fetchAll();if(!allData.length)allData=data;const rows=aggYearly(data);setMetrics(data);drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title','연도별 매출','revenueChart');drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title','연도별 환자수','patientChart');drawDonut(rows.reduce((s,[,d])=>s+d.cash,0),rows.reduce((s,[,d])=>s+d.card,0),rows.reduce((s,[,d])=>s+d.claim,0));renderYearlyTable(rows);}
-    else if(vt==='monthly'){data=await fetchYear(yr);const rows=aggMonthly(data);setMetrics(data);drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');drawDonut(rows.reduce((s,[,d])=>s+d.cash,0),rows.reduce((s,[,d])=>s+d.card,0),rows.reduce((s,[,d])=>s+d.claim,0));renderMonthlyTable(rows);}
-    else{data=await fetchYear(yr);setMetrics(data);const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');drawDonut(data.reduce((s,r)=>s+(r.cash||0),0),data.reduce((s,r)=>s+(r.card||0),0),data.reduce((s,r)=>s+(r.insurance_claim||0),0));renderDailyTable(data);}
+    if(vt==='yearly'){data=allData.length?allData:await fetchAll();if(!allData.length)allData=data;const rows=aggYearly(data);setMetrics(data);drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title','연도별 매출','revenueChart');drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title','연도별 환자수','patientChart');drawNewPatientChart(rows.map(([y])=>y),rows.map(([,d])=>d.new_p),'연도별 초진환자수');renderYearlyTable(rows);}
+    else if(vt==='monthly'){data=await fetchYear(yr);const rows=aggMonthly(data);setMetrics(data);drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');drawNewPatientChart(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.new_p),`${yr}년 월별 초진환자수`);renderMonthlyTable(rows);}
+    else{data=await fetchYear(yr);setMetrics(data);const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');drawNewPatientChart(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.new_patients||0),`${yr}년 일별 초진환자수`);renderDailyTable(data);}
     setStatus(`✓ ${data.length}개 레코드 로드됨`,'success');
   }catch(e){setStatus('⚠ '+e.message,'error');}
   finally{loading(false);}
@@ -955,24 +967,24 @@ function nextDay(dateStr) {
 let hhRevChart, hhHanNetChart, hhSarangNetChart;
 
 async function initHousehold() {
-  const yr = document.getElementById('hh-year').value;
-  await loadHousehold(yr);
+  await loadHousehold();
 }
 
 async function loadHousehold(yr) {
-  yr = yr || document.getElementById('hh-year').value;
+  const fromYr = document.getElementById('hh-year-from')?.value || yr || '2013';
+  const toYr   = document.getElementById('hh-year-to')?.value   || yr || '2026';
   loading(true);
   try {
-    // 1. Income_Expense 테이블: year_month like yr
+    // 1. Income_Expense 테이블: 기간 범위
     const ieRes = await fetch(
-      SUPABASE_URL+'/rest/v1/Income_Expense?year_month=gte.'+yr+'-01&year_month=lte.'+yr+'-12&order=year_month.asc&limit=12',
+      SUPABASE_URL+'/rest/v1/Income_Expense?year_month=gte.'+fromYr+'-01&year_month=lte.'+toYr+'-12&order=year_month.asc&limit=200',
       {headers:HDR}
     );
     const ieData = await ieRes.json();
 
     // 2. Monthly_finance 테이블: 해당 연도
     const mfRes = await fetch(
-      SUPABASE_URL+'/rest/v1/Monthly_finance?year_month=gte.'+yr+'-01&year_month=lte.'+yr+'-12&order=year_month.asc&limit=24',
+      SUPABASE_URL+'/rest/v1/Monthly_finance?year_month=gte.'+fromYr+'-01&year_month=lte.'+toYr+'-12&order=year_month.asc&limit=200',
       {headers:HDR}
     );
     const mfData = await mfRes.json();
@@ -1069,7 +1081,7 @@ async function loadHousehold(yr) {
       </tr>`;
     }).join('');
 
-    setStatus('✓ 가계통계 로드 완료 · '+rows.length+'개월', 'success');
+    setStatus('✓ 가계통계 로드 완료 · '+fromYr+'~'+toYr+' · '+rows.length+'개월', 'success');
   } catch(e) {
     setStatus('⚠ 가계통계 오류: '+e.message, 'error');
     console.error(e);

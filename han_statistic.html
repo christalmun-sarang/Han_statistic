@@ -308,20 +308,21 @@ tr:hover td { background: #f5f5f0; }
 <div id="page-stats" class="page">
   <div class="controls">
     <span class="ctrl-label">기간:</span>
-    <select id="view-type" onchange="updateView()">
+    <select id="view-type" onchange="onViewTypeChange()">
       <option value="monthly">월별</option>
       <option value="yearly">연도별</option>
       <option value="daily">일별 (최근 30일)</option>
     </select>
-    <select id="year-select">
-      <option value="2026" selected>2026</option><option value="2025">2025</option>
-      <option value="2024">2024</option><option value="2023">2023</option>
-      <option value="2022">2022</option><option value="2021">2021</option>
-      <option value="2020">2020</option><option value="2019">2019</option>
-      <option value="2018">2018</option><option value="2017">2017</option>
-      <option value="2016">2016</option><option value="2015">2015</option>
-      <option value="2014">2014</option><option value="2013">2013</option>
-    </select>
+    <!-- 단일연도 (월별/일별용) -->
+    <span id="single-year-wrap" style="display:none;">
+      <select id="year-select"><option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option></select>
+    </span>
+    <!-- 범위연도 (연도별용) -->
+    <span id="range-year-wrap">
+      <select id="year-from"><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013" selected>2013</option></select>
+      <span class="ctrl-label">~</span>
+      <select id="year-to"><option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option></select>
+    </span>
     <button onclick="updateView()">조회</button>
     <button class="secondary" onclick="refreshStats()">↻ 새로고침</button>
   </div>
@@ -856,15 +857,59 @@ function renderMonthlyTable(rows){document.getElementById('table-title').textCon
 function renderYearlyTable(rows){document.getElementById('table-title').textContent='연도별 상세';document.getElementById('table-head').innerHTML=`<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([y,d])=>`<tr><td>${y}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td><td class="num">${d.days?Math.round(d.patients/d.days):'-'}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderDailyTable(data){document.getElementById('table-title').textContent='일별 상세 (최근 30일)';const rows=[...data].sort((a,b)=>b.date>a.date?1:-1).slice(0,30);document.getElementById('table-head').innerHTML=`<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th>`;document.getElementById('table-body').innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td><td class="num">${(r.daily_revenue||0).toLocaleString()}</td><td class="num">${r.total_patients||0}</td><td class="num">${r.new_patients||0}</td><td class="num">${(r.cash||0).toLocaleString()}</td><td class="num">${(r.card||0).toLocaleString()}</td><td class="num">${(r.insurance_claim||0).toLocaleString()}</td></tr>`).join('');}
 
+function onViewTypeChange(){
+  const vt=document.getElementById('view-type').value;
+  document.getElementById('single-year-wrap').style.display = (vt==='yearly') ? 'none' : '';
+  document.getElementById('range-year-wrap').style.display  = (vt==='yearly') ? '' : 'none';
+}
+// 초기 상태: 월별이 기본이므로 단일연도 보이고 범위 숨기기
+(function(){ onViewTypeChange(); })();
+
+async function fetchRange(fromYr, toYr){
+  const res=await fetch(
+    `${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${fromYr}-01-01&date=lte.${toYr}-12-31&select=date,daily_revenue,total_patients,new_patients,cash,card,insurance_claim&order=date.asc&limit=5000`,
+    {headers:HDR});
+  if(!res.ok)throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 async function updateView(){
   const vt=document.getElementById('view-type').value;
   const yr=document.getElementById('year-select').value;
+  const fromYr=document.getElementById('year-from')?.value||yr;
+  const toYr=document.getElementById('year-to')?.value||yr;
   loading(true);
   try{
     let data;
-    if(vt==='yearly'){data=allData.length?allData:await fetchAll();if(!allData.length)allData=data;const rows=aggYearly(data);setMetrics(data);drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title','연도별 매출','revenueChart');drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title','연도별 환자수','patientChart');drawNewPatientChart(rows.map(([y])=>y),rows.map(([,d])=>d.new_p),'연도별 초진환자수');renderYearlyTable(rows);}
-    else if(vt==='monthly'){data=await fetchYear(yr);const rows=aggMonthly(data);setMetrics(data);drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');drawNewPatientChart(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.new_p),`${yr}년 월별 초진환자수`);renderMonthlyTable(rows);}
-    else{data=await fetchYear(yr);setMetrics(data);const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');drawNewPatientChart(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.new_patients||0),`${yr}년 일별 초진환자수`);renderDailyTable(data);}
+    if(vt==='yearly'){
+      // 범위 전체 fetch
+      data=await fetchRange(fromYr,toYr);
+      allData=data;
+      const rows=aggYearly(data);
+      setMetrics(data);
+      drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${fromYr}~${toYr} 연도별 매출`,'revenueChart');
+      drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title',`${fromYr}~${toYr} 연도별 환자수`,'patientChart');
+      drawNewPatientChart(rows.map(([y])=>y),rows.map(([,d])=>d.new_p),`${fromYr}~${toYr} 연도별 초진환자수`);
+      renderYearlyTable(rows);
+    }
+    else if(vt==='monthly'){
+      data=await fetchYear(yr);
+      const rows=aggMonthly(data);
+      setMetrics(data);
+      drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');
+      drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');
+      drawNewPatientChart(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.new_p),`${yr}년 월별 초진환자수`);
+      renderMonthlyTable(rows);
+    }
+    else{
+      data=await fetchYear(yr);
+      setMetrics(data);
+      const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);
+      drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');
+      drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');
+      drawNewPatientChart(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.new_patients||0),`${yr}년 일별 초진환자수`);
+      renderDailyTable(data);
+    }
     setStatus(`✓ ${data.length}개 레코드 로드됨`,'success');
   }catch(e){setStatus('⚠ '+e.message,'error');}
   finally{loading(false);}
