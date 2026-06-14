@@ -132,8 +132,8 @@ tr:hover td { background: #f5f5f0; }
 .hh-src-both { background: #f1efe8; color: #888780; }
 
 /* ── 가계통계 자산 ── */
-.sarang-section { display: none; }
-.sarang-section:first-of-type { display: block; }
+.gahye-section { display: none; }
+.gahye-section:first-of-type { display: block; }
 .asset-section { background:#fff; border:0.5px solid #ddddd5; border-radius:12px; padding:18px 22px; margin-bottom:16px; }
 .asset-section h3 { font-size:14px; font-weight:600; margin-bottom:14px; color:#444441; display:flex; justify-content:space-between; align-items:center; }
 .asset-section h3 .total-val { font-size:18px; font-weight:500; color:#185fa5; }
@@ -174,6 +174,7 @@ tr:hover td { background: #f5f5f0; }
     <button class="subtab active" onclick="showSubpage('daily',this)">한강일일통계</button>
     <button class="subtab" onclick="showSubpage('han',this)">한강한달통계</button>
     <button class="subtab" onclick="showSubpage('sarang',this)">사랑한달통계</button>
+    <button class="subtab" onclick="showSubpage('gahye',this)">가계통계입력</button>
   </div>
 
   <!-- 서브: 일별 데이터 -->
@@ -271,22 +272,6 @@ tr:hover td { background: #f5f5f0; }
 
   <!-- 서브: 사랑 매출지출 -->
   <div id="subpage-sarang" class="subpage">
-    <!-- 2차 서브탭 -->
-    <div class="subtabs" style="background:#f5f5f0;border-top:0.5px solid #e0ddd4;padding-left:24px;">
-      <button class="subtab active" id="sarang-sub-rev" onclick="showSarangSection('rev',this)">사랑 매출지출</button>
-      <button class="subtab" id="sarang-sub-jo11" onclick="showSarangSection('jo11',this)">11조/선교헌금</button>
-      <button class="subtab" id="sarang-sub-reserve" onclick="showSarangSection('reserve',this)">예비비</button>
-      <button class="subtab" id="sarang-sub-bank" onclick="showSarangSection('bank',this)">①통장</button>
-      <button class="subtab" id="sarang-sub-stock" onclick="showSarangSection('stock',this)">②주식</button>
-      <button class="subtab" id="sarang-sub-savings" onclick="showSarangSection('savings',this)">③적금</button>
-      <button class="subtab" id="sarang-sub-deposit" onclick="showSarangSection('deposit',this)">④정기예금</button>
-      <button class="subtab" id="sarang-sub-yellow" onclick="showSarangSection('yellow',this)">⑤노란우산</button>
-      <button class="subtab" id="sarang-sub-guarantee" onclick="showSarangSection('guarantee',this)">⑥보증금</button>
-      <button class="subtab" id="sarang-sub-retire" onclick="showSarangSection('retire',this)">⑦퇴직연금</button>
-      <button class="subtab" id="sarang-sub-annuity" onclick="showSarangSection('annuity',this)">⑧연금보험</button>
-    </div>
-    <!-- 사랑 매출지출 섹션 -->
-    <div id="sarang-section-rev" class="sarang-section">
     <div class="main">
       <div class="ie-form-card">
         <h2>사랑의원 월별 매출·지출</h2>
@@ -334,7 +319,23 @@ tr:hover td { background: #f5f5f0; }
         </table></div>
       </div>
     </div>
-    </div><!-- /sarang-section-rev -->
+  </div><!-- /subpage-sarang -->
+
+  <!-- 서브: 가계통계입력 -->
+  <div id="subpage-gahye" class="subpage">
+    <!-- 2차 서브탭 -->
+    <div class="subtabs" style="background:#f5f5f0;border-top:0.5px solid #e0ddd4;padding-left:24px;">
+      <button class="subtab active" id="gahye-sub-jo11" onclick="showGahyeSection('jo11',this)">11조/선교헌금</button>
+      <button class="subtab" id="gahye-sub-reserve" onclick="showGahyeSection('reserve',this)">예비비</button>
+      <button class="subtab" id="gahye-sub-bank" onclick="showGahyeSection('bank',this)">①통장</button>
+      <button class="subtab" id="gahye-sub-stock" onclick="showGahyeSection('stock',this)">②주식</button>
+      <button class="subtab" id="gahye-sub-savings" onclick="showGahyeSection('savings',this)">③적금</button>
+      <button class="subtab" id="gahye-sub-deposit" onclick="showGahyeSection('deposit',this)">④정기예금</button>
+      <button class="subtab" id="gahye-sub-yellow" onclick="showGahyeSection('yellow',this)">⑤노란우산</button>
+      <button class="subtab" id="gahye-sub-guarantee" onclick="showGahyeSection('guarantee',this)">⑥보증금</button>
+      <button class="subtab" id="gahye-sub-retire" onclick="showGahyeSection('retire',this)">⑦퇴직연금</button>
+      <button class="subtab" id="gahye-sub-annuity" onclick="showGahyeSection('annuity',this)">⑧연금보험</button>
+    </div>
 
     <!-- 가계 입력 섹션들 (asset-controls 공유) -->
     <div id="asset-controls-inline" style="background:#fff;border-bottom:0.5px solid #ddddd5;padding:10px 24px;display:none;gap:10px;flex-wrap:wrap;align-items:center;">
@@ -347,7 +348,7 @@ tr:hover td { background: #f5f5f0; }
     </div>
 
     <!-- 11조/선교헌금 섹션 -->
-    <div id="sarang-section-jo11" class="sarang-section" style="display:none;">
+    <div id="gahye-section-jo11" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;" id="jo11-section-content">
       <!-- 수입 요약 -->
       <div class="asset-section" style="background:#f5f5f0;">
@@ -391,10 +392,10 @@ tr:hover td { background: #f5f5f0; }
         <span id="final-save-msg" style="font-size:13px;color:#3b6d11;"></span>
       </div>
     </div>
-    </div><!-- /sarang-section-jo11 -->
+    </div><!-- /gahye-section-jo11 -->
 
     <!-- 예비비 섹션 -->
-    <div id="sarang-section-reserve" class="sarang-section" style="display:none;">
+    <div id="gahye-section-reserve" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div style="margin-top:0;border-top:none;padding-top:0;" class="asset-section">
         <h3 style="font-size:14px;font-weight:600;color:#185fa5;margin-bottom:4px;">🏦 예비비 관리</h3>
@@ -444,10 +445,10 @@ tr:hover td { background: #f5f5f0; }
         <div style="margin-top:10px;text-align:right;font-size:13px;color:#888780;">총 예비비 잔액 (한강+사랑): <b id="reserve-remain" style="color:#185fa5;font-size:15px;">-</b></div>
       </div>
     </div>
-    </div><!-- /sarang-section-reserve -->
+    </div><!-- /gahye-section-reserve -->
 
     <!-- ①통장 섹션 -->
-    <div id="sarang-section-bank" class="sarang-section" style="display:none;">
+    <div id="gahye-section-bank" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-abcd">
         <div class="abcd-card a"><div class="aclabel">A. 현금 (1~4 합)</div><div class="acvalue" id="ac-a">-</div></div>
@@ -462,10 +463,10 @@ tr:hover td { background: #f5f5f0; }
         <button class="add-btn" onclick="addBankRow()">+ 은행 추가</button>
       </div>
     </div>
-    </div><!-- /sarang-section-bank -->
+    </div><!-- /gahye-section-bank -->
 
     <!-- ②주식 섹션 -->
-    <div id="sarang-section-stock" class="sarang-section" style="display:none;">
+    <div id="gahye-section-stock" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>② 주식합 <span class="total-val" id="at-stock">0</span></h3>
@@ -475,10 +476,10 @@ tr:hover td { background: #f5f5f0; }
         </div>
       </div>
     </div>
-    </div><!-- /sarang-section-stock -->
+    </div><!-- /gahye-section-stock -->
 
     <!-- ③적금 섹션 -->
-    <div id="sarang-section-savings" class="sarang-section" style="display:none;">
+    <div id="gahye-section-savings" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>③ 적금합 <span class="total-val" id="at-savings">0</span></h3>
@@ -487,10 +488,10 @@ tr:hover td { background: #f5f5f0; }
         <button class="add-btn" style="margin-top:6px;" onclick="addSavingsRow()">+ 적금 추가</button>
       </div>
     </div>
-    </div><!-- /sarang-section-savings -->
+    </div><!-- /gahye-section-savings -->
 
     <!-- ④정기예금 섹션 -->
-    <div id="sarang-section-deposit" class="sarang-section" style="display:none;">
+    <div id="gahye-section-deposit" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>④ 정기예금합 <span class="total-val" id="at-deposit">0</span></h3>
@@ -500,10 +501,10 @@ tr:hover td { background: #f5f5f0; }
         </div>
       </div>
     </div>
-    </div><!-- /sarang-section-deposit -->
+    </div><!-- /gahye-section-deposit -->
 
     <!-- ⑤노란우산 섹션 -->
-    <div id="sarang-section-yellow" class="sarang-section" style="display:none;">
+    <div id="gahye-section-yellow" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>⑤ 노란우산합 <span class="total-val" id="at-yellow">0</span></h3>
@@ -520,10 +521,10 @@ tr:hover td { background: #f5f5f0; }
         </div>
       </div>
     </div>
-    </div><!-- /sarang-section-yellow -->
+    </div><!-- /gahye-section-yellow -->
 
     <!-- ⑥보증금 섹션 -->
-    <div id="sarang-section-guarantee" class="sarang-section" style="display:none;">
+    <div id="gahye-section-guarantee" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>⑥ 보증금합 <span class="total-val" id="at-guarantee">0</span></h3>
@@ -534,10 +535,10 @@ tr:hover td { background: #f5f5f0; }
         </div>
       </div>
     </div>
-    </div><!-- /sarang-section-guarantee -->
+    </div><!-- /gahye-section-guarantee -->
 
     <!-- ⑦퇴직연금 섹션 -->
-    <div id="sarang-section-retire" class="sarang-section" style="display:none;">
+    <div id="gahye-section-retire" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>⑦ 퇴직연금합 <span class="total-val" id="at-retirement">0</span></h3>
@@ -554,10 +555,10 @@ tr:hover td { background: #f5f5f0; }
         </div>
       </div>
     </div>
-    </div><!-- /sarang-section-retire -->
+    </div><!-- /gahye-section-retire -->
 
     <!-- ⑧연금보험 섹션 -->
-    <div id="sarang-section-annuity" class="sarang-section" style="display:none;">
+    <div id="gahye-section-annuity" class="gahye-section" style="display:none;">
     <div class="main" style="padding-top:20px;">
       <div class="asset-section">
         <h3>⑧ 연금보험합 <span class="total-val" id="at-annuity">0</span></h3>
@@ -571,10 +572,9 @@ tr:hover td { background: #f5f5f0; }
         <textarea id="a-memo" style="width:100%;height:60px;border:0.5px solid #b4b2a9;border-radius:8px;padding:8px;font-size:13px;resize:none;" placeholder="이달 특이사항"></textarea>
       </div>
     </div>
-    </div><!-- /sarang-section-annuity -->
+    </div><!-- /gahye-section-annuity -->
 
-  </div><!-- /subpage-sarang -->
-</div><!-- /page-input -->
+  </div><!-- /subpage-gahye -->
 
 <!-- ════════════════════════════════
      병원 통계 페이지
@@ -816,23 +816,36 @@ function showSubpage(name, el) {
   document.getElementById('subpage-'+name).classList.add('active');
   el.classList.add('active');
   if (name==='han') initHanForm();
-  if (name==='sarang') { initSarangForm(); initAssets(); }
+  if (name==='sarang') initSarangForm();
+  if (name==='gahye') initGahye();
   if (name==='daily') loadRecent();
 }
 
-/* ══════════ 사랑한달통계 내 2차 섹션 전환 ══════════ */
+/* ══════════ 가계통계입력 내 2차 섹션 전환 ══════════ */
 let assetInitDone = false;
-function showSarangSection(name, el) {
-  document.querySelectorAll('.sarang-section').forEach(s=>s.style.display='none');
-  document.querySelectorAll('#subpage-sarang .subtab').forEach(t=>t.classList.remove('active'));
-  const sec = document.getElementById('sarang-section-'+name);
+function showGahyeSection(name, el) {
+  document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
+  const sec = document.getElementById('gahye-section-'+name);
   if (sec) sec.style.display = '';
   el.classList.add('active');
 
-  // asset-controls-inline 표시 여부
+  // asset-controls-inline 표시
   const ctrl = document.getElementById('asset-controls-inline');
-  const assetSections = ['jo11','reserve','bank','stock','savings','deposit','yellow','guarantee','retire','annuity'];
-  if (ctrl) ctrl.style.display = assetSections.includes(name) ? 'flex' : 'none';
+  if (ctrl) ctrl.style.display = 'flex';
+}
+
+function initGahye() {
+  // 가계통계입력 탭 최초 진입 시
+  const ctrl = document.getElementById('asset-controls-inline');
+  if (ctrl) ctrl.style.display = 'flex';
+  // 첫 번째 섹션 활성화
+  document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
+  const first = document.getElementById('gahye-section-jo11');
+  if (first) first.style.display = '';
+  const firstBtn = document.getElementById('gahye-sub-jo11');
+  if (firstBtn) { document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active')); firstBtn.classList.add('active'); }
+  initAssets();
 }
 
 /* ══════════ 일별 데이터 ══════════ */
