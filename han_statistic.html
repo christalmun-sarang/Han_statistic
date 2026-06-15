@@ -725,85 +725,71 @@ const SUPABASE_URL = 'https://algfzvbqxxvcaunlsrxd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsZ2Z6dmJxeHh2Y2F1bmxzcnhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MDM5MDQsImV4cCI6MjA5NDQ3OTkwNH0.lD9pIFoSw2lYY23zDMFbfeGvI0p_kcih61rScSh5a3s';
 const HDR = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' };
 const DOW = ['일','월','화','수','목','금','토'];
-const TABLE = 'Household_statistics'; // ← 단일 테이블
-// year_month: YYYY-MM 형식 통일 (DB도 동일)
-function prevMonthUI(ym){
-  const [y,m] = ym.split('-').map(Number);
-  return m===1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2,'0')}`;
-}
+const HS  = 'Household_statistics';
 
-// ── 한강 기본 항목 정의 ──
+/* ══ 기본 항목 정의 ══ */
 const HAN_REV_DEFAULT = [
-  { name:'현금입금', type:'변동' }, { name:'카드입금', type:'변동' },
-  { name:'공단입금', type:'변동' }, { name:'계좌이체', type:'변동' },
-  { name:'자보입금', type:'변동' },
+  {name:'현금입금',type:'변동'},{name:'카드입금',type:'변동'},{name:'공단입금',type:'변동'},
+  {name:'계좌이체',type:'변동'},{name:'자보입금',type:'변동'},
 ];
 const HAN_EXP_DEFAULT = [
-  { name:'상가월세', type:'고정' }, { name:'직원월급', type:'고정' },
-  { name:'퇴직금', type:'변동' }, { name:'예비비', type:'변동' },
-  { name:'상가관리비', type:'고정' }, { name:'4대보험 건강', type:'고정' },
-  { name:'4대보험 연금', type:'고정' }, { name:'4대보험 고용', type:'고정' },
-  { name:'4대보험 산재', type:'고정' }, { name:'엘지 인터넷', type:'고정' },
-  { name:'SK 정수기', type:'고정' }, { name:'엘지 전화', type:'고정' },
-  { name:'의사랑', type:'고정' }, { name:'세무사', type:'고정' },
-  { name:'기타잡비', type:'변동' }, { name:'직원 상품권', type:'변동' },
+  {name:'상가월세',type:'고정'},{name:'직원월급',type:'고정'},{name:'퇴직금',type:'변동'},
+  {name:'예비비',type:'변동'},{name:'상가관리비',type:'고정'},{name:'4대보험 건강',type:'고정'},
+  {name:'4대보험 연금',type:'고정'},{name:'4대보험 고용',type:'고정'},{name:'4대보험 산재',type:'고정'},
+  {name:'엘지 인터넷',type:'고정'},{name:'SK 정수기',type:'고정'},{name:'엘지 전화',type:'고정'},
+  {name:'의사랑',type:'고정'},{name:'세무사',type:'고정'},{name:'기타잡비',type:'변동'},{name:'직원 상품권',type:'변동'},
 ];
 const SARANG_REV_DEFAULT = [
-  { name:'카드', type:'변동' }, { name:'보건소', type:'변동' },
-  { name:'공단', type:'변동' }, { name:'현금', type:'변동' },
-  { name:'영유아', type:'변동' }, { name:'기타', type:'변동' },
+  {name:'카드',type:'변동'},{name:'보건소',type:'변동'},{name:'공단',type:'변동'},
+  {name:'현금',type:'변동'},{name:'영유아',type:'변동'},{name:'기타',type:'변동'},
 ];
 const SARANG_EXP_DEFAULT = [
-  { name:'세현', type:'변동' }, { name:'상가월세', type:'고정' },
-  { name:'예비비', type:'변동' }, { name:'4대보험 건강', type:'고정' },
-  { name:'4대보험 연금', type:'고정' }, { name:'4대보험 고용', type:'고정' },
-  { name:'4대보험 산재', type:'고정' }, { name:'상가관리비', type:'고정' },
-  { name:'인터넷', type:'고정' }, { name:'전화', type:'고정' },
-  { name:'예닮환경', type:'고정' }, { name:'직원 식비', type:'변동' },
-  { name:'유비케어', type:'고정' }, { name:'월급1', type:'고정' },
-  { name:'월급2', type:'고정' }, { name:'월급3', type:'고정' },
-  { name:'보령', type:'변동' }, { name:'광동', type:'변동' },
-  { name:'이노엔', type:'변동' }, { name:'한국백신', type:'변동' },
-  { name:'페드넷', type:'고정' }, { name:'의약품1', type:'변동' },
-  { name:'의약품2', type:'변동' }, { name:'의약품3', type:'변동' },
-  { name:'의약품4', type:'변동' }, { name:'씨젠', type:'변동' },
-  { name:'기타', type:'변동' },
+  {name:'세현',type:'변동'},{name:'상가월세',type:'고정'},{name:'예비비',type:'변동'},
+  {name:'4대보험 건강',type:'고정'},{name:'4대보험 연금',type:'고정'},{name:'4대보험 고용',type:'고정'},
+  {name:'4대보험 산재',type:'고정'},{name:'상가관리비',type:'고정'},{name:'인터넷',type:'고정'},
+  {name:'전화',type:'고정'},{name:'예닮환경',type:'고정'},{name:'직원 식비',type:'변동'},
+  {name:'유비케어',type:'고정'},{name:'월급1',type:'고정'},{name:'월급2',type:'고정'},{name:'월급3',type:'고정'},
+  {name:'보령',type:'변동'},{name:'광동',type:'변동'},{name:'이노엔',type:'변동'},
+  {name:'한국백신',type:'변동'},{name:'페드넷',type:'고정'},{name:'의약품1',type:'변동'},
+  {name:'의약품2',type:'변동'},{name:'의약품3',type:'변동'},{name:'의약품4',type:'변동'},
+  {name:'씨젠',type:'변동'},{name:'기타',type:'변동'},
 ];
 
-/* ══════════ 공통 유틸 ══════════ */
-let _loadingCount = 0;
-function loading(on){ _loadingCount=Math.max(0,_loadingCount+(on?1:-1)); document.getElementById('loading-overlay').classList[_loadingCount>0?'add':'remove']('visible'); }
-function fmt(n){ n=(n!=null&&n!=='')?Number(n):null; if(n==null||isNaN(n))return'-'; if(Math.abs(n)>=100000000)return(n/100000000).toFixed(1)+'억'; if(Math.abs(n)>=10000)return Math.round(n/10000)+'만'; return n.toLocaleString(); }
-function fmtW(v){ v=(v!=null&&v!=='')?Number(v):null; if(v==null||isNaN(v))return'-'; if(Math.abs(v)>=100000000)return(v/100000000).toFixed(1)+'억'; if(Math.abs(v)>=10000)return Math.round(v/10000)+'만'; return v.toLocaleString(); }
-function numOrNull(id){ const v=document.getElementById(id)?.value.trim(); return (!v||v==='')?null:parseInt(v,10)||0; }
-function getN(id){ return parseInt(document.getElementById(id)?.value||0)||0; }
-function setN(id,v){ const el=document.getElementById(id); if(el&&v!=null) el.value=v; }
+/* ══ 공통 유틸 ══ */
+let _lc = 0;
+function loading(on){ _lc=Math.max(0,_lc+(on?1:-1)); document.getElementById('loading-overlay').classList[_lc>0?'add':'remove']('visible'); }
+function fmt(n){ n=Number(n); if(isNaN(n))return'-'; if(Math.abs(n)>=100000000)return(n/100000000).toFixed(1)+'억'; if(Math.abs(n)>=10000)return Math.round(n/10000)+'만'; return n.toLocaleString(); }
+function fmtW(v){ v=Number(v); if(isNaN(v))return'-'; if(Math.abs(v)>=100000000)return(v/100000000).toFixed(1)+'억'; if(Math.abs(v)>=10000)return Math.round(v/10000)+'만'; return v.toLocaleString(); }
+function numOrNull(id){ const v=document.getElementById(id)?.value.trim(); return(!v||v==='')?null:parseInt(v,10)||0; }
+function getN(id){ const v=document.getElementById(id)?.value; return(v===''||v==null)?0:parseInt(v)||0; }
+function setN(id,v){ const el=document.getElementById(id); if(el) el.value=(v!=null&&v!==''&&v!==0)?v:''; }
 function showMsg(id,msg,ok){ const el=document.getElementById(id); if(!el)return; el.textContent=msg; el.className='form-msg '+(ok?'ok':'err'); setTimeout(()=>el.textContent='',5000); }
 function setStatus(msg,type='success'){ const el=document.getElementById('status-bar'); el.className='status-bar '+type; el.textContent=msg; }
+function prevM(ym){ const[y,m]=ym.split('-').map(Number); return m===1?`${y-1}-12`:`${y}-${String(m-1).padStart(2,'0')}`; }
+function nextDay(d){ const dt=new Date(d); dt.setDate(dt.getDate()+1); return dt.toISOString().slice(0,10); }
 
-
-/* ══════════ 탭/서브탭 전환 ══════════ */
-function showPage(name, el) {
+/* ══ 탭 전환 ══ */
+function showPage(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   el.classList.add('active');
-  if (name==='stats')     setTimeout(updateView,     50);
-  if (name==='input')     setTimeout(loadRecent,     50);
-  if (name==='household') setTimeout(initHousehold,  50);
-  if (name==='assets')    setTimeout(loadAssetHistory,50);
+  if(name==='stats')     setTimeout(()=>{ onViewTypeChange(); updateView(); },50);
+  if(name==='input')     setTimeout(loadRecent,50);
+  if(name==='household') setTimeout(initHousehold,50);
+  if(name==='assets')    setTimeout(loadAssetHistory,50);
 }
-function showSubpage(name, el) {
+function showSubpage(name,el){
   document.querySelectorAll('.subpage').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
   document.getElementById('subpage-'+name).classList.add('active');
   el.classList.add('active');
-  if (name==='han')   initHanForm();
-  if (name==='sarang') initSarangForm();
-  if (name==='gahye')  initGahye();
-  if (name==='daily')  loadRecent();
+  if(name==='han')   initHanForm();
+  if(name==='sarang') initSarangForm();
+  if(name==='gahye')  initGahye();
+  if(name==='daily')  loadRecent();
 }
-function showGahyeSection(name, el) {
+function showGahyeSection(name,el){
   document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
   const sec=document.getElementById('gahye-section-'+name);
@@ -811,33 +797,27 @@ function showGahyeSection(name, el) {
   el.classList.add('active');
   document.getElementById('asset-controls-inline').style.display='flex';
 }
-let assetInitDone=false;
+let _assetInited=false;
 function initGahye(){
   document.getElementById('asset-controls-inline').style.display='flex';
   document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
-  const first=document.getElementById('gahye-section-jo11');
-  if(first) first.style.display='';
+  const f=document.getElementById('gahye-section-jo11'); if(f) f.style.display='';
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
-  const firstBtn=document.getElementById('gahye-sub-jo11');
-  if(firstBtn) firstBtn.classList.add('active');
-  if(!assetInitDone){ assetInitDone=true; initAssets(); }
+  const fb=document.getElementById('gahye-sub-jo11'); if(fb) fb.classList.add('active');
+  if(!_assetInited){ _assetInited=true; initAssets(); }
 }
 
-/* ══════════ 일별 데이터 입력 (Han_statics) ══════════ */
-document.getElementById('f-date').addEventListener('change', function(){
+/* ══ 일별 데이터 (Han_statics) ══ */
+document.getElementById('f-date').addEventListener('change',function(){
   document.getElementById('f-dow').value=this.value?DOW[new Date(this.value).getDay()]:'';
 });
 (function(){
   const t=new Date();
   const ym=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}`;
-  document.getElementById('f-date').value=`${ym}-${String(t.getDate()).padStart(2,'0')}`;
+  const yd=`${ym}-${String(t.getDate()).padStart(2,'0')}`;
+  document.getElementById('f-date').value=yd;
   document.getElementById('f-dow').value=DOW[t.getDay()];
-  const hm=document.getElementById('han-month');
-  const sm=document.getElementById('sarang-month');
-  const am=document.getElementById('asset-month');
-  if(hm) hm.value=ym;
-  if(sm) sm.value=ym;
-  if(am) am.value=ym;
+  ['han-month','sarang-month','asset-month'].forEach(id=>{ const el=document.getElementById(id); if(el&&!el.value) el.value=ym; });
 })();
 
 async function saveDaily(){
@@ -855,10 +835,9 @@ async function saveDaily(){
     const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics`,{method:'POST',headers:{...HDR,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(payload)});
     if(!res.ok){const e=await res.json();throw new Error(e.message||`HTTP ${res.status}`);}
     showMsg('form-msg','✓ 저장 완료!',true); setStatus(`✓ ${dateVal} 저장됨`,'success'); loadRecent();
-  }catch(e){showMsg('form-msg','오류: '+e.message,false);setStatus('⚠ '+e.message,'error');}
+  }catch(e){showMsg('form-msg','오류: '+e.message,false);}
   finally{loading(false);}
 }
-function clearDailyForm(){ ['f-total','f-new','f-return','f-revenue','f-cash','f-card','f-claim','f-deposit'].forEach(id=>document.getElementById(id).value=''); }
 async function loadRecent(){
   try{
     const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?select=*&order=date.desc&limit=20`,{headers:HDR});
@@ -866,12 +845,10 @@ async function loadRecent(){
     const tbody=document.getElementById('recent-tbody');
     if(!Array.isArray(data)||!data.length){tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:#888780;padding:20px;">데이터 없음</td></tr>';return;}
     tbody.innerHTML=data.map(r=>`<tr>
-      <td>${r.date||''}</td>
-      <td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
+      <td>${r.date||''}</td><td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
       <td class="num">${r.total_patients??'-'}</td><td class="num">${r.new_patients??'-'}</td><td class="num">${r.return_patients??'-'}</td>
       <td class="num">${r.daily_revenue!=null?r.daily_revenue.toLocaleString():'-'}</td>
-      <td class="num">${r.cash!=null?r.cash.toLocaleString():'-'}</td>
-      <td class="num">${r.card!=null?r.card.toLocaleString():'-'}</td>
+      <td class="num">${r.cash!=null?r.cash.toLocaleString():'-'}</td><td class="num">${r.card!=null?r.card.toLocaleString():'-'}</td>
       <td class="num">${r.insurance_claim!=null?r.insurance_claim.toLocaleString():'-'}</td>
       <td class="num">${r.deposit!=null?r.deposit.toLocaleString():'-'}</td>
       <td><button class="danger" style="padding:3px 10px;font-size:12px;" onclick="deleteDaily('${r.date}')">삭제</button></td>
@@ -879,104 +856,62 @@ async function loadRecent(){
     setStatus(`✓ 연결됨 · 최근 ${data.length}건`,'success');
   }catch(e){setStatus('⚠ '+e.message,'error');}
 }
-async function deleteDaily(date){
-  if(!confirm(`${date} 데이터를 삭제할까요?`))return;
-  try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=eq.${date}`,{method:'DELETE',headers:HDR});
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
-    setStatus(`✓ ${date} 삭제됨`,'success'); loadRecent();
-  }catch(e){setStatus('⚠ '+e.message,'error');}
-}
+async function deleteDaily(date){ if(!confirm(`${date} 삭제?`))return; try{ await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=eq.${date}`,{method:'DELETE',headers:HDR}); loadRecent(); }catch(e){} }
 
-/* ══════════════════════════════════════════════════
-   한강/사랑 월별 매출지출 ← Household_statistics.h_items / s_items
-══════════════════════════════════════════════════ */
-let hanRevItems=[], hanExpItems=[];
-let sarangRevItems=[], sarangExpItems=[];
-
-function renderRows(containerId, items, clinic, kind){
-  const container=document.getElementById(containerId);
-  container.innerHTML='';
+/* ══ 한강/사랑 월별 매출지출 ← Household_statistics h_items / s_items ══ */
+let hanRevItems=[], hanExpItems=[], sarangRevItems=[], sarangExpItems=[];
+function getList(c,k){ return k==='rev'?(c==='han'?hanRevItems:sarangRevItems):(c==='han'?hanExpItems:sarangExpItems); }
+function renderRows(containerId,items,clinic,kind){
+  const container=document.getElementById(containerId); container.innerHTML='';
   items.forEach((item,idx)=>{
-    const row=document.createElement('div');
-    row.className='ie-row';
-    row.innerHTML=`
-      <span class="item-name">${item.name}</span>
+    const row=document.createElement('div'); row.className='ie-row';
+    row.innerHTML=`<span class="item-name">${item.name}</span>
       <span class="badge-type ${item.type==='고정'?'badge-fixed':'badge-var'}">${item.type}</span>
-      <input type="number" min="0" placeholder="0" value="${item.amount||''}"
-        oninput="onAmountChange('${clinic}','${kind}',${idx},this.value)" style="text-align:right;">
-      <input type="text" class="note-input" placeholder="비고" value="${item.note||''}"
-        oninput="onNoteChange('${clinic}','${kind}',${idx},this.value)">
-      <button class="del-btn" onclick="deleteRow('${clinic}','${kind}',${idx})" title="삭제">✕</button>`;
+      <input type="number" min="0" placeholder="0" value="${item.amount||''}" oninput="getList('${clinic}','${kind}')[${idx}].amount=this.value===''?null:parseInt(this.value)||0;recalc('${clinic}')" style="text-align:right;">
+      <input type="text" class="note-input" placeholder="비고" value="${item.note||''}" oninput="getList('${clinic}','${kind}')[${idx}].note=this.value">
+      <button class="del-btn" onclick="getList('${clinic}','${kind}').splice(${idx},1);renderRows('${containerId}',getList('${clinic}','${kind}'),'${clinic}','${kind}')" title="삭제">✕</button>`;
     container.appendChild(row);
   });
   recalc(clinic);
 }
-function onAmountChange(clinic,kind,idx,val){ getList(clinic,kind)[idx].amount=val===''?null:parseInt(val)||0; recalc(clinic); }
-function onNoteChange(clinic,kind,idx,val){ getList(clinic,kind)[idx].note=val.trim(); }
-function deleteRow(clinic,kind,idx){ getList(clinic,kind).splice(idx,1); renderRows(`${clinic}-${kind}-rows`,getList(clinic,kind),clinic,kind); }
-function getList(clinic,kind){ return kind==='rev'?(clinic==='han'?hanRevItems:sarangRevItems):(clinic==='han'?hanExpItems:sarangExpItems); }
 function recalc(clinic){
-  const revList=clinic==='han'?hanRevItems:sarangRevItems;
-  const expList=clinic==='han'?hanExpItems:sarangExpItems;
-  const totRev=revList.reduce((s,i)=>s+(i.amount||0),0);
-  const totExp=expList.reduce((s,i)=>s+(i.amount||0),0);
-  const net=totRev-totExp;
-  document.getElementById(`${clinic}-rev-total`).textContent='합계: '+totRev.toLocaleString()+'원';
-  document.getElementById(`${clinic}-exp-total`).textContent='합계: '+totExp.toLocaleString()+'원';
-  document.getElementById(`${clinic}-ns-rev`).textContent=totRev.toLocaleString()+'원';
-  document.getElementById(`${clinic}-ns-exp`).textContent=totExp.toLocaleString()+'원';
-  const netEl=document.getElementById(`${clinic}-ns-net`);
-  netEl.textContent=net.toLocaleString()+'원';
-  netEl.className='ns-value '+(net>=0?'positive':'negative');
+  const rev=clinic==='han'?hanRevItems:sarangRevItems;
+  const exp=clinic==='han'?hanExpItems:sarangExpItems;
+  const tR=rev.reduce((s,i)=>s+(i.amount||0),0);
+  const tE=exp.reduce((s,i)=>s+(i.amount||0),0);
+  document.getElementById(`${clinic}-rev-total`).textContent='합계: '+tR.toLocaleString()+'원';
+  document.getElementById(`${clinic}-exp-total`).textContent='합계: '+tE.toLocaleString()+'원';
+  document.getElementById(`${clinic}-ns-rev`).textContent=tR.toLocaleString()+'원';
+  document.getElementById(`${clinic}-ns-exp`).textContent=tE.toLocaleString()+'원';
+  const netEl=document.getElementById(`${clinic}-ns-net`); netEl.textContent=(tR-tE).toLocaleString()+'원'; netEl.style.color=(tR-tE)>=0?'#185fa5':'#a32d2d';
 }
-function addHanRow(kind){ const name=prompt('항목명:'); if(!name)return; const type=confirm('"확인"=고정, "취소"=변동')?'고정':'변동'; getList('han',kind).push({name,type,amount:null}); renderRows(`han-${kind}-rows`,getList('han',kind),'han',kind); }
-function addSarangRow(kind){ const name=prompt('항목명:'); if(!name)return; const type=confirm('"확인"=고정, "취소"=변동')?'고정':'변동'; getList('sarang',kind).push({name,type,amount:null}); renderRows(`sarang-${kind}-rows`,getList('sarang',kind),'sarang',kind); }
+function addHanRow(k){ const n=prompt('항목명:'); if(!n)return; const t=confirm('"확인"=고정, "취소"=변동')?'고정':'변동'; getList('han',k).push({name:n,type:t,amount:null}); renderRows(`han-${k}-rows`,getList('han',k),'han',k); }
+function addSarangRow(k){ const n=prompt('항목명:'); if(!n)return; const t=confirm('"확인"=고정, "취소"=변동')?'고정':'변동'; getList('sarang',k).push({name:n,type:t,amount:null}); renderRows(`sarang-${k}-rows`,getList('sarang',k),'sarang',k); }
+function initHanForm(){ if(!hanRevItems.length) hanRevItems=HAN_REV_DEFAULT.map(i=>({...i,amount:null})); if(!hanExpItems.length) hanExpItems=HAN_EXP_DEFAULT.map(i=>({...i,amount:null})); renderRows('han-rev-rows',hanRevItems,'han','rev'); renderRows('han-exp-rows',hanExpItems,'han','exp'); loadHanHistory(); }
+function initSarangForm(){ if(!sarangRevItems.length) sarangRevItems=SARANG_REV_DEFAULT.map(i=>({...i,amount:null})); if(!sarangExpItems.length) sarangExpItems=SARANG_EXP_DEFAULT.map(i=>({...i,amount:null})); renderRows('sarang-rev-rows',sarangRevItems,'sarang','rev'); renderRows('sarang-exp-rows',sarangExpItems,'sarang','exp'); loadSarangHistory(); }
 
-/* ── 한강/사랑 초기화 ── */
-function initHanForm(){
-  if(!hanRevItems.length) hanRevItems=HAN_REV_DEFAULT.map(i=>({...i,amount:null}));
-  if(!hanExpItems.length) hanExpItems=HAN_EXP_DEFAULT.map(i=>({...i,amount:null}));
-  renderRows('han-rev-rows',hanRevItems,'han','rev');
-  renderRows('han-exp-rows',hanExpItems,'han','exp');
-  loadHanHistory();
-}
-function initSarangForm(){
-  if(!sarangRevItems.length) sarangRevItems=SARANG_REV_DEFAULT.map(i=>({...i,amount:null}));
-  if(!sarangExpItems.length) sarangExpItems=SARANG_EXP_DEFAULT.map(i=>({...i,amount:null}));
-  renderRows('sarang-rev-rows',sarangRevItems,'sarang','rev');
-  renderRows('sarang-exp-rows',sarangExpItems,'sarang','exp');
-  loadSarangHistory();
-}
-
-/* ── 불러오기: Household_statistics → h_items / s_items ── */
 async function loadHanMonth(){
-  const month=document.getElementById('han-month').value;
-  if(!month)return;
+  const month=document.getElementById('han-month').value; if(!month)return;
   loading(true);
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=h_items,han_revenue,han_expense,han_net&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=h_items&limit=1`,{headers:HDR});
     const data=await res.json();
-    const prevM=prevMonthUI(month);
-    if(data.length && data[0].h_items){
-      const saved=typeof data[0].h_items==='string'?JSON.parse(data[0].h_items):data[0].h_items;
-      hanRevItems=saved.rev||HAN_REV_DEFAULT.map(i=>({...i,amount:null}));
-      hanExpItems=saved.exp||HAN_EXP_DEFAULT.map(i=>({...i,amount:null}));
-      if(saved.revLastDate) document.getElementById('han-rev-lastdate').value=saved.revLastDate;
-      if(saved.expLastDate) document.getElementById('han-exp-lastdate').value=saved.expLastDate;
+    if(data.length&&data[0].h_items){
+      const s=typeof data[0].h_items==='string'?JSON.parse(data[0].h_items):data[0].h_items;
+      hanRevItems=s.rev||HAN_REV_DEFAULT.map(i=>({...i,amount:null}));
+      hanExpItems=s.exp||HAN_EXP_DEFAULT.map(i=>({...i,amount:null}));
+      if(s.revLastDate) document.getElementById('han-rev-lastdate').value=s.revLastDate;
+      if(s.expLastDate) document.getElementById('han-exp-lastdate').value=s.expLastDate;
       showMsg('han-msg',`✓ ${month} 불러옴`,true);
     } else {
-      // 이전달 고정항목 적용
-      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&select=h_items&limit=1`,{headers:HDR});
-      const prev=await res2.json();
-      if(prev.length && prev[0].h_items){
-        const p=typeof prev[0].h_items==='string'?JSON.parse(prev[0].h_items):prev[0].h_items;
+      const pm=prevM(month);
+      const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=h_items&limit=1`,{headers:HDR});
+      const pd=await r2.json();
+      if(pd.length&&pd[0].h_items){
+        const p=typeof pd[0].h_items==='string'?JSON.parse(pd[0].h_items):pd[0].h_items;
         hanRevItems=HAN_REV_DEFAULT.map(di=>{const m=(p.rev||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
         hanExpItems=HAN_EXP_DEFAULT.map(di=>{const m=(p.exp||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
-      } else {
-        hanRevItems=HAN_REV_DEFAULT.map(i=>({...i,amount:null}));
-        hanExpItems=HAN_EXP_DEFAULT.map(i=>({...i,amount:null}));
-      }
+      } else { hanRevItems=HAN_REV_DEFAULT.map(i=>({...i,amount:null})); hanExpItems=HAN_EXP_DEFAULT.map(i=>({...i,amount:null})); }
       showMsg('han-msg','이전달 고정항목 적용됨',true);
     }
     renderRows('han-rev-rows',hanRevItems,'han','rev');
@@ -984,33 +919,28 @@ async function loadHanMonth(){
   }catch(e){showMsg('han-msg','오류: '+e.message,false);}
   finally{loading(false);}
 }
-
 async function loadSarangMonth(){
-  const month=document.getElementById('sarang-month').value;
-  if(!month)return;
+  const month=document.getElementById('sarang-month').value; if(!month)return;
   loading(true);
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=s_items,sarang_revenue,sarang_expense,sarang_net&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=s_items&limit=1`,{headers:HDR});
     const data=await res.json();
-    const prevM=prevMonthUI(month);
-    if(data.length && data[0].s_items){
-      const saved=typeof data[0].s_items==='string'?JSON.parse(data[0].s_items):data[0].s_items;
-      sarangRevItems=saved.rev||SARANG_REV_DEFAULT.map(i=>({...i,amount:null}));
-      sarangExpItems=saved.exp||SARANG_EXP_DEFAULT.map(i=>({...i,amount:null}));
-      if(saved.revLastDate) document.getElementById('sarang-rev-lastdate').value=saved.revLastDate;
-      if(saved.expLastDate) document.getElementById('sarang-exp-lastdate').value=saved.expLastDate;
+    if(data.length&&data[0].s_items){
+      const s=typeof data[0].s_items==='string'?JSON.parse(data[0].s_items):data[0].s_items;
+      sarangRevItems=s.rev||SARANG_REV_DEFAULT.map(i=>({...i,amount:null}));
+      sarangExpItems=s.exp||SARANG_EXP_DEFAULT.map(i=>({...i,amount:null}));
+      if(s.revLastDate) document.getElementById('sarang-rev-lastdate').value=s.revLastDate;
+      if(s.expLastDate) document.getElementById('sarang-exp-lastdate').value=s.expLastDate;
       showMsg('sarang-msg',`✓ ${month} 불러옴`,true);
     } else {
-      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&select=s_items&limit=1`,{headers:HDR});
-      const prev=await res2.json();
-      if(prev.length && prev[0].s_items){
-        const p=typeof prev[0].s_items==='string'?JSON.parse(prev[0].s_items):prev[0].s_items;
+      const pm=prevM(month);
+      const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=s_items&limit=1`,{headers:HDR});
+      const pd=await r2.json();
+      if(pd.length&&pd[0].s_items){
+        const p=typeof pd[0].s_items==='string'?JSON.parse(pd[0].s_items):pd[0].s_items;
         sarangRevItems=SARANG_REV_DEFAULT.map(di=>{const m=(p.rev||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
         sarangExpItems=SARANG_EXP_DEFAULT.map(di=>{const m=(p.exp||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
-      } else {
-        sarangRevItems=SARANG_REV_DEFAULT.map(i=>({...i,amount:null}));
-        sarangExpItems=SARANG_EXP_DEFAULT.map(i=>({...i,amount:null}));
-      }
+      } else { sarangRevItems=SARANG_REV_DEFAULT.map(i=>({...i,amount:null})); sarangExpItems=SARANG_EXP_DEFAULT.map(i=>({...i,amount:null})); }
       showMsg('sarang-msg','이전달 고정항목 적용됨',true);
     }
     renderRows('sarang-rev-rows',sarangRevItems,'sarang','rev');
@@ -1019,151 +949,121 @@ async function loadSarangMonth(){
   finally{loading(false);}
 }
 
-/* ── 저장: Household_statistics에 h_items / s_items 패치 ── */
-async function saveHan(){
-  const month=document.getElementById('han-month').value;
-  if(!month){showMsg('han-msg','월을 선택하세요.',false);return;}
-  const totRev=hanRevItems.reduce((s,i)=>s+(i.amount||0),0);
-  const totExp=hanExpItems.reduce((s,i)=>s+(i.amount||0),0);
-  const revLastDate=document.getElementById('han-rev-lastdate')?.value||null;
-  const expLastDate=document.getElementById('han-exp-lastdate')?.value||null;
-  const hItems=JSON.stringify({rev:hanRevItems,exp:hanExpItems,revLastDate,expLastDate});
-  const payload={year_month:month,han_revenue:totRev,han_expense:totExp,han_net:totRev-totExp,h_items:hItems};
-  await upsertHS(month,payload,'han-msg',`한강 ${month}`);
-  loadHanHistory();
-}
-async function saveSarang(){
-  const month=document.getElementById('sarang-month').value;
-  if(!month){showMsg('sarang-msg','월을 선택하세요.',false);return;}
-  const totRev=sarangRevItems.reduce((s,i)=>s+(i.amount||0),0);
-  const totExp=sarangExpItems.reduce((s,i)=>s+(i.amount||0),0);
-  const revLastDate=document.getElementById('sarang-rev-lastdate')?.value||null;
-  const expLastDate=document.getElementById('sarang-exp-lastdate')?.value||null;
-  const sItems=JSON.stringify({rev:sarangRevItems,exp:sarangExpItems,revLastDate,expLastDate});
-  const payload={year_month:month,sarang_revenue:totRev,sarang_expense:totExp,sarang_net:totRev-totExp,s_items:sItems};
-  await upsertHS(month,payload,'sarang-msg',`사랑 ${month}`);
-  loadSarangHistory();
-}
-
-/* Household_statistics upsert 공통 */
 async function upsertHS(month,payload,msgId,label){
   loading(true);
   try{
-    const chk=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=year_month&limit=1`,{headers:HDR});
+    const chk=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=year_month&limit=1`,{headers:HDR});
     const ex=await chk.json();
-    let res;
-    if(Array.isArray(ex)&&ex.length){
-      res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}`,{method:'PATCH',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
-    } else {
-      res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}`,{method:'POST',headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
-    }
-    if(!res.ok){let msg='HTTP '+res.status;try{const e=await res.json();msg=e.message||msg;}catch(e2){}throw new Error(msg);}
+    const method=(Array.isArray(ex)&&ex.length)?'PATCH':'POST';
+    const url=method==='PATCH'?`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}`:`${SUPABASE_URL}/rest/v1/${HS}`;
+    const res=await fetch(url,{method,headers:{...HDR,'Prefer':'return=minimal'},body:JSON.stringify(payload)});
+    if(!res.ok){let m='HTTP '+res.status;try{const e=await res.json();m=e.message||m;}catch(e2){}throw new Error(m);}
     if(msgId) showMsg(msgId,`✓ ${label} 저장 완료!`,true);
     setStatus(`✓ ${label} 저장됨`,'success');
   }catch(e){if(msgId)showMsg(msgId,'오류: '+e.message,false);setStatus('⚠ '+e.message,'error');}
   finally{loading(false);}
 }
 
-/* ── 이력 테이블 (Household_statistics) ── */
+async function saveHan(){
+  const month=document.getElementById('han-month').value; if(!month){showMsg('han-msg','월을 선택하세요.',false);return;}
+  const tR=hanRevItems.reduce((s,i)=>s+(i.amount||0),0);
+  const tE=hanExpItems.reduce((s,i)=>s+(i.amount||0),0);
+  const hItems=JSON.stringify({rev:hanRevItems,exp:hanExpItems,revLastDate:document.getElementById('han-rev-lastdate')?.value||null,expLastDate:document.getElementById('han-exp-lastdate')?.value||null});
+  await upsertHS(month,{year_month:month,han_revenue:tR,han_expense:tE,han_net:tR-tE,h_items:hItems},'han-msg',`한강 ${month}`);
+  loadHanHistory();
+}
+async function saveSarang(){
+  const month=document.getElementById('sarang-month').value; if(!month){showMsg('sarang-msg','월을 선택하세요.',false);return;}
+  const tR=sarangRevItems.reduce((s,i)=>s+(i.amount||0),0);
+  const tE=sarangExpItems.reduce((s,i)=>s+(i.amount||0),0);
+  const sItems=JSON.stringify({rev:sarangRevItems,exp:sarangExpItems,revLastDate:document.getElementById('sarang-rev-lastdate')?.value||null,expLastDate:document.getElementById('sarang-exp-lastdate')?.value||null});
+  await upsertHS(month,{year_month:month,sarang_revenue:tR,sarang_expense:tE,sarang_net:tR-tE,s_items:sItems},'sarang-msg',`사랑 ${month}`);
+  loadSarangHistory();
+}
+
 async function loadHanHistory(){
-  try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month,han_revenue,han_expense,han_net&order=year_month.desc&limit=24`,{headers:HDR});
-    const data=await res.json();
-    renderHistoryTable('han-history-tbody',data,'han_revenue','han_expense','han_net');
-  }catch(e){}
+  try{ const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,han_revenue,han_expense,han_net&order=year_month.desc&limit=24`,{headers:HDR}); renderHistoryTable('han-history-tbody',await res.json(),'han_revenue','han_expense','han_net'); }catch(e){}
 }
 async function loadSarangHistory(){
-  try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month,sarang_revenue,sarang_expense,sarang_net&order=year_month.desc&limit=24`,{headers:HDR});
-    const data=await res.json();
-    renderHistoryTable('sarang-history-tbody',data,'sarang_revenue','sarang_expense','sarang_net');
-  }catch(e){}
+  try{ const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,sarang_revenue,sarang_expense,sarang_net&order=year_month.desc&limit=24`,{headers:HDR}); renderHistoryTable('sarang-history-tbody',await res.json(),'sarang_revenue','sarang_expense','sarang_net'); }catch(e){}
 }
-function renderHistoryTable(tbodyId,data,revKey,expKey,netKey){
+function renderHistoryTable(tbodyId,data,rk,ek,nk){
   const tbody=document.getElementById(tbodyId);
   if(!Array.isArray(data)||!data.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>';return;}
   tbody.innerHTML=data.map(r=>{
-    const rev=r[revKey]||0,exp=r[expKey]||0,net=r[netKey]??rev-exp;
+    const rev=Number(r[rk])||0,exp=Number(r[ek])||0,net=Number(r[nk])??rev-exp;
     const rate=rev?Math.round(net/rev*100):0;
-    return`<tr><td>${r.year_month}</td><td class="num">${rev.toLocaleString()}</td><td class="num">${exp.toLocaleString()}</td>
-      <td class="num" style="color:${net>=0?'#185fa5':'#a32d2d'}">${net.toLocaleString()}</td>
-      <td class="num">${rate}%</td></tr>`;
+    return`<tr><td>${r.year_month}</td><td class="num">${rev.toLocaleString()}</td><td class="num">${exp.toLocaleString()}</td><td class="num" style="color:${net>=0?'#185fa5':'#a32d2d'}">${net.toLocaleString()}</td><td class="num">${rate}%</td></tr>`;
   }).join('');
 }
 
-/* ── 자동집계 ── */
 async function autoCalcHan(kind){
-  const dateEl=document.getElementById('han-rev-lastdate');
-  const lastDate=dateEl.value;
+  const dateEl=document.getElementById('han-rev-lastdate'); const lastDate=dateEl.value;
   if(!lastDate){alert('마지막 입력일을 먼저 선택하세요.');return;}
-  const month=document.getElementById('han-month').value;
-  if(!month){alert('입력 월을 먼저 선택하세요.');return;}
+  const month=document.getElementById('han-month').value; if(!month){alert('입력 월을 선택하세요.');return;}
   loading(true);
   try{
-    const startDate=month+'-01';
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${startDate}&date=lte.${lastDate}&select=daily_revenue,cash,card,insurance_claim,deposit&order=date.asc`,{headers:HDR});
+    const[y,m]=month.split('-').map(Number);
+    const endDate=`${month}-${String(new Date(y,m,0).getDate()).padStart(2,'0')}`;
+    const afterDate=nextDay(lastDate);
+    if(afterDate>endDate){showMsg('han-msg','선택한 날짜 이후 데이터가 없습니다.',false);return;}
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${afterDate}&date=lte.${endDate}&select=date,daily_revenue,cash,card,insurance_claim,deposit&order=date.asc`,{headers:HDR});
     const rows=await res.json();
-    if(!Array.isArray(rows)||!rows.length){alert('해당 기간 일별 데이터 없음.');return;}
-    const totRev=rows.reduce((s,r)=>s+(r.daily_revenue||0),0);
-    const totCash=rows.reduce((s,r)=>s+(r.cash||0),0);
-    const totCard=rows.reduce((s,r)=>s+(r.card||0),0);
-    const totClaim=rows.reduce((s,r)=>s+(r.insurance_claim||0),0);
-    const totDep=rows.reduce((s,r)=>s+(r.deposit||0),0);
-    const mapping={'현금입금':totCash,'카드입금':totCard,'공단입금':totClaim,'계좌이체':totDep};
-    hanRevItems=hanRevItems.map(item=>({...item,amount:mapping[item.name]??item.amount}));
+    if(!rows.length){showMsg('han-msg',`${afterDate} 이후 데이터 없음`,false);return;}
+    const mapping={'현금입금':rows.reduce((s,r)=>s+(r.cash||0),0),'카드입금':rows.reduce((s,r)=>s+(r.card||0),0),'공단입금':rows.reduce((s,r)=>s+(r.insurance_claim||0),0),'계좌이체':rows.reduce((s,r)=>s+(r.deposit||0),0)};
+    hanRevItems=hanRevItems.map(item=>mapping[item.name]!==undefined?{...item,amount:mapping[item.name]}:item);
     renderRows('han-rev-rows',hanRevItems,'han','rev');
-    showMsg('han-msg',`✓ ${startDate}~${lastDate} 자동집계 완료`,true);
-  }catch(e){alert('오류: '+e.message);}
+    dateEl.value=rows[rows.length-1].date;
+    showMsg('han-msg',`✓ ${afterDate}~${rows[rows.length-1].date} 자동집계 완료`,true);
+  }catch(e){showMsg('han-msg','오류: '+e.message,false);}
   finally{loading(false);}
 }
-async function autoCalcSarang(kind){
-  const dateEl=document.getElementById('sarang-rev-lastdate');
-  const lastDate=dateEl.value;
-  if(!lastDate){alert('마지막 입력일을 먼저 선택하세요.');return;}
-  showMsg('sarang-msg','사랑의원은 일별 자동집계 미지원 (수동 입력)',true);
-}
+async function autoCalcSarang(kind){ showMsg('sarang-msg','사랑의원은 수동 입력',true); }
 
-/* ══════════════════════════════════════════════════
-   병원 통계 (Han_statics)
-══════════════════════════════════════════════════ */
-let revenueChart,patientChart,newPatientChart;
-async function fetchYear(yr){const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${yr}-01-01&date=lte.${yr}-12-31&order=date.asc&limit=400`,{headers:HDR});if(!res.ok)throw new Error(`HTTP ${res.status}`);return res.json();}
-async function fetchRange(fromYr,toYr){const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${fromYr}-01-01&date=lte.${toYr}-12-31&select=date,daily_revenue,total_patients,new_patients,cash,card,insurance_claim&order=date.asc&limit=5000`,{headers:HDR});if(!res.ok)throw new Error(`HTTP ${res.status}`);return res.json();}
+/* ══════════════════════════════════════════════
+   ① 한강 통계 ← Han_statics (index.html과 동일)
+══════════════════════════════════════════════ */
+let revenueChart, patientChart, newPatientChart;
+async function fetchYear(yr){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${yr}-01-01&date=lte.${yr}-12-31&order=date.asc&limit=400`,{headers:HDR});
+  if(!res.ok)throw new Error(`HTTP ${res.status}`); return res.json();
+}
+async function fetchRange(fromYr,toYr){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${fromYr}-01-01&date=lte.${toYr}-12-31&select=date,daily_revenue,total_patients,new_patients,cash,card,insurance_claim&order=date.asc&limit=5000`,{headers:HDR});
+  if(!res.ok)throw new Error(`HTTP ${res.status}`); return res.json();
+}
 function aggMonthly(data){const m={};for(const r of data){if(!r.date)continue;const k=r.date.slice(0,7);if(!m[k])m[k]={revenue:0,patients:0,new_p:0,cash:0,card:0,claim:0,days:0};m[k].revenue+=r.daily_revenue||0;m[k].patients+=r.total_patients||0;m[k].new_p+=r.new_patients||0;m[k].cash+=r.cash||0;m[k].card+=r.card||0;m[k].claim+=r.insurance_claim||0;if(r.daily_revenue>0)m[k].days++;}return Object.entries(m).sort((a,b)=>a[0]>b[0]?1:-1);}
 function aggYearly(data){const y={};for(const r of data){if(!r.date)continue;const k=r.date.slice(0,4);if(!y[k])y[k]={revenue:0,patients:0,new_p:0,cash:0,card:0,claim:0,days:0};y[k].revenue+=r.daily_revenue||0;y[k].patients+=r.total_patients||0;y[k].new_p+=r.new_patients||0;y[k].cash+=r.cash||0;y[k].card+=r.card||0;y[k].claim+=r.insurance_claim||0;if(r.daily_revenue>0)y[k].days++;}return Object.entries(y).sort((a,b)=>a[0]>b[0]?1:-1);}
 function setMetrics(data){const rev=data.reduce((s,r)=>s+(r.daily_revenue||0),0);const pat=data.reduce((s,r)=>s+(r.total_patients||0),0);const nw=data.reduce((s,r)=>s+(r.new_patients||0),0);const clm=data.reduce((s,r)=>s+(r.insurance_claim||0),0);const wd=data.filter(r=>r.daily_revenue>0).length;document.getElementById('m-revenue').textContent=fmt(rev);document.getElementById('m-revenue-sub').textContent=rev.toLocaleString()+'원';document.getElementById('m-patients').textContent=pat.toLocaleString()+'명';document.getElementById('m-patients-sub').textContent=`진료일 ${wd}일`;document.getElementById('m-avg-revenue').textContent=wd?fmt(Math.round(rev/wd)):'-';document.getElementById('m-avg-patients').textContent=wd?Math.round(pat/wd)+'명':'-';document.getElementById('m-new').textContent=nw.toLocaleString()+'명';document.getElementById('m-claim').textContent=fmt(clm);}
-// Chart 안전 생성: canvas에 기존 차트 있으면 무조건 destroy
-const _chartMap = {};
-function safeChart(canvasId, config) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) { console.warn('canvas not found:', canvasId); return null; }
-  // Chart.js v4: Chart.getChart()로 기존 인스턴스 확인
-  const existing = Chart.getChart(canvas);
-  if (existing) existing.destroy();
-  if (_chartMap[canvasId]) { try { _chartMap[canvasId].destroy(); } catch(e){} }
-  const c = new Chart(canvas, config);
-  _chartMap[canvasId] = c;
-  return c;
-}
-function dc(c){ if(c){ try{c.destroy();}catch(e){} } }
+
+// index.html과 동일한 단순 destroy+new Chart 방식
+function dc(c){ if(c){try{c.destroy();}catch(e){}} }
 function drawBar(labels,data,titleId,title,canvasId){
-  const el=document.getElementById(titleId); if(el) el.textContent=title;
-  const vals=data.map(v=>{ const n=Math.round(Number(v)/10000); return isNaN(n)?0:n; });
-  revenueChart=safeChart(canvasId,{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:'#185fa5',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y).toLocaleString()+'만원'}}},scales:{x:{ticks:{autoSkip:false,maxRotation:45,font:{size:11}}},y:{ticks:{callback:v=>v+'만'}}}}});
+  dc(revenueChart);
+  document.getElementById(titleId).textContent=title;
+  revenueChart=new Chart(document.getElementById(canvasId),{type:'bar',data:{labels,datasets:[{data:data.map(v=>Math.round(v/10000)),backgroundColor:'#185fa5',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y).toLocaleString()+'만원'}}},scales:{x:{ticks:{autoSkip:false,maxRotation:45,font:{size:11}}},y:{ticks:{callback:v=>v+'만'}}}}});
 }
 function drawLine(labels,data,titleId,title,canvasId){
-  const el=document.getElementById(titleId); if(el) el.textContent=title;
-  patientChart=safeChart(canvasId,{type:'line',data:{labels,datasets:[{data,borderColor:'#3b6d11',backgroundColor:'rgba(59,109,17,0.08)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:11}}}}}});
+  dc(patientChart);
+  document.getElementById(titleId).textContent=title;
+  patientChart=new Chart(document.getElementById(canvasId),{type:'line',data:{labels,datasets:[{data,borderColor:'#3b6d11',backgroundColor:'rgba(59,109,17,0.08)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:11}}}}}});
 }
 function drawNewPatientChart(labels,data,title){
-  const el=document.getElementById('newpt-chart-title'); if(el) el.textContent=title;
-  newPatientChart=safeChart('newPatientChart',{type:'bar',data:{labels,datasets:[{label:'초진환자수',data,backgroundColor:'rgba(186,117,23,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:14,font:{size:11}}},y:{ticks:{callback:v=>v+'명'}}}}});
+  dc(newPatientChart);
+  document.getElementById('newpt-chart-title').textContent=title;
+  newPatientChart=new Chart(document.getElementById('newPatientChart'),{type:'bar',data:{labels,datasets:[{label:'초진환자수',data,backgroundColor:'rgba(186,117,23,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:14,font:{size:11}}},y:{ticks:{callback:v=>v+'명'}}}}});
 }
 function renderMonthlyTable(rows){document.getElementById('table-title').textContent='월별 상세';document.getElementById('table-head').innerHTML=`<th>월</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([m,d])=>`<tr><td>${m}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.cash.toLocaleString()}</td><td class="num">${d.card.toLocaleString()}</td><td class="num">${d.claim.toLocaleString()}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderYearlyTable(rows){document.getElementById('table-title').textContent='연도별 상세';document.getElementById('table-head').innerHTML=`<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([y,d])=>`<tr><td>${y}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td><td class="num">${d.days?Math.round(d.patients/d.days):'-'}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderDailyTable(data){document.getElementById('table-title').textContent='일별 상세 (최근 30일)';const rows=[...data].sort((a,b)=>b.date>a.date?1:-1).slice(0,30);document.getElementById('table-head').innerHTML=`<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th>`;document.getElementById('table-body').innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td><td class="num">${(r.daily_revenue||0).toLocaleString()}</td><td class="num">${r.total_patients||0}</td><td class="num">${r.new_patients||0}</td><td class="num">${(r.cash||0).toLocaleString()}</td><td class="num">${(r.card||0).toLocaleString()}</td><td class="num">${(r.insurance_claim||0).toLocaleString()}</td></tr>`).join('');}
-function onViewTypeChange(){const vt=document.getElementById('view-type').value;document.getElementById('single-year-wrap').style.display=(vt==='yearly')?'none':'';document.getElementById('range-year-wrap').style.display=(vt==='yearly')?'':'none';}
-(function(){onViewTypeChange();})();
+
+function onViewTypeChange(){
+  const vt=document.getElementById('view-type').value;
+  document.getElementById('single-year-wrap').style.display=(vt==='yearly')?'none':'inline-flex';
+  document.getElementById('range-year-wrap').style.display=(vt==='yearly')?'inline-flex':'none';
+}
+(function(){ onViewTypeChange(); })();
+
 async function updateView(){
   const vt=document.getElementById('view-type').value;
   const yr=document.getElementById('year-select').value;
@@ -1172,87 +1072,112 @@ async function updateView(){
   loading(true);
   try{
     let data;
-    if(vt==='yearly'){data=await fetchRange(fromYr,toYr);const rows=aggYearly(data);setMetrics(data);drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${fromYr}~${toYr} 연도별 매출`,'revenueChart');drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title',`${fromYr}~${toYr} 연도별 환자수`,'patientChart');drawNewPatientChart(rows.map(([y])=>y),rows.map(([,d])=>d.new_p),`${fromYr}~${toYr} 연도별 초진환자수`);renderYearlyTable(rows);}
-    else if(vt==='monthly'){data=await fetchYear(yr);const rows=aggMonthly(data);setMetrics(data);drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');drawNewPatientChart(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.new_p),`${yr}년 월별 초진환자수`);renderMonthlyTable(rows);}
-    else{data=await fetchYear(yr);setMetrics(data);const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');drawNewPatientChart(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.new_patients||0),`${yr}년 일별 초진환자수`);renderDailyTable(data);}
-    if(!data||!data.length){ setStatus('⚠ Han_statics 데이터 없음','error'); return; }
+    if(vt==='yearly'){
+      data=await fetchRange(fromYr,toYr);
+      const rows=aggYearly(data); setMetrics(data);
+      drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${fromYr}~${toYr} 연도별 매출`,'revenueChart');
+      drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title',`${fromYr}~${toYr} 연도별 환자수`,'patientChart');
+      drawNewPatientChart(rows.map(([y])=>y),rows.map(([,d])=>d.new_p),`${fromYr}~${toYr} 연도별 초진환자수`);
+      renderYearlyTable(rows);
+    } else if(vt==='monthly'){
+      data=await fetchYear(yr);
+      const rows=aggMonthly(data); setMetrics(data);
+      drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');
+      drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');
+      drawNewPatientChart(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.new_p),`${yr}년 월별 초진환자수`);
+      renderMonthlyTable(rows);
+    } else {
+      data=await fetchYear(yr); setMetrics(data);
+      const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);
+      drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');
+      drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');
+      drawNewPatientChart(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.new_patients||0),`${yr}년 일별 초진환자수`);
+      renderDailyTable(data);
+    }
     setStatus(`✓ ${data.length}개 레코드 로드됨`,'success');
-  }catch(e){setStatus('⚠ 한강통계 오류: '+e.message,'error'); console.error(e);}
+  }catch(e){setStatus('⚠ 한강통계 오류: '+e.message,'error');console.error(e);}
   finally{loading(false);}
 }
-function refreshStats(){updateView();}
+function refreshStats(){ updateView(); }
 
-/* ══════════════════════════════════════════════════
-   한강/사랑 통계 ← Household_statistics
-══════════════════════════════════════════════════ */
-let hhRevChart,hhHanNetChart,hhSarangNetChart;
+/* ══════════════════════════════════════════════
+   ② 한강/사랑 통계 ← Household_statistics
+   (index.html의 drawHhRevChart/drawHhNetChart 구조 적용)
+══════════════════════════════════════════════ */
+let hhRevChart, hhHanNetChart, hhSarangNetChart;
 async function initHousehold(){ await loadHousehold(); }
 async function loadHousehold(){
   const fromYr=document.getElementById('hh-year-from')?.value||'2013';
   const toYr=document.getElementById('hh-year-to')?.value||'2026';
   loading(true);
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month,han_revenue,han_expense,han_net,sarang_revenue,sarang_expense,sarang_net&year_month=gte.${fromYr}-01&year_month=lte.${toYr}-12&order=year_month.asc&limit=200`,{headers:HDR});
-    const rows=await res.json();
-    if(!Array.isArray(rows)||rows.error){throw new Error('응답오류: '+JSON.stringify(rows).slice(0,100));}
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,han_revenue,han_expense,han_net,sarang_revenue,sarang_expense,sarang_net&year_month=gte.${fromYr}-01&year_month=lte.${toYr}-12&order=year_month.asc&limit=200`,{headers:HDR});
+    const raw=await res.json();
+    if(!Array.isArray(raw)||raw.error) throw new Error('응답 오류: '+JSON.stringify(raw).slice(0,80));
+    // 중간 객체로 변환 (index.html 방식)
+    const rows=raw.map(r=>({
+      ym:r.year_month,
+      hanRev:Number(r.han_revenue)||0, hanExp:Number(r.han_expense)||0, hanNet:Number(r.han_net)||0,
+      sarangRev:Number(r.sarang_revenue)||0, sarangExp:Number(r.sarang_expense)||0, sarangNet:Number(r.sarang_net)||0,
+    }));
     if(!rows.length){
-      document.getElementById('hh-tbody').innerHTML='<tr><td colspan="9" style="text-align:center;color:#888780;padding:20px;">조회된 데이터 없음 (기간: ${fromYr}~${toYr})</td></tr>';
-      setStatus(`⚠ Household_statistics ${fromYr}~${toYr} 데이터 없음`,'error');
-      loading(false); return;
+      document.getElementById('hh-tbody').innerHTML='<tr><td colspan="9" style="text-align:center;color:#888780;padding:20px;">데이터 없음</td></tr>';
+      setStatus(`⚠ ${fromYr}~${toYr} 데이터 없음`,'error'); loading(false); return;
     }
-    const totHanRev=rows.reduce((s,r)=>s+(r.han_revenue||0),0);
-    const totHanExp=rows.reduce((s,r)=>s+(r.han_expense||0),0);
-    const totHanNet=rows.reduce((s,r)=>s+(r.han_net||0),0);
-    const totSarangRev=rows.reduce((s,r)=>s+(r.sarang_revenue||0),0);
-    const totSarangExp=rows.reduce((s,r)=>s+(r.sarang_expense||0),0);
-    const totSarangNet=rows.reduce((s,r)=>s+(r.sarang_net||0),0);
+    const totHanRev=rows.reduce((s,r)=>s+r.hanRev,0), totHanExp=rows.reduce((s,r)=>s+r.hanExp,0), totHanNet=rows.reduce((s,r)=>s+r.hanNet,0);
+    const totSarangRev=rows.reduce((s,r)=>s+r.sarangRev,0), totSarangExp=rows.reduce((s,r)=>s+r.sarangExp,0), totSarangNet=rows.reduce((s,r)=>s+r.sarangNet,0);
     const totNet=totHanNet+totSarangNet;
     const setM=(id,v,colored)=>{const el=document.getElementById(id);if(!el)return;el.textContent=fmt(v);if(colored)el.style.color=v>=0?'#3b6d11':'#a32d2d';};
     setM('hh-han-rev',totHanRev); setM('hh-han-exp',totHanExp); setM('hh-han-net',totHanNet,true);
     setM('hh-sarang-rev',totSarangRev); setM('hh-sarang-exp',totSarangExp); setM('hh-sarang-net',totSarangNet,true);
     setM('hh-total-net',totNet,true);
-    const labels=rows.map(r=>r.year_month.slice(5)+'월');
-    // 차트
-    hhRevChart=safeChart('hhRevenueChart',{type:'bar',data:{labels,datasets:[
-      {label:'한강매출',data:rows.map(r=>Math.round((Number(r.han_revenue)||0)/10000)),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:3},
-      {label:'사랑매출',data:rows.map(r=>Math.round((Number(r.sarang_revenue)||0)/10000)),backgroundColor:'rgba(59,109,17,0.7)',borderRadius:3},
-      {label:'합산실수입',data:rows.map(r=>Math.round(((Number(r.han_net)||0)+(Number(r.sarang_net)||0))/10000)),backgroundColor:'rgba(26,26,24,0.15)',borderRadius:3},
+    const labels=rows.map(r=>r.ym.slice(5)+'월');
+    // index.html과 동일한 방식: destroy 후 new Chart
+    if(hhRevChart) hhRevChart.destroy();
+    hhRevChart=new Chart(document.getElementById('hhRevenueChart'),{type:'bar',data:{labels,datasets:[
+      {label:'한강매출',data:rows.map(r=>Math.round(r.hanRev/10000)),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:3},
+      {label:'사랑매출',data:rows.map(r=>Math.round(r.sarangRev/10000)),backgroundColor:'rgba(59,109,17,0.7)',borderRadius:3},
+      {label:'한강실수입',data:rows.map(r=>Math.round(r.hanNet/10000)),backgroundColor:'rgba(24,95,165,0.2)',borderRadius:3},
+      {label:'사랑실수입',data:rows.map(r=>Math.round(r.sarangNet/10000)),backgroundColor:'rgba(59,109,17,0.2)',borderRadius:3},
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11}}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
-    const drawNet=(canvasId,netData,color)=>{
-      safeChart(canvasId,{type:'line',data:{labels,datasets:[{data:netData,borderColor:color,backgroundColor:color.replace('rgb(','rgba(').replace(')',',0.08)'),borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
-    };
-    drawNet('hhHanNetChart',rows.map(r=>Math.round((Number(r.han_net)||0)/10000)),'rgb(24,95,165)');
-    drawNet('hhSarangNetChart',rows.map(r=>Math.round((Number(r.sarang_net)||0)/10000)),'rgb(59,109,17)');
+    if(hhHanNetChart) hhHanNetChart.destroy();
+    hhHanNetChart=new Chart(document.getElementById('hhHanNetChart'),{type:'bar',data:{labels,datasets:[{label:'한강실수입',data:rows.map(r=>Math.round(r.hanNet/10000)),backgroundColor:rows.map(r=>r.hanNet>=0?'#185fa5aa':'#a32d2daa'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
+    if(hhSarangNetChart) hhSarangNetChart.destroy();
+    hhSarangNetChart=new Chart(document.getElementById('hhSarangNetChart'),{type:'bar',data:{labels,datasets:[{label:'사랑실수입',data:rows.map(r=>Math.round(r.sarangNet/10000)),backgroundColor:rows.map(r=>r.sarangNet>=0?'#3b6d11aa':'#a32d2daa'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
     // 테이블
     document.getElementById('hh-tbody').innerHTML=rows.map(r=>{
-      const net=(Number(r.han_net)||0)+(Number(r.sarang_net)||0);
-      const totRev=(Number(r.han_revenue)||0)+(Number(r.sarang_revenue)||0);
+      const net=r.hanNet+r.sarangNet, totRev=r.hanRev+r.sarangRev;
       const rate=totRev?Math.round(net/totRev*100):0;
-      return`<tr><td>${r.year_month}</td>
-        <td class="num" style="color:#185fa5;">${(r.han_revenue||0).toLocaleString()}</td>
-        <td class="num" style="color:#888780;">${(r.han_expense||0).toLocaleString()}</td>
-        <td class="num" style="color:${(r.han_net||0)>=0?'#185fa5':'#a32d2d'};font-weight:500;">${(r.han_net||0).toLocaleString()}</td>
-        <td class="num" style="color:#3b6d11;">${(r.sarang_revenue||0).toLocaleString()}</td>
-        <td class="num" style="color:#888780;">${(r.sarang_expense||0).toLocaleString()}</td>
-        <td class="num" style="color:${(r.sarang_net||0)>=0?'#3b6d11':'#a32d2d'};font-weight:500;">${(r.sarang_net||0).toLocaleString()}</td>
+      return`<tr><td>${r.ym}</td>
+        <td class="num" style="color:#185fa5;">${r.hanRev.toLocaleString()}</td>
+        <td class="num" style="color:#888780;">${r.hanExp.toLocaleString()}</td>
+        <td class="num" style="color:${r.hanNet>=0?'#185fa5':'#a32d2d'};font-weight:500;">${r.hanNet.toLocaleString()}</td>
+        <td class="num" style="color:#3b6d11;">${r.sarangRev.toLocaleString()}</td>
+        <td class="num" style="color:#888780;">${r.sarangExp.toLocaleString()}</td>
+        <td class="num" style="color:${r.sarangNet>=0?'#3b6d11':'#a32d2d'};font-weight:500;">${r.sarangNet.toLocaleString()}</td>
         <td class="num" style="color:${net>=0?'#1a1a18':'#a32d2d'};font-weight:700;">${net.toLocaleString()}</td>
         <td class="num">${rate}%</td></tr>`;
     }).join('');
-    setStatus(`✓ 한강/사랑 통계 로드 완료 · ${rows.length}개월`,'success');
-  }catch(e){setStatus('⚠ '+e.message,'error');console.error(e);}
+    setStatus(`✓ 한강/사랑 통계 · ${rows.length}개월 (${fromYr}~${toYr})`,'success');
+  }catch(e){setStatus('⚠ 한강/사랑통계 오류: '+e.message,'error');console.error(e);}
   finally{loading(false);}
 }
 
-/* ══════════════════════════════════════════════════
-   가계통계 (가계 통계 탭) ← Household_statistics
-══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   ③ 가계 통계 ← Household_statistics
+   (index.html의 loadAssetHistory 구조 동일 적용)
+══════════════════════════════════════════════ */
 let assetTrendChart;
 async function loadAssetHistory(){
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month,a_cash,b_longterm,c_pension,d_total,income_total,mission_total,reserve_total&order=year_month.asc&limit=100`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,a_cash,b_longterm,c_pension,d_total,income_total,mission_total,reserve_total&order=year_month.asc&limit=100`,{headers:HDR});
     const data=await res.json();
-    if(!Array.isArray(data)||!data.length){document.getElementById('asset-history-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>';return;}
-    assetTrendChart=safeChart('assetTrendChart',{type:'line',data:{labels:data.map(r=>r.year_month),datasets:[
+    if(!Array.isArray(data)||!data.length){
+      document.getElementById('asset-history-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#888780;padding:16px;">데이터 없음 — 가계통계입력 탭에서 저장하세요</td></tr>';
+      setStatus('가계통계: 데이터 없음','error'); return;
+    }
+    if(assetTrendChart) assetTrendChart.destroy();
+    assetTrendChart=new Chart(document.getElementById('assetTrendChart'),{type:'line',data:{labels:data.map(r=>r.year_month),datasets:[
       {label:'D.총합',data:data.map(r=>Math.round((Number(r.d_total)||0)/10000)),borderColor:'#1a1a18',backgroundColor:'rgba(26,26,24,0.05)',borderWidth:2.5,pointRadius:3,fill:true,tension:0.3},
       {label:'A.현금',data:data.map(r=>Math.round((Number(r.a_cash)||0)/10000)),borderColor:'#185fa5',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
       {label:'C.연금성',data:data.map(r=>Math.round((Number(r.c_pension)||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
@@ -1267,157 +1192,24 @@ async function loadAssetHistory(){
       <td class="num">${fmtW(r.mission_total)}</td>
       <td class="num">${fmtW(r.reserve_total)}</td>
     </tr>`).join('');
-  }catch(e){console.error('loadAssetHistory 오류:',e);setStatus('⚠ 가계통계 오류: '+e.message,'error');}
+    setStatus(`✓ 가계통계 로드 완료 · ${data.length}개월`,'success');
+  }catch(e){setStatus('⚠ 가계통계 오류: '+e.message,'error');console.error(e);}
 }
 
-/* ══════════════════════════════════════════════════
-   가계통계입력 ← Household_statistics (모든 자산 컬럼)
-══════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   ④ 가계통계입력 ← Household_statistics
+══════════════════════════════════════════════ */
 let bankRows=[], savingsRows=[], missionUsage=[], hanReserveUsage=[], sarangReserveUsage=[];
 let prevMissionTotal=0, prevHanReserve=0, prevSarangReserve=0;
 
-/* 통장 */
-function addBankRow(data){bankRows.push(data||{bank:'',amount:0,date:''});renderBankRows();}
-function renderBankRows(){
-  const c=document.getElementById('bank-rows'); c.innerHTML='';
-  bankRows.forEach((r,idx)=>{
-    const d=document.createElement('div');
-    d.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 28px;gap:6px;align-items:center;margin-bottom:6px;';
-    d.innerHTML=`<input type="text" placeholder="은행명" value="${r.bank||''}" oninput="bankRows[${idx}].bank=this.value;recalcBank()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;">
-      <input type="number" placeholder="금액" value="${r.amount||''}" oninput="bankRows[${idx}].amount=parseInt(this.value)||0;recalcBank()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;text-align:right;">
-      <input type="date" value="${r.date||''}" oninput="bankRows[${idx}].date=this.value" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:5px 8px;font-size:12px;">
-      <button onclick="bankRows.splice(${idx},1);renderBankRows()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0;">✕</button>`;
-    c.appendChild(d);
-  });
-  recalcBank();
-}
-function recalcBank(){const t=bankRows.reduce((s,r)=>s+(r.amount||0),0);document.getElementById('at-bank').textContent=fmtW(t);recalcAssets();}
-function getBankTotal(){return bankRows.reduce((s,r)=>s+(r.amount||0),0);}
-
-/* 적금 */
-function addSavingsRow(data){savingsRows.push(data||{name:'',monthly:0,startMonth:'',total:0});renderSavingsRows();}
-function renderSavingsRows(){
-  const c=document.getElementById('savings-rows'); c.innerHTML='';
-  const curMonth=document.getElementById('asset-month')?.value||(new Date().toISOString().slice(0,7));
-  savingsRows.forEach((r,idx)=>{
-    let autoTotal=0;
-    if(r.startMonth&&r.monthly&&curMonth>=r.startMonth){const[sy,sm]=r.startMonth.split('-').map(Number);const[cy,cm]=curMonth.split('-').map(Number);autoTotal=((cy-sy)*12+(cm-sm)+1)*(r.monthly||0);}
-    if(!r.manual)r.total=autoTotal;
-    const d=document.createElement('div');
-    d.style.cssText='background:#fafaf8;border:0.5px solid #ddddd5;border-radius:8px;padding:10px 12px;margin-bottom:8px;';
-    d.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 28px;gap:6px;align-items:center;">
-      <input type="text" placeholder="적금명" value="${r.name||''}" oninput="savingsRows[${idx}].name=this.value" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;">
-      <div><label style="font-size:10px;color:#888780;display:block;">시작월</label>
-        <input type="month" value="${r.startMonth||''}" oninput="savingsRows[${idx}].startMonth=this.value;savingsRows[${idx}].manual=false;renderSavingsRows();recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:5px 8px;font-size:12px;width:100%;"></div>
-      <div><label style="font-size:10px;color:#888780;display:block;">월납입액</label>
-        <input type="number" placeholder="0" value="${r.monthly||''}" oninput="savingsRows[${idx}].monthly=parseInt(this.value)||0;savingsRows[${idx}].manual=false;renderSavingsRows();recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:5px 8px;font-size:12px;width:100%;text-align:right;"></div>
-      <div><label style="font-size:10px;color:#888780;display:block;">누계 <span style="color:#185fa5;">(자동)</span></label>
-        <input type="number" value="${r.total||0}" oninput="savingsRows[${idx}].manual=true;savingsRows[${idx}].total=parseInt(this.value)||0;recalcAssets()" style="border:0.5px solid ${r.manual?'#b4b2a9':'#85b7eb'};border-radius:8px;padding:5px 8px;font-size:12px;width:100%;text-align:right;background:${r.manual?'#fff':'#e6f1fb'};"></div>
-      <button onclick="savingsRows.splice(${idx},1);renderSavingsRows();recalcAssets()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0;align-self:center;">✕</button>
-    </div>`;
-    c.appendChild(d);
-  });
-  const t=savingsRows.reduce((s,r)=>s+(r.total||0),0);
-  document.getElementById('at-savings').textContent=fmtW(t);
-  recalcAssets();
-}
-function getSavingsTotal(){return savingsRows.reduce((s,r)=>s+(r.total||0),0);}
-
-/* 선교헌금/예비비 사용 내역 */
-function addUsageRow(type){if(type==='mission')missionUsage.push({amount:0,note:''});renderUsageRows(type);}
-function renderUsageRows(type){
-  const list=missionUsage;
-  const c=document.getElementById(type+'-usage-rows'); c.innerHTML='';
-  list.forEach((r,idx)=>{
-    const d=document.createElement('div');
-    d.style.cssText='display:grid;grid-template-columns:1fr 2fr 28px;gap:6px;align-items:center;margin-bottom:6px;';
-    d.innerHTML=`<input type="number" placeholder="금액" value="${r.amount||''}" oninput="${type}Usage[${idx}].amount=parseInt(this.value)||0;recalcUsage()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;text-align:right;">
-      <input type="text" placeholder="비고" value="${r.note||''}" oninput="${type}Usage[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:8px;padding:6px 10px;font-size:13px;background:#fafaf8;">
-      <button onclick="${type}Usage.splice(${idx},1);renderUsageRows('${type}');recalcUsage()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0;">✕</button>`;
-    c.appendChild(d);
-  });
-  recalcUsage();
-}
-function addHanReserveRow(data){hanReserveUsage.push(data||{amount:0,note:''});renderHanReserveUsage();}
-function addSarangReserveRow(data){sarangReserveUsage.push(data||{amount:0,note:''});renderSarangReserveUsage();}
-function renderHanReserveUsage(){
-  const c=document.getElementById('han-reserve-usage-rows'); c.innerHTML='';
-  hanReserveUsage.forEach((r,idx)=>{
-    const d=document.createElement('div');
-    d.style.cssText='display:grid;grid-template-columns:1fr 2fr 28px;gap:6px;align-items:center;margin-bottom:5px;';
-    d.innerHTML=`<input type="number" placeholder="사용금액" value="${r.amount||''}" oninput="hanReserveUsage[${idx}].amount=parseInt(this.value)||0;recalcReserve()" style="border:0.5px solid #b4b2a9;border-radius:7px;padding:5px 8px;font-size:12px;text-align:right;">
-      <input type="text" placeholder="사용처" value="${r.note||''}" oninput="hanReserveUsage[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:7px;padding:5px 8px;font-size:12px;background:#fafaf8;">
-      <button onclick="hanReserveUsage.splice(${idx},1);renderHanReserveUsage();recalcReserve()" style="background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;padding:0;">✕</button>`;
-    c.appendChild(d);
-  });
-  recalcReserve();
-}
-function renderSarangReserveUsage(){
-  const c=document.getElementById('sarang-reserve-usage-rows'); c.innerHTML='';
-  sarangReserveUsage.forEach((r,idx)=>{
-    const d=document.createElement('div');
-    d.style.cssText='display:grid;grid-template-columns:1fr 2fr 28px;gap:6px;align-items:center;margin-bottom:5px;';
-    d.innerHTML=`<input type="number" placeholder="사용금액" value="${r.amount||''}" oninput="sarangReserveUsage[${idx}].amount=parseInt(this.value)||0;recalcReserve()" style="border:0.5px solid #b4b2a9;border-radius:7px;padding:5px 8px;font-size:12px;text-align:right;">
-      <input type="text" placeholder="사용처" value="${r.note||''}" oninput="sarangReserveUsage[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:7px;padding:5px 8px;font-size:12px;background:#fafaf8;">
-      <button onclick="sarangReserveUsage.splice(${idx},1);renderSarangReserveUsage();recalcReserve()" style="background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;padding:0;">✕</button>`;
-    c.appendChild(d);
-  });
-  recalcReserve();
-}
-
-function recalcUsage(){
-  const used=missionUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const jo11El=document.getElementById('is-jo11');
-  const missionThisEl=document.getElementById('is-mission-this');
-  const jo11=jo11El?parseInt(jo11El.textContent.replace(/[^0-9]/g,''))||0:0;
-  const mThis=missionThisEl?parseInt(missionThisEl.textContent.replace(/[^0-9]/g,''))||0:0;
-  const total=prevMissionTotal+mThis;
-  const remain=total-used;
-  const mEl=document.getElementById('is-mission');
-  if(mEl)mEl.textContent=fmtW(total);
-  const rEl=document.getElementById('mission-remain');
-  if(rEl)rEl.textContent=fmtW(remain);
-}
-
-function recalcReserve(){
-  const rH=parseInt(document.getElementById('reserve-han')?.value||0)||0;
-  const rS=parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
-  const hanUsed=hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const sarangUsed=sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const hanRemain=prevHanReserve+rH-hanUsed;
-  const sarangRemain=prevSarangReserve+rS-sarangUsed;
-  const hEl=document.getElementById('han-reserve-remain');
-  const sEl=document.getElementById('sarang-reserve-remain');
-  const tEl=document.getElementById('reserve-remain');
-  if(hEl)hEl.textContent=fmtW(hanRemain);
-  if(sEl)sEl.textContent=fmtW(sarangRemain);
-  if(tEl)tEl.textContent=fmtW(hanRemain+sarangRemain);
-  const rsEl=document.getElementById('is-reserve');
-  if(rsEl)rsEl.textContent=fmtW(hanRemain+sarangRemain);
-}
-
-function recalcYellow(){
-  const hM=parseInt(document.getElementById('yellow-h-monthly')?.value||0)||0;
-  const sM=parseInt(document.getElementById('yellow-s-monthly')?.value||0)||0;
-  // 이전달 값에 이번달 납입 추가는 불러오기 시 처리됨
-  recalcAssets();
-}
-function recalcRetire(){ recalcAssets(); }
-
 function recalcAssets(){
-  const bank=getBankTotal();
-  const stock=getN('a-stock');
-  const savings=getSavingsTotal();
-  const dep=getN('a-deposit');
-  const yH=getN('a-yellow-h'), yS=getN('a-yellow-s');
-  const guar=getN('a-guarantee');
-  const rH=getN('a-retire-h'), rS=getN('a-retire-s');
-  const ann=getN('a-annuity');
-  const A=bank+stock+savings+dep;
-  const B=(yH+yS)+guar;
-  const C=(rH+rS)+ann;
-  const D=A+B+C;
+  const bank=getBankTotal(), stock=getN('a-stock'), savings=getSavingsTotal(), dep=getN('a-deposit');
+  const yH=getN('a-yellow-h'), yS=getN('a-yellow-s'), guar=getN('a-guarantee');
+  const rH=getN('a-retire-h'), rS=getN('a-retire-s'), ann=getN('a-annuity');
+  const A=bank+stock+savings+dep, B=(yH+yS)+guar, C=(rH+rS)+ann, D=A+B+C;
+  document.getElementById('at-bank').textContent=fmtW(bank);
   document.getElementById('at-stock').textContent=fmtW(stock);
+  document.getElementById('at-savings').textContent=fmtW(savings);
   document.getElementById('at-deposit').textContent=fmtW(dep);
   document.getElementById('at-yellow').textContent=fmtW(yH+yS);
   document.getElementById('at-guarantee').textContent=fmtW(guar);
@@ -1427,232 +1219,272 @@ function recalcAssets(){
   document.getElementById('ac-b').textContent=fmtW(B);
   document.getElementById('ac-c').textContent=fmtW(C);
   document.getElementById('ac-d').textContent=fmtW(D);
-  // 선교헌금 자동계산
-  const incomeTotal=parseInt(document.getElementById('_income_total')?.value||0)||0;
-  if(incomeTotal>0){
-    const jo11=Math.min(Math.round(incomeTotal*0.07),1500000);
-    const over=Math.max(0,Math.round(incomeTotal*0.07)-1500000);
-    const mission=Math.round(incomeTotal*0.03)+700000+over;
+  const inc=parseInt(document.getElementById('_income_total')?.value||0)||0;
+  if(inc>0){
+    const jo11=Math.min(Math.round(inc*0.07),1500000);
+    const over=Math.max(0,Math.round(inc*0.07)-1500000);
+    const mission=Math.round(inc*0.03)+700000+over;
     const mEl=document.getElementById('mission-calc');
-    if(mEl){mEl.style.display='block';mEl.innerHTML=`선교헌금 계산: 11조 = 가계수입(${fmtW(incomeTotal)}) × 7% = ${fmtW(Math.round(incomeTotal*0.07))} (최대 150만) → <b>${fmtW(jo11)}</b> &nbsp;|&nbsp; 선교헌금 = 수입 × 3%(${fmtW(Math.round(incomeTotal*0.03))}) + 70만 + 초과분(${fmtW(over)}) = <b>${fmtW(mission)}</b>`;}
-    const j11El=document.getElementById('is-jo11');
-    const mThEl=document.getElementById('is-mission-this');
-    if(j11El)j11El.textContent=fmtW(jo11);
-    if(mThEl)mThEl.textContent=fmtW(mission);
+    if(mEl){mEl.style.display='block';mEl.innerHTML=`선교헌금: 11조=${fmtW(jo11)}, 선교헌금=${fmtW(mission)}`;}
+    const j11=document.getElementById('is-jo11'); if(j11) j11.textContent=fmtW(jo11);
+    const mTh=document.getElementById('is-mission-this'); if(mTh) mTh.textContent=fmtW(mission);
   }
-  recalcUsage();
-  const month=document.getElementById('asset-month')?.value||'';
-  if(month){const fdEl=document.getElementById('final-save-desc');if(fdEl)fdEl.textContent=`저장하면 Household_statistics 테이블 ${month} 데이터가 업데이트됩니다.`;}
+  recalcUsage(); recalcReserve();
 }
 
-/* ── 수입 연동 (Household_statistics h_items/s_items 예비비 자동 적용) ── */
+/* 통장 */
+function getBankTotal(){ return bankRows.reduce((s,r)=>s+(r.amount||0),0); }
+function addBankRow(data){ bankRows.push(data||{bank:'',amount:0,date:''}); renderBankRows(); }
+function renderBankRows(){
+  const c=document.getElementById('bank-rows'); c.innerHTML='';
+  bankRows.forEach((r,idx)=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 28px;gap:6px;align-items:center;margin-bottom:6px;';
+    d.innerHTML=`<input type="text" placeholder="은행명" value="${r.bank||''}" oninput="bankRows[${idx}].bank=this.value;recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;">
+      <input type="number" placeholder="금액" value="${r.amount||''}" oninput="bankRows[${idx}].amount=parseInt(this.value)||0;recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;text-align:right;">
+      <input type="date" value="${r.date||''}" oninput="bankRows[${idx}].date=this.value" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:5px 8px;font-size:12px;">
+      <button onclick="bankRows.splice(${idx},1);renderBankRows()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;">✕</button>`;
+    c.appendChild(d);
+  });
+  document.getElementById('at-bank').textContent=fmtW(getBankTotal()); recalcAssets();
+}
+
+/* 적금 */
+function getSavingsTotal(){ return savingsRows.reduce((s,r)=>s+(r.total||0),0); }
+function addSavingsRow(data){ savingsRows.push(data||{name:'',monthly:0,startMonth:'',total:0,manual:false}); renderSavingsRows(); }
+function renderSavingsRows(){
+  const c=document.getElementById('savings-rows'); c.innerHTML='';
+  const curM=document.getElementById('asset-month')?.value||(new Date().toISOString().slice(0,7));
+  savingsRows.forEach((r,idx)=>{
+    if(!r.manual&&r.startMonth&&r.monthly&&curM>=r.startMonth){
+      const[sy,sm]=r.startMonth.split('-').map(Number);
+      const[cy,cm]=curM.split('-').map(Number);
+      r.total=((cy-sy)*12+(cm-sm)+1)*(r.monthly||0);
+    }
+    const d=document.createElement('div');
+    d.style.cssText='background:#fafaf8;border:0.5px solid #ddddd5;border-radius:8px;padding:10px 12px;margin-bottom:8px;';
+    d.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 28px;gap:6px;align-items:center;">
+      <input type="text" placeholder="적금명" value="${r.name||''}" oninput="savingsRows[${idx}].name=this.value" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;">
+      <div><label style="font-size:10px;color:#888780;display:block;">시작월</label><input type="month" value="${r.startMonth||''}" oninput="savingsRows[${idx}].startMonth=this.value;savingsRows[${idx}].manual=false;renderSavingsRows()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:5px 8px;font-size:12px;width:100%;"></div>
+      <div><label style="font-size:10px;color:#888780;display:block;">월납입액</label><input type="number" value="${r.monthly||''}" oninput="savingsRows[${idx}].monthly=parseInt(this.value)||0;savingsRows[${idx}].manual=false;renderSavingsRows()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:5px 8px;font-size:12px;width:100%;text-align:right;"></div>
+      <div><label style="font-size:10px;color:#888780;display:block;">누계<span style="color:#185fa5;">(자동)</span></label><input type="number" value="${r.total||0}" oninput="savingsRows[${idx}].manual=true;savingsRows[${idx}].total=parseInt(this.value)||0;recalcAssets()" style="border:0.5px solid ${r.manual?'#b4b2a9':'#85b7eb'};border-radius:8px;padding:5px 8px;font-size:12px;width:100%;text-align:right;background:${r.manual?'#fff':'#e6f1fb'};"></div>
+      <button onclick="savingsRows.splice(${idx},1);renderSavingsRows();recalcAssets()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0;align-self:center;">✕</button>
+    </div>`;
+    c.appendChild(d);
+  });
+  document.getElementById('at-savings').textContent=fmtW(getSavingsTotal()); recalcAssets();
+}
+
+/* 사용내역 공통 */
+function addUsageRow(type){ if(type==='mission')missionUsage.push({amount:0,note:''}); renderUsageRows(type); }
+function renderUsageRows(type){
+  const list=missionUsage, c=document.getElementById(type+'-usage-rows'); c.innerHTML='';
+  list.forEach((r,idx)=>{
+    const d=document.createElement('div');
+    d.style.cssText='display:grid;grid-template-columns:1fr 2fr 28px;gap:6px;align-items:center;margin-bottom:6px;';
+    d.innerHTML=`<input type="number" placeholder="금액" value="${r.amount||''}" oninput="missionUsage[${idx}].amount=parseInt(this.value)||0;recalcUsage()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;text-align:right;">
+      <input type="text" placeholder="비고" value="${r.note||''}" oninput="missionUsage[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:8px;padding:6px 10px;font-size:13px;background:#fafaf8;">
+      <button onclick="missionUsage.splice(${idx},1);renderUsageRows('${type}');recalcUsage()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;">✕</button>`;
+    c.appendChild(d);
+  });
+  recalcUsage();
+}
+function recalcUsage(){
+  const used=missionUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const mThEl=document.getElementById('is-mission-this'); const mThis=mThEl?parseInt(mThEl.textContent.replace(/[^0-9]/g,''))||0:0;
+  const total=prevMissionTotal+mThis;
+  const mEl=document.getElementById('is-mission'); if(mEl)mEl.textContent=fmtW(total);
+  const rEl=document.getElementById('mission-remain'); if(rEl)rEl.textContent=fmtW(total-used);
+}
+
+function addHanReserveRow(data){ hanReserveUsage.push(data||{amount:0,note:''}); renderHanReserveUsage(); }
+function addSarangReserveRow(data){ sarangReserveUsage.push(data||{amount:0,note:''}); renderSarangReserveUsage(); }
+function renderHanReserveUsage(){
+  const c=document.getElementById('han-reserve-usage-rows'); c.innerHTML='';
+  hanReserveUsage.forEach((r,idx)=>{
+    const d=document.createElement('div'); d.style.cssText='display:grid;grid-template-columns:1fr 2fr 28px;gap:6px;align-items:center;margin-bottom:5px;';
+    d.innerHTML=`<input type="number" placeholder="사용금액" value="${r.amount||''}" oninput="hanReserveUsage[${idx}].amount=parseInt(this.value)||0;recalcReserve()" style="border:0.5px solid #b4b2a9;border-radius:7px;padding:5px 8px;font-size:12px;text-align:right;">
+      <input type="text" placeholder="사용처" value="${r.note||''}" oninput="hanReserveUsage[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:7px;padding:5px 8px;font-size:12px;background:#fafaf8;">
+      <button onclick="hanReserveUsage.splice(${idx},1);renderHanReserveUsage();recalcReserve()" style="background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;">✕</button>`;
+    c.appendChild(d);
+  });
+  recalcReserve();
+}
+function renderSarangReserveUsage(){
+  const c=document.getElementById('sarang-reserve-usage-rows'); c.innerHTML='';
+  sarangReserveUsage.forEach((r,idx)=>{
+    const d=document.createElement('div'); d.style.cssText='display:grid;grid-template-columns:1fr 2fr 28px;gap:6px;align-items:center;margin-bottom:5px;';
+    d.innerHTML=`<input type="number" placeholder="사용금액" value="${r.amount||''}" oninput="sarangReserveUsage[${idx}].amount=parseInt(this.value)||0;recalcReserve()" style="border:0.5px solid #b4b2a9;border-radius:7px;padding:5px 8px;font-size:12px;text-align:right;">
+      <input type="text" placeholder="사용처" value="${r.note||''}" oninput="sarangReserveUsage[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:7px;padding:5px 8px;font-size:12px;background:#fafaf8;">
+      <button onclick="sarangReserveUsage.splice(${idx},1);renderSarangReserveUsage();recalcReserve()" style="background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;">✕</button>`;
+    c.appendChild(d);
+  });
+  recalcReserve();
+}
+function recalcReserve(){
+  const rH=parseInt(document.getElementById('reserve-han')?.value||0)||0;
+  const rS=parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
+  const hU=hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const sU=sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const hRem=prevHanReserve+rH-hU, sRem=prevSarangReserve+rS-sU;
+  const hEl=document.getElementById('han-reserve-remain'); if(hEl)hEl.textContent=fmtW(hRem);
+  const sEl=document.getElementById('sarang-reserve-remain'); if(sEl)sEl.textContent=fmtW(sRem);
+  const tEl=document.getElementById('reserve-remain'); if(tEl)tEl.textContent=fmtW(hRem+sRem);
+  const rsEl=document.getElementById('is-reserve'); if(rsEl)rsEl.textContent=fmtW(hRem+sRem);
+}
+function recalcYellow(){ recalcAssets(); }
+function recalcRetire(){ recalcAssets(); }
+
 async function loadMonthlyIncome(month){
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&select=han_net,sarang_net,h_items,s_items&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=han_net,sarang_net,h_items,s_items&limit=1`,{headers:HDR});
     const data=await res.json();
-    const hanNet=data.length?(data[0].han_net||0):0;
-    const sarangNet=data.length?(data[0].sarang_net||0):0;
+    const hanNet=data.length?(Number(data[0].han_net)||0):0;
+    const sarangNet=data.length?(Number(data[0].sarang_net)||0):0;
     const total=hanNet+sarangNet;
-    document.getElementById('is-han').textContent=fmtW(hanNet);
-    document.getElementById('is-sarang').textContent=fmtW(sarangNet);
-    document.getElementById('is-total').textContent=fmtW(total);
-    // 한강 h_items에서 예비비 자동 연동
-    if(data.length&&data[0].h_items){
-      try{const p=typeof data[0].h_items==='string'?JSON.parse(data[0].h_items):data[0].h_items;
-        const ei=(p.exp||[]).find(i=>i.name==='예비비');
-        if(ei&&ei.amount!=null){const el=document.getElementById('reserve-han');if(el){el.value=ei.amount;el.style.background='#eaf3de';const b=document.getElementById('han-reserve-auto-badge');if(b)b.style.display='inline';}}}catch(e2){}
-    }
-    // 사랑 s_items에서 예비비 자동 연동
-    if(data.length&&data[0].s_items){
-      try{const p=typeof data[0].s_items==='string'?JSON.parse(data[0].s_items):data[0].s_items;
-        const ei=(p.exp||[]).find(i=>i.name==='예비비');
-        if(ei&&ei.amount!=null){const el=document.getElementById('reserve-sarang');if(el){el.value=ei.amount;el.style.background='#eaf3de';const b=document.getElementById('sarang-reserve-auto-badge');if(b)b.style.display='inline';}}}catch(e2){}
-    }
+    const hEl=document.getElementById('is-han'); if(hEl)hEl.textContent=fmtW(hanNet);
+    const sEl=document.getElementById('is-sarang'); if(sEl)sEl.textContent=fmtW(sarangNet);
+    const tEl=document.getElementById('is-total'); if(tEl)tEl.textContent=fmtW(total);
+    // 예비비 자동연동
+    if(data.length&&data[0].h_items){try{const p=typeof data[0].h_items==='string'?JSON.parse(data[0].h_items):data[0].h_items;const ei=(p.exp||[]).find(i=>i.name==='예비비');if(ei?.amount!=null){const el=document.getElementById('reserve-han');if(el){el.value=ei.amount;el.style.background='#eaf3de';}}}catch(e2){}}
+    if(data.length&&data[0].s_items){try{const p=typeof data[0].s_items==='string'?JSON.parse(data[0].s_items):data[0].s_items;const ei=(p.exp||[]).find(i=>i.name==='예비비');if(ei?.amount!=null){const el=document.getElementById('reserve-sarang');if(el){el.value=ei.amount;el.style.background='#eaf3de';}}}catch(e2){}}
     let hid=document.getElementById('_income_total');
     if(!hid){hid=document.createElement('input');hid.type='hidden';hid.id='_income_total';document.body.appendChild(hid);}
-    hid.value=total;
-    recalcAssets();
+    hid.value=total; recalcAssets();
   }catch(e){console.error('loadMonthlyIncome:',e);}
 }
 
-/* ── 가계통계입력 초기화 ── */
 async function initAssets(){
   const t=new Date();
   const ym=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}`;
-  const monthEl=document.getElementById('asset-month');
-  if(monthEl&&!monthEl.value)monthEl.value=ym;
+  const el=document.getElementById('asset-month'); if(el&&!el.value) el.value=ym;
   renderBankRows(); renderSavingsRows(); renderUsageRows('mission');
   renderHanReserveUsage(); renderSarangReserveUsage();
   try{
-    const test=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month&limit=1`,{headers:HDR});
-    if(!test.ok){showMsg('asset-msg','⚠ Household_statistics 접근 오류',false);setStatus('⚠ Household_statistics 테이블을 확인하세요','error');return;}
+    const test=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month&limit=1`,{headers:HDR});
+    if(!test.ok){showMsg('asset-msg','⚠ Household_statistics 접근 오류',false);return;}
     await loadAssetMonth();
     await loadAssetHistory();
-  }catch(e){showMsg('asset-msg','⚠ 오류: '+e.message,false);}
+  }catch(e){showMsg('asset-msg','⚠ '+e.message,false);}
 }
 
-/* ── 불러오기 ── */
 async function loadAssetMonth(){
-  const month=document.getElementById('asset-month').value;
-  if(!month)return;
+  const month=document.getElementById('asset-month').value; if(!month)return;
   loading(true);
-  const prevM=prevMonthUI(month);
+  const pm=prevM(month);
   try{
-    // 이전달 누적값
-    const prevRes=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&select=mission_total,reserve_h,reserve_s,mission_m,reserve_h_m,reserve_s_m&limit=1`,{headers:HDR});
-    const prevBase=await prevRes.json();
-    if(prevBase.length){
-      prevMissionTotal=prevBase[0].mission_total||0;
-      // 이전달 예비비 잔액: reserve_h_m/reserve_s_m JSON에서 hanReserveRemain/sarangReserveRemain
-      const hM=prevBase[0].reserve_h_m;
-      const sM=prevBase[0].reserve_s_m;
-      try{const ph=hM?(typeof hM==='string'?JSON.parse(hM):hM):null;prevHanReserve=ph?.hanReserveRemain??prevBase[0].reserve_h??0;}catch(e2){prevHanReserve=prevBase[0].reserve_h||0;}
-      try{const ps=sM?(typeof sM==='string'?JSON.parse(sM):sM):null;prevSarangReserve=ps?.sarangReserveRemain??prevBase[0].reserve_s??0;}catch(e2){prevSarangReserve=prevBase[0].reserve_s||0;}
-    } else {prevMissionTotal=0;prevHanReserve=0;prevSarangReserve=0;}
-    const labelEl=document.getElementById('prev-month-label');
-    if(labelEl)labelEl.textContent=`📌 ${prevM} 누적 기준 → 선교헌금 ${fmtW(prevMissionTotal)}, 한강예비비잔액 ${fmtW(prevHanReserve)}, 사랑예비비잔액 ${fmtW(prevSarangReserve)}`;
-    const hPI=document.getElementById('han-reserve-prev'); if(hPI)hPI.value=prevHanReserve||0;
-    const sPI=document.getElementById('sarang-reserve-prev'); if(sPI)sPI.value=prevSarangReserve||0;
-
-    // 이번달 데이터
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${month}&limit=1`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&limit=1`,{headers:HDR});
     const data=await res.json();
     if(data.length){
       const r=data[0];
-      // 관리 JSON 필드들에서 상세 데이터 복원
       const bm=r.bank_m?(typeof r.bank_m==='string'?JSON.parse(r.bank_m):r.bank_m):{};
-      const sm_=r.saving_m?(typeof r.saving_m==='string'?JSON.parse(r.saving_m):r.saving_m):{};
+      const sm=r.saving_m?(typeof r.saving_m==='string'?JSON.parse(r.saving_m):r.saving_m):{};
       const mm=r.mission_m?(typeof r.mission_m==='string'?JSON.parse(r.mission_m):r.mission_m):{};
       const rhm=r.reserve_h_m?(typeof r.reserve_h_m==='string'?JSON.parse(r.reserve_h_m):r.reserve_h_m):{};
       const rsm=r.reserve_s_m?(typeof r.reserve_s_m==='string'?JSON.parse(r.reserve_s_m):r.reserve_s_m):{};
-      bankRows=bm.rows||[];
-      savingsRows=sm_.rows||[];
-      missionUsage=mm.usage||[];
-      hanReserveUsage=rhm.usage||[];
-      sarangReserveUsage=rsm.usage||[];
-      if(rhm.reserveHan!=null)setN('reserve-han',rhm.reserveHan);
-      if(rsm.reserveSarang!=null)setN('reserve-sarang',rsm.reserveSarang);
-      // 숫자 자산 필드
-      setN('a-stock',    r.stock_total);
-      setN('a-deposit',  r.deposit_total);
-      setN('a-guarantee',r.guarantee_total);
-      setN('a-annuity',  r.annuity_total);
-      setN('a-memo-val', null);
+      bankRows=bm.rows||[]; savingsRows=sm.rows||[]; missionUsage=mm.usage||[];
+      hanReserveUsage=rhm.usage||[]; sarangReserveUsage=rsm.usage||[];
+      if(rhm.reserveHan!=null) setN('reserve-han',rhm.reserveHan);
+      if(rsm.reserveSarang!=null) setN('reserve-sarang',rsm.reserveSarang);
+      setN('a-stock',Number(r.stock_total)||0); setN('a-deposit',Number(r.deposit_total)||0);
+      setN('a-guarantee',Number(r.guarantee_total)||0); setN('a-annuity',Number(r.annuity_total)||0);
       document.getElementById('a-memo').value=r.memo||'';
-      // 노란우산: yellow_m에서 h/s 분리, 없으면 half
       const ym_=r.yellow_m?(typeof r.yellow_m==='string'?JSON.parse(r.yellow_m):r.yellow_m):{};
-      setN('a-yellow-h', ym_.h??( r.yellow_total?Math.round(r.yellow_total/2):0));
-      setN('a-yellow-s', ym_.s??( r.yellow_total?Math.round(r.yellow_total/2):0));
+      setN('a-yellow-h',ym_.h??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0));
+      setN('a-yellow-s',ym_.s??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0));
       if(ym_.hMonthly) setN('yellow-h-monthly',ym_.hMonthly);
       if(ym_.sMonthly) setN('yellow-s-monthly',ym_.sMonthly);
-      // 퇴직연금: retirement_m에서 h/s 분리
       const rtm=r.retirement_m?(typeof r.retirement_m==='string'?JSON.parse(r.retirement_m):r.retirement_m):{};
-      setN('a-retire-h', rtm.h??( r.retirement_total?Math.round(r.retirement_total/2):0));
-      setN('a-retire-s', rtm.s??( r.retirement_total?Math.round(r.retirement_total/2):0));
+      setN('a-retire-h',rtm.h??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0));
+      setN('a-retire-s',rtm.s??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0));
       if(rtm.hMonthly) setN('retire-h-monthly',rtm.hMonthly);
       if(rtm.sMonthly) setN('retire-s-monthly',rtm.sMonthly);
-      // 비고 (보증금/주식/정기예금)
       const dm=r.deposit_m?(typeof r.deposit_m==='string'?JSON.parse(r.deposit_m):r.deposit_m):{};
       const stm=r.stock_m?(typeof r.stock_m==='string'?JSON.parse(r.stock_m):r.stock_m):{};
       const gm=r.quarantee_m?(typeof r.quarantee_m==='string'?JSON.parse(r.quarantee_m):r.quarantee_m):{};
       const anm=r.annuity_m?(typeof r.annuity_m==='string'?JSON.parse(r.annuity_m):r.annuity_m):{};
-      if(dm.note)  document.getElementById('a-deposit-note').value  =dm.note;
-      if(stm.note) document.getElementById('a-stock-note').value    =stm.note;
-      if(gm.note)  document.getElementById('a-guarantee-note').value=gm.note;
-      if(anm.note) document.getElementById('a-annuity-note').value  =anm.note;
+      const dmN=document.getElementById('a-deposit-note'); if(dm.note&&dmN) dmN.value=dm.note;
+      const stmN=document.getElementById('a-stock-note'); if(stm.note&&stmN) stmN.value=stm.note;
+      const gmN=document.getElementById('a-guarantee-note'); if(gm.note&&gmN) gmN.value=gm.note;
+      const anmN=document.getElementById('a-annuity-note'); if(anm.note&&anmN) anmN.value=anm.note;
+      // 이전달 누적
+      const prevRes=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=mission_total,reserve_h_m,reserve_s_m&limit=1`,{headers:HDR});
+      const prevBase=await prevRes.json();
+      if(prevBase.length){
+        prevMissionTotal=Number(prevBase[0].mission_total)||0;
+        try{const ph=prevBase[0].reserve_h_m?(typeof prevBase[0].reserve_h_m==='string'?JSON.parse(prevBase[0].reserve_h_m):prevBase[0].reserve_h_m):{};prevHanReserve=ph.hanReserveRemain??0;}catch(e2){prevHanReserve=0;}
+        try{const ps=prevBase[0].reserve_s_m?(typeof prevBase[0].reserve_s_m==='string'?JSON.parse(prevBase[0].reserve_s_m):prevBase[0].reserve_s_m):{};prevSarangReserve=ps.sarangReserveRemain??0;}catch(e2){prevSarangReserve=0;}
+      }
+      const hPI=document.getElementById('han-reserve-prev'); if(hPI)hPI.value=prevHanReserve||0;
+      const sPI=document.getElementById('sarang-reserve-prev'); if(sPI)sPI.value=prevSarangReserve||0;
       showMsg('asset-msg','✓ '+month+' 불러옴',true);
     } else {
-      // 신규월: 이전달 자산 이어받기
-      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?year_month=eq.${prevM}&limit=1`,{headers:HDR});
+      // 신규: 이전달 이어받기
+      const res2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&limit=1`,{headers:HDR});
       const prev=await res2.json();
       bankRows=[];savingsRows=[];missionUsage=[];hanReserveUsage=[];sarangReserveUsage=[];
-      document.getElementById('reserve-han').value='';
-      document.getElementById('reserve-sarang').value='';
       if(prev.length){
         const r=prev[0];
-        const sm_=r.saving_m?(typeof r.saving_m==='string'?JSON.parse(r.saving_m):r.saving_m):{};
-        savingsRows=(sm_.rows||[]).map(s=>({...s}));
-        setN('a-stock',r.stock_total);
-        setN('a-deposit',r.deposit_total);
-        setN('a-guarantee',r.guarantee_total);
-        setN('a-annuity',r.annuity_total);
+        const sm=r.saving_m?(typeof r.saving_m==='string'?JSON.parse(r.saving_m):r.saving_m):{};
+        savingsRows=(sm.rows||[]).map(s=>({...s}));
+        setN('a-stock',Number(r.stock_total)||0); setN('a-deposit',Number(r.deposit_total)||0);
+        setN('a-guarantee',Number(r.guarantee_total)||0); setN('a-annuity',Number(r.annuity_total)||0);
         const ym2=r.yellow_m?(typeof r.yellow_m==='string'?JSON.parse(r.yellow_m):r.yellow_m):{};
-        const yh=ym2.h??( r.yellow_total?Math.round(r.yellow_total/2):0);
-        const ys=ym2.s??( r.yellow_total?Math.round(r.yellow_total/2):0);
+        const yh=ym2.h??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0);
+        const ys=ym2.s??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0);
         const hMo=ym2.hMonthly||250000, sMo=ym2.sMonthly||250000;
         setN('a-yellow-h',yh+hMo); setN('a-yellow-s',ys+sMo);
         setN('yellow-h-monthly',hMo); setN('yellow-s-monthly',sMo);
         const rtm=r.retirement_m?(typeof r.retirement_m==='string'?JSON.parse(r.retirement_m):r.retirement_m):{};
-        const rh=rtm.h??(r.retirement_total?Math.round(r.retirement_total/2):0);
-        const rs=rtm.s??(r.retirement_total?Math.round(r.retirement_total/2):0);
+        const rh=rtm.h??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0);
+        const rs=rtm.s??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0);
         const rhMo=rtm.hMonthly||340000, rsMo=rtm.sMonthly||340000;
         setN('a-retire-h',rh+rhMo); setN('a-retire-s',rs+rsMo);
         setN('retire-h-monthly',rhMo); setN('retire-s-monthly',rsMo);
-        const dm=r.deposit_m?(typeof r.deposit_m==='string'?JSON.parse(r.deposit_m):r.deposit_m):{};
-        const stm=r.stock_m?(typeof r.stock_m==='string'?JSON.parse(r.stock_m):r.stock_m):{};
-        const gm=r.quarantee_m?(typeof r.quarantee_m==='string'?JSON.parse(r.quarantee_m):r.quarantee_m):{};
-        const anm=r.annuity_m?(typeof r.annuity_m==='string'?JSON.parse(r.annuity_m):r.annuity_m):{};
-        if(dm.note)  document.getElementById('a-deposit-note').value  =dm.note;
-        if(stm.note) document.getElementById('a-stock-note').value    =stm.note;
-        if(gm.note)  document.getElementById('a-guarantee-note').value=gm.note;
-        if(anm.note) document.getElementById('a-annuity-note').value  =anm.note;
+        prevMissionTotal=Number(r.mission_total)||0;
         showMsg('asset-msg','이전달 참고값 적용됨',true);
-      } else {showMsg('asset-msg','신규 월',true);}
+      } else { showMsg('asset-msg','신규 월',true); }
     }
-    renderBankRows();renderSavingsRows();renderUsageRows('mission');
-    renderHanReserveUsage();renderSarangReserveUsage();
-    recalcAssets();
+    renderBankRows(); renderSavingsRows(); renderUsageRows('mission');
+    renderHanReserveUsage(); renderSarangReserveUsage(); recalcAssets();
     await loadMonthlyIncome(month);
   }catch(e){showMsg('asset-msg','오류: '+e.message,false);console.error(e);}
   finally{loading(false);}
 }
 
-/* ── 저장 ── */
 async function saveAssets(){
-  const month=document.getElementById('asset-month').value;
-  if(!month){showMsg('asset-msg','월을 선택하세요.',false);return;}
-  const bank=getBankTotal();
-  const stock=getN('a-stock');
-  const savings=getSavingsTotal();
-  const dep=getN('a-deposit');
-  const yH=getN('a-yellow-h'), yS=getN('a-yellow-s');
-  const guar=getN('a-guarantee');
-  const rH_=getN('a-retire-h'), rS_=getN('a-retire-s');
-  const ann=getN('a-annuity');
-  const yellow=yH+yS, retire=rH_+rS_;
-  const A=bank+stock+savings+dep, B=yellow+guar, C=retire+ann;
-  const hanNet=parseInt(document.getElementById('is-han').textContent.replace(/[^0-9\-]/g,''))||0;
-  const sarangNet=parseInt(document.getElementById('is-sarang').textContent.replace(/[^0-9\-]/g,''))||0;
+  const month=document.getElementById('asset-month').value; if(!month){showMsg('asset-msg','월을 선택하세요.',false);return;}
+  const bank=getBankTotal(), stock=getN('a-stock'), savings=getSavingsTotal(), dep=getN('a-deposit');
+  const yH=getN('a-yellow-h'), yS=getN('a-yellow-s'), guar=getN('a-guarantee');
+  const rH=getN('a-retire-h'), rS=getN('a-retire-s'), ann=getN('a-annuity');
+  const A=bank+stock+savings+dep, B=(yH+yS)+guar, C=(rH+rS)+ann;
+  const hanNet=Number(document.getElementById('is-han')?.textContent?.replace(/[^0-9\-]/g,''))||0;
+  const sarangNet=Number(document.getElementById('is-sarang')?.textContent?.replace(/[^0-9\-]/g,''))||0;
   const incTotal=hanNet+sarangNet;
   const jo11=Math.min(Math.round(incTotal*0.07),1500000);
-  const over_=Math.max(0,Math.round(incTotal*0.07)-1500000);
-  const missionThis=Math.round(incTotal*0.03)+700000+over_;
+  const over=Math.max(0,Math.round(incTotal*0.07)-1500000);
+  const missionThis=Math.round(incTotal*0.03)+700000+over;
   const missionTotal_=prevMissionTotal+missionThis;
   const rHVal=parseInt(document.getElementById('reserve-han')?.value||0)||0;
   const rSVal=parseInt(document.getElementById('reserve-sarang')?.value||0)||0;
-  const hanUsed=hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const sarangUsed=sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
-  const hanRemain=prevHanReserve+rHVal-hanUsed;
-  const sarangRemain=prevSarangReserve+rSVal-sarangUsed;
-  const mUsed=missionUsage.reduce((s,r)=>s+(r.amount||0),0);
-
+  const hU=hanReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const sU=sarangReserveUsage.reduce((s,r)=>s+(r.amount||0),0);
+  const hRem=prevHanReserve+rHVal-hU, sRem=prevSarangReserve+rSVal-sU;
+  const mU=missionUsage.reduce((s,r)=>s+(r.amount||0),0);
   const payload={
-    year_month:month,
-    a_cash:A, b_longterm:B, c_pension:C, d_total:A+B+C,
-    han_net:hanNet, sarang_net:sarangNet, income_total:incTotal,
-    mission_total:missionTotal_, reserve_total:hanRemain+sarangRemain,
+    year_month:month, a_cash:A, b_longterm:B, c_pension:C, d_total:A+B+C,
+    income_total:incTotal, mission_total:missionTotal_, reserve_total:hRem+sRem,
     reserve_h:rHVal, reserve_s:rSVal,
     bank_total:bank, stock_total:stock, savings_total:savings, deposit_total:dep,
-    yellow_total:yellow, guarantee_total:guar, retirement_total:retire, annuity_total:ann,
+    yellow_total:yH+yS, guarantee_total:guar, retirement_total:rH+rS, annuity_total:ann,
     memo:document.getElementById('a-memo').value||null,
-    // 관리 JSON 필드들
     bank_m:JSON.stringify({rows:bankRows}),
     saving_m:JSON.stringify({rows:savingsRows}),
-    mission_m:JSON.stringify({usage:missionUsage,total:missionTotal_,used:mUsed,remain:missionTotal_-mUsed}),
-    reserve_h_m:JSON.stringify({usage:hanReserveUsage,reserveHan:rHVal,hanReserveRemain:hanRemain}),
-    reserve_s_m:JSON.stringify({usage:sarangReserveUsage,reserveSarang:rSVal,sarangReserveRemain:sarangRemain}),
+    mission_m:JSON.stringify({usage:missionUsage,total:missionTotal_,used:mU,remain:missionTotal_-mU}),
+    reserve_h_m:JSON.stringify({usage:hanReserveUsage,reserveHan:rHVal,hanReserveRemain:hRem}),
+    reserve_s_m:JSON.stringify({usage:sarangReserveUsage,reserveSarang:rSVal,sarangReserveRemain:sRem}),
     yellow_m:JSON.stringify({h:yH,s:yS,hMonthly:getN('yellow-h-monthly'),sMonthly:getN('yellow-s-monthly')}),
-    retirement_m:JSON.stringify({h:rH_,s:rS_,hMonthly:getN('retire-h-monthly'),sMonthly:getN('retire-s-monthly')}),
+    retirement_m:JSON.stringify({h:rH,s:rS,hMonthly:getN('retire-h-monthly'),sMonthly:getN('retire-s-monthly')}),
     deposit_m:JSON.stringify({note:document.getElementById('a-deposit-note')?.value||''}),
     stock_m:JSON.stringify({note:document.getElementById('a-stock-note')?.value||''}),
     quarantee_m:JSON.stringify({note:document.getElementById('a-guarantee-note')?.value||''}),
@@ -1662,11 +1494,10 @@ async function saveAssets(){
   await loadAssetHistory();
 }
 
-/* ── 최종저장 (11조/선교헌금 탭 저장버튼) = saveAssets와 동일 ── */
 async function finalSave(){
   const month=document.getElementById('asset-month').value;
   if(!month){alert('월을 먼저 선택하세요.');return;}
-  if(!confirm(`${month} 가계통계를 Household_statistics에 최종저장할까요?`))return;
+  if(!confirm(`${month} 가계통계를 최종저장할까요?`))return;
   await saveAssets();
   const msgEl=document.getElementById('final-save-msg');
   if(msgEl){msgEl.textContent=`✓ ${month} 최종저장 완료!`;setTimeout(()=>msgEl.textContent='',5000);}
