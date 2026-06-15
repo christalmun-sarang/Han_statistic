@@ -1132,10 +1132,33 @@ async function fetchRange(fromYr,toYr){const res=await fetch(`${SUPABASE_URL}/re
 function aggMonthly(data){const m={};for(const r of data){if(!r.date)continue;const k=r.date.slice(0,7);if(!m[k])m[k]={revenue:0,patients:0,new_p:0,cash:0,card:0,claim:0,days:0};m[k].revenue+=r.daily_revenue||0;m[k].patients+=r.total_patients||0;m[k].new_p+=r.new_patients||0;m[k].cash+=r.cash||0;m[k].card+=r.card||0;m[k].claim+=r.insurance_claim||0;if(r.daily_revenue>0)m[k].days++;}return Object.entries(m).sort((a,b)=>a[0]>b[0]?1:-1);}
 function aggYearly(data){const y={};for(const r of data){if(!r.date)continue;const k=r.date.slice(0,4);if(!y[k])y[k]={revenue:0,patients:0,new_p:0,cash:0,card:0,claim:0,days:0};y[k].revenue+=r.daily_revenue||0;y[k].patients+=r.total_patients||0;y[k].new_p+=r.new_patients||0;y[k].cash+=r.cash||0;y[k].card+=r.card||0;y[k].claim+=r.insurance_claim||0;if(r.daily_revenue>0)y[k].days++;}return Object.entries(y).sort((a,b)=>a[0]>b[0]?1:-1);}
 function setMetrics(data){const rev=data.reduce((s,r)=>s+(r.daily_revenue||0),0);const pat=data.reduce((s,r)=>s+(r.total_patients||0),0);const nw=data.reduce((s,r)=>s+(r.new_patients||0),0);const clm=data.reduce((s,r)=>s+(r.insurance_claim||0),0);const wd=data.filter(r=>r.daily_revenue>0).length;document.getElementById('m-revenue').textContent=fmt(rev);document.getElementById('m-revenue-sub').textContent=rev.toLocaleString()+'원';document.getElementById('m-patients').textContent=pat.toLocaleString()+'명';document.getElementById('m-patients-sub').textContent=`진료일 ${wd}일`;document.getElementById('m-avg-revenue').textContent=wd?fmt(Math.round(rev/wd)):'-';document.getElementById('m-avg-patients').textContent=wd?Math.round(pat/wd)+'명':'-';document.getElementById('m-new').textContent=nw.toLocaleString()+'명';document.getElementById('m-claim').textContent=fmt(clm);}
-function dc(c){if(c)c.destroy();}
-function drawBar(labels,data,titleId,title,canvasId){dc(revenueChart);document.getElementById(titleId).textContent=title;revenueChart=new Chart(document.getElementById(canvasId),{type:'bar',data:{labels,datasets:[{data:data.map(v=>Math.round(v/10000)),backgroundColor:'#185fa5',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y).toLocaleString()+'만원'}}},scales:{x:{ticks:{autoSkip:false,maxRotation:45,font:{size:11}}},y:{ticks:{callback:v=>v+'만'}}}}});}
-function drawLine(labels,data,titleId,title,canvasId){dc(patientChart);document.getElementById(titleId).textContent=title;patientChart=new Chart(document.getElementById(canvasId),{type:'line',data:{labels,datasets:[{data,borderColor:'#3b6d11',backgroundColor:'rgba(59,109,17,0.08)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:11}}}}}});}
-function drawNewPatientChart(labels,data,title){dc(newPatientChart);document.getElementById('newpt-chart-title').textContent=title;newPatientChart=new Chart(document.getElementById('newPatientChart'),{type:'bar',data:{labels,datasets:[{label:'초진환자수',data,backgroundColor:'rgba(186,117,23,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:14,font:{size:11}}},y:{ticks:{callback:v=>v+'명'}}}}});}
+// Chart 안전 생성: canvas에 기존 차트 있으면 무조건 destroy
+const _chartMap = {};
+function safeChart(canvasId, config) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) { console.warn('canvas not found:', canvasId); return null; }
+  // Chart.js v4: Chart.getChart()로 기존 인스턴스 확인
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+  if (_chartMap[canvasId]) { try { _chartMap[canvasId].destroy(); } catch(e){} }
+  const c = new Chart(canvas, config);
+  _chartMap[canvasId] = c;
+  return c;
+}
+function dc(c){ if(c){ try{c.destroy();}catch(e){} } }
+function drawBar(labels,data,titleId,title,canvasId){
+  const el=document.getElementById(titleId); if(el) el.textContent=title;
+  const vals=data.map(v=>{ const n=Math.round(Number(v)/10000); return isNaN(n)?0:n; });
+  revenueChart=safeChart(canvasId,{type:'bar',data:{labels,datasets:[{data:vals,backgroundColor:'#185fa5',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>(ctx.parsed.y).toLocaleString()+'만원'}}},scales:{x:{ticks:{autoSkip:false,maxRotation:45,font:{size:11}}},y:{ticks:{callback:v=>v+'만'}}}}});
+}
+function drawLine(labels,data,titleId,title,canvasId){
+  const el=document.getElementById(titleId); if(el) el.textContent=title;
+  patientChart=safeChart(canvasId,{type:'line',data:{labels,datasets:[{data,borderColor:'#3b6d11',backgroundColor:'rgba(59,109,17,0.08)',borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:11}}}}}});
+}
+function drawNewPatientChart(labels,data,title){
+  const el=document.getElementById('newpt-chart-title'); if(el) el.textContent=title;
+  newPatientChart=safeChart('newPatientChart',{type:'bar',data:{labels,datasets:[{label:'초진환자수',data,backgroundColor:'rgba(186,117,23,0.75)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:14,font:{size:11}}},y:{ticks:{callback:v=>v+'명'}}}}});
+}
 function renderMonthlyTable(rows){document.getElementById('table-title').textContent='월별 상세';document.getElementById('table-head').innerHTML=`<th>월</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([m,d])=>`<tr><td>${m}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.cash.toLocaleString()}</td><td class="num">${d.card.toLocaleString()}</td><td class="num">${d.claim.toLocaleString()}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderYearlyTable(rows){document.getElementById('table-title').textContent='연도별 상세';document.getElementById('table-head').innerHTML=`<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([y,d])=>`<tr><td>${y}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td><td class="num">${d.days?Math.round(d.patients/d.days):'-'}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderDailyTable(data){document.getElementById('table-title').textContent='일별 상세 (최근 30일)';const rows=[...data].sort((a,b)=>b.date>a.date?1:-1).slice(0,30);document.getElementById('table-head').innerHTML=`<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th>`;document.getElementById('table-body').innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td><td class="num">${(r.daily_revenue||0).toLocaleString()}</td><td class="num">${r.total_patients||0}</td><td class="num">${r.new_patients||0}</td><td class="num">${(r.cash||0).toLocaleString()}</td><td class="num">${(r.card||0).toLocaleString()}</td><td class="num">${(r.insurance_claim||0).toLocaleString()}</td></tr>`).join('');}
@@ -1152,8 +1175,9 @@ async function updateView(){
     if(vt==='yearly'){data=await fetchRange(fromYr,toYr);const rows=aggYearly(data);setMetrics(data);drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${fromYr}~${toYr} 연도별 매출`,'revenueChart');drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title',`${fromYr}~${toYr} 연도별 환자수`,'patientChart');drawNewPatientChart(rows.map(([y])=>y),rows.map(([,d])=>d.new_p),`${fromYr}~${toYr} 연도별 초진환자수`);renderYearlyTable(rows);}
     else if(vt==='monthly'){data=await fetchYear(yr);const rows=aggMonthly(data);setMetrics(data);drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');drawNewPatientChart(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.new_p),`${yr}년 월별 초진환자수`);renderMonthlyTable(rows);}
     else{data=await fetchYear(yr);setMetrics(data);const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');drawNewPatientChart(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.new_patients||0),`${yr}년 일별 초진환자수`);renderDailyTable(data);}
+    if(!data||!data.length){ setStatus('⚠ Han_statics 데이터 없음','error'); return; }
     setStatus(`✓ ${data.length}개 레코드 로드됨`,'success');
-  }catch(e){setStatus('⚠ '+e.message,'error');}
+  }catch(e){setStatus('⚠ 한강통계 오류: '+e.message,'error'); console.error(e);}
   finally{loading(false);}
 }
 function refreshStats(){updateView();}
@@ -1189,15 +1213,16 @@ async function loadHousehold(){
     setM('hh-total-net',totNet,true);
     const labels=rows.map(r=>r.year_month.slice(5)+'월');
     // 차트
-    if(hhRevChart)hhRevChart.destroy();
-    hhRevChart=new Chart(document.getElementById('hhRevenueChart'),{type:'bar',data:{labels,datasets:[
-      {label:'한강매출',data:rows.map(r=>Math.round((r.han_revenue||0)/10000)),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:3},
-      {label:'사랑매출',data:rows.map(r=>Math.round((r.sarang_revenue||0)/10000)),backgroundColor:'rgba(59,109,17,0.7)',borderRadius:3},
-      {label:'합산실수입',data:rows.map(r=>Math.round(((r.han_net||0)+(r.sarang_net||0))/10000)),backgroundColor:'rgba(26,26,24,0.15)',borderRadius:3},
+    hhRevChart=safeChart('hhRevenueChart',{type:'bar',data:{labels,datasets:[
+      {label:'한강매출',data:rows.map(r=>Math.round((Number(r.han_revenue)||0)/10000)),backgroundColor:'rgba(24,95,165,0.7)',borderRadius:3},
+      {label:'사랑매출',data:rows.map(r=>Math.round((Number(r.sarang_revenue)||0)/10000)),backgroundColor:'rgba(59,109,17,0.7)',borderRadius:3},
+      {label:'합산실수입',data:rows.map(r=>Math.round(((Number(r.han_net)||0)+(Number(r.sarang_net)||0))/10000)),backgroundColor:'rgba(26,26,24,0.15)',borderRadius:3},
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:11}}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
-    const drawNet=(canvasId,data,oldChart,setChart,color)=>{if(oldChart)oldChart.destroy();const c=new Chart(document.getElementById(canvasId),{type:'line',data:{labels,datasets:[{data,borderColor:color,backgroundColor:color.replace(')',',0.08)').replace('rgb','rgba'),borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});setChart(c);};
-    drawNet('hhHanNetChart',rows.map(r=>Math.round((r.han_net||0)/10000)),hhHanNetChart,c=>hhHanNetChart=c,'rgb(24,95,165)');
-    drawNet('hhSarangNetChart',rows.map(r=>Math.round((r.sarang_net||0)/10000)),hhSarangNetChart,c=>hhSarangNetChart=c,'rgb(59,109,17)');
+    const drawNet=(canvasId,netData,color)=>{
+      safeChart(canvasId,{type:'line',data:{labels,datasets:[{data:netData,borderColor:color,backgroundColor:color.replace('rgb(','rgba(').replace(')',',0.08)'),borderWidth:2,pointRadius:3,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:12,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
+    };
+    drawNet('hhHanNetChart',rows.map(r=>Math.round((Number(r.han_net)||0)/10000)),'rgb(24,95,165)');
+    drawNet('hhSarangNetChart',rows.map(r=>Math.round((Number(r.sarang_net)||0)/10000)),'rgb(59,109,17)');
     // 테이블
     document.getElementById('hh-tbody').innerHTML=rows.map(r=>{
       const net=(Number(r.han_net)||0)+(Number(r.sarang_net)||0);
@@ -1227,11 +1252,10 @@ async function loadAssetHistory(){
     const res=await fetch(`${SUPABASE_URL}/rest/v1/${TABLE}?select=year_month,a_cash,b_longterm,c_pension,d_total,income_total,mission_total,reserve_total&order=year_month.asc&limit=100`,{headers:HDR});
     const data=await res.json();
     if(!Array.isArray(data)||!data.length){document.getElementById('asset-history-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>';return;}
-    if(assetTrendChart)assetTrendChart.destroy();
-    assetTrendChart=new Chart(document.getElementById('assetTrendChart'),{type:'line',data:{labels:data.map(r=>r.year_month),datasets:[
-      {label:'D.총합',data:data.map(r=>Math.round((r.d_total||0)/10000)),borderColor:'#1a1a18',backgroundColor:'rgba(26,26,24,0.05)',borderWidth:2.5,pointRadius:3,fill:true,tension:0.3},
-      {label:'A.현금',data:data.map(r=>Math.round((r.a_cash||0)/10000)),borderColor:'#185fa5',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
-      {label:'C.연금성',data:data.map(r=>Math.round((r.c_pension||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
+    assetTrendChart=safeChart('assetTrendChart',{type:'line',data:{labels:data.map(r=>r.year_month),datasets:[
+      {label:'D.총합',data:data.map(r=>Math.round((Number(r.d_total)||0)/10000)),borderColor:'#1a1a18',backgroundColor:'rgba(26,26,24,0.05)',borderWidth:2.5,pointRadius:3,fill:true,tension:0.3},
+      {label:'A.현금',data:data.map(r=>Math.round((Number(r.a_cash)||0)/10000)),borderColor:'#185fa5',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
+      {label:'C.연금성',data:data.map(r=>Math.round((Number(r.c_pension)||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:12},padding:10}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:16,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
     document.getElementById('asset-history-tbody').innerHTML=data.slice().reverse().map(r=>`<tr>
       <td>${r.year_month}</td>
@@ -1243,7 +1267,7 @@ async function loadAssetHistory(){
       <td class="num">${fmtW(r.mission_total)}</td>
       <td class="num">${fmtW(r.reserve_total)}</td>
     </tr>`).join('');
-  }catch(e){console.error(e);}
+  }catch(e){console.error('loadAssetHistory 오류:',e);setStatus('⚠ 가계통계 오류: '+e.message,'error');}
 }
 
 /* ══════════════════════════════════════════════════
