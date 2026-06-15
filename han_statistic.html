@@ -581,25 +581,44 @@ tr:hover td { background: #f5f5f0; }
      병원 통계 페이지
 ════════════════════════════════ -->
 <div id="page-stats" class="page">
-  <div class="controls">
+  <div class="controls" style="flex-wrap:wrap;gap:8px;">
     <span class="ctrl-label">기간:</span>
     <select id="view-type" onchange="onViewTypeChange()">
       <option value="monthly">월별</option>
       <option value="yearly">연도별</option>
-      <option value="daily">일별 (최근 30일)</option>
+      <option value="daily">일별 날짜검색</option>
     </select>
-    <!-- 단일연도 (월별/일별용) -->
+    <!-- 월별: 단일연도 -->
     <span id="single-year-wrap" style="display:inline-flex;align-items:center;gap:6px;">
-      <select id="year-select"><option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option></select>
+      <select id="year-select">
+        <option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option>
+      </select>
     </span>
-    <!-- 범위연도 (연도별용) -->
+    <!-- 연도별: 연도 범위 -->
     <span id="range-year-wrap" style="display:none;align-items:center;gap:6px;">
-      <select id="year-from"><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013" selected>2013</option></select>
+      <select id="year-from">
+        <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013" selected>2013</option>
+      </select>
       <span class="ctrl-label">~</span>
-      <select id="year-to"><option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option></select>
+      <select id="year-to">
+        <option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option>
+      </select>
+    </span>
+    <!-- 일별: 날짜 범위 -->
+    <span id="date-range-wrap" style="display:none;align-items:center;gap:6px;">
+      <input type="date" id="date-from" style="width:150px;padding:6px 10px;font-size:13px;border:0.5px solid #b4b2a9;border-radius:8px;">
+      <span class="ctrl-label">~</span>
+      <input type="date" id="date-to" style="width:150px;padding:6px 10px;font-size:13px;border:0.5px solid #b4b2a9;border-radius:8px;">
     </span>
     <button onclick="updateView()">조회</button>
     <button class="secondary" onclick="refreshStats()">↻ 새로고침</button>
+    <!-- 정렬 버튼 (테이블용) -->
+    <span id="sort-btns" style="display:none;gap:4px;margin-left:8px;">
+      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('revenue')">매출순</button>
+      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('patients')">환자수순</button>
+      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('new_p')">초진순</button>
+      <button class="secondary" style="font-size:12px;padding:5px 10px;" onclick="sortTable('date')">날짜순</button>
+    </span>
   </div>
   <div class="main">
     <div class="metric-grid">
@@ -623,18 +642,14 @@ tr:hover td { background: #f5f5f0; }
      가계 통계 페이지
 ════════════════════════════════ -->
 <div id="page-household" class="page">
-  <div class="controls">
+  <div class="controls" style="flex-wrap:wrap;gap:8px;">
     <span class="ctrl-label">기간:</span>
-    <select id="hh-year-from">
-      <option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013" selected>2013</option>
-    </select>
+    <input type="month" id="hh-month-from" value="2013-01" style="width:150px;padding:6px 10px;font-size:13px;border:0.5px solid #b4b2a9;border-radius:8px;">
     <span class="ctrl-label">~</span>
-    <select id="hh-year-to">
-      <option value="2026" selected>2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option><option value="2018">2018</option><option value="2017">2017</option><option value="2016">2016</option><option value="2015">2015</option><option value="2014">2014</option><option value="2013">2013</option>
-    </select>
+    <input type="month" id="hh-month-to" value="2026-06" style="width:150px;padding:6px 10px;font-size:13px;border:0.5px solid #b4b2a9;border-radius:8px;">
     <button onclick="loadHousehold()">조회</button>
     <button class="secondary" onclick="loadHousehold()">↻ 새로고침</button>
-    <span style="font-size:12px;color:#888780;margin-left:8px;">Household_statistics 전용</span>
+    <span style="font-size:12px;color:#888780;margin-left:8px;">Household_statistics</span>
   </div>
   <div class="main">
     <!-- 요약 카드 -->
@@ -691,28 +706,46 @@ tr:hover td { background: #f5f5f0; }
      가계 통계 페이지
 ════════════════════════════════ -->
 <div id="page-assets" class="page">
-  <div class="main" style="padding-top:20px;">
-
-    <!-- 월별 이력 차트 -->
+  <div class="controls" style="flex-wrap:wrap;gap:8px;">
+    <span class="ctrl-label">기간:</span>
+    <input type="month" id="asset-hist-from" value="2024-02" style="width:150px;padding:6px 10px;font-size:13px;border:0.5px solid #b4b2a9;border-radius:8px;">
+    <span class="ctrl-label">~</span>
+    <input type="month" id="asset-hist-to" value="2026-06" style="width:150px;padding:6px 10px;font-size:13px;border:0.5px solid #b4b2a9;border-radius:8px;">
+    <button onclick="loadAssetHistory()">조회</button>
+    <button class="secondary" onclick="loadAssetHistory()">↻ 새로고침</button>
+  </div>
+  <div class="main" style="padding-top:12px;">
+    <!-- 총자산 추이 차트 -->
     <div class="asset-section">
       <h3>📈 총자산 추이</h3>
       <div style="position:relative;height:240px;"><canvas id="assetTrendChart"></canvas></div>
     </div>
-
-    <!-- 월별 이력 테이블 -->
+    <!-- 월별 이력 테이블 (전체 컬럼) -->
     <div class="asset-section">
       <h3>월별 이력</h3>
       <div style="overflow-x:auto;">
-        <table>
+        <table style="font-size:12px;min-width:1400px;">
           <thead><tr>
-            <th>월</th>
-            <th class="num" style="color:#185fa5;">A.현금</th>
-            <th class="num" style="color:#3b6d11;">B.장기현금</th>
-            <th class="num" style="color:#ba7517;">C.연금성</th>
-            <th class="num" style="font-weight:600;">D.총합</th>
-            <th class="num">수입합</th>
-            <th class="num">선교헌금</th>
-            <th class="num">예비비</th>
+            <th style="white-space:nowrap;">월</th>
+            <th class="num" style="color:#185fa5;white-space:nowrap;">A.현금</th>
+            <th class="num" style="color:#3b6d11;white-space:nowrap;">B.장기현금</th>
+            <th class="num" style="color:#ba7517;white-space:nowrap;">C.연금성</th>
+            <th class="num" style="font-weight:600;white-space:nowrap;">D.총합</th>
+            <th class="num" style="white-space:nowrap;">한강실수입</th>
+            <th class="num" style="white-space:nowrap;">사랑실수입</th>
+            <th class="num" style="white-space:nowrap;">수입합</th>
+            <th class="num" style="white-space:nowrap;">선교헌금합</th>
+            <th class="num" style="white-space:nowrap;">예비비합</th>
+            <th class="num" style="white-space:nowrap;">한강예비비</th>
+            <th class="num" style="white-space:nowrap;">사랑예비비</th>
+            <th class="num" style="white-space:nowrap;">①통장합</th>
+            <th class="num" style="white-space:nowrap;">②주식합</th>
+            <th class="num" style="white-space:nowrap;">③적금합</th>
+            <th class="num" style="white-space:nowrap;">④정기예금합</th>
+            <th class="num" style="white-space:nowrap;">⑤노란우산합</th>
+            <th class="num" style="white-space:nowrap;">⑥보증금합</th>
+            <th class="num" style="white-space:nowrap;">⑦퇴직연금합</th>
+            <th class="num" style="white-space:nowrap;">⑧연금보험합</th>
           </tr></thead>
           <tbody id="asset-history-tbody"></tbody>
         </table>
@@ -1056,26 +1089,58 @@ function drawNewPatientChart(labels,data,title){
 }
 function renderMonthlyTable(rows){document.getElementById('table-title').textContent='월별 상세';document.getElementById('table-head').innerHTML=`<th>월</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([m,d])=>`<tr><td>${m}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.cash.toLocaleString()}</td><td class="num">${d.card.toLocaleString()}</td><td class="num">${d.claim.toLocaleString()}</td><td class="num">${d.days}</td></tr>`).join('');}
 function renderYearlyTable(rows){document.getElementById('table-title').textContent='연도별 상세';document.getElementById('table-head').innerHTML=`<th>연도</th><th class="num">매출</th><th class="num">환자수</th><th class="num">초진</th><th class="num">일평균매출</th><th class="num">일평균환자</th><th class="num">진료일</th>`;document.getElementById('table-body').innerHTML=rows.map(([y,d])=>`<tr><td>${y}</td><td class="num">${d.revenue.toLocaleString()}</td><td class="num">${d.patients.toLocaleString()}</td><td class="num">${d.new_p.toLocaleString()}</td><td class="num">${d.days?Math.round(d.revenue/d.days).toLocaleString():'-'}</td><td class="num">${d.days?Math.round(d.patients/d.days):'-'}</td><td class="num">${d.days}</td></tr>`).join('');}
-function renderDailyTable(data){document.getElementById('table-title').textContent='일별 상세 (최근 30일)';const rows=[...data].sort((a,b)=>b.date>a.date?1:-1).slice(0,30);document.getElementById('table-head').innerHTML=`<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th>`;document.getElementById('table-body').innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td><td class="num">${(r.daily_revenue||0).toLocaleString()}</td><td class="num">${r.total_patients||0}</td><td class="num">${r.new_patients||0}</td><td class="num">${(r.cash||0).toLocaleString()}</td><td class="num">${(r.card||0).toLocaleString()}</td><td class="num">${(r.insurance_claim||0).toLocaleString()}</td></tr>`).join('');}
+function renderDailyTable(data, noSort=false){
+  const rows=noSort?data:[...data].sort((a,b)=>b.date>a.date?1:-1);
+  document.getElementById('table-title').textContent=`일별 상세 (${rows.length}건)`;
+  document.getElementById('table-head').innerHTML=`<th>날짜</th><th>요일</th><th class="num">매출</th><th class="num">환자</th><th class="num">초진</th><th class="num">현금</th><th class="num">카드</th><th class="num">청구액</th><th class="num">입금</th>`;
+  document.getElementById('table-body').innerHTML=rows.map(r=>`<tr>
+    <td>${r.date}</td>
+    <td>${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
+    <td class="num">${(r.daily_revenue||0).toLocaleString()}</td>
+    <td class="num">${r.total_patients||0}</td>
+    <td class="num">${r.new_patients||0}</td>
+    <td class="num">${(r.cash||0).toLocaleString()}</td>
+    <td class="num">${(r.card||0).toLocaleString()}</td>
+    <td class="num">${(r.insurance_claim||0).toLocaleString()}</td>
+    <td class="num">${(r.deposit||0).toLocaleString()}</td>
+  </tr>`).join('');
+}
 
 function onViewTypeChange(){
   const vt=document.getElementById('view-type').value;
-  document.getElementById('single-year-wrap').style.display=(vt==='yearly')?'none':'inline-flex';
+  document.getElementById('single-year-wrap').style.display=(vt==='monthly')?'inline-flex':'none';
   document.getElementById('range-year-wrap').style.display=(vt==='yearly')?'inline-flex':'none';
+  document.getElementById('date-range-wrap').style.display=(vt==='daily')?'inline-flex':'none';
+  // 정렬버튼: 일별/월별/연도별 테이블에 모두 표시
+  document.getElementById('sort-btns').style.display='inline-flex';
+  // 날짜 기본값 세팅
+  if(vt==='daily'){
+    const today=new Date();
+    const tf=document.getElementById('date-to');
+    const ff=document.getElementById('date-from');
+    if(!tf.value) tf.value=today.toISOString().slice(0,10);
+    if(!ff.value){const m=new Date(today);m.setMonth(m.getMonth()-1);ff.value=m.toISOString().slice(0,10);}
+  }
 }
 (function(){ onViewTypeChange(); })();
+
+// 현재 테이블 데이터 (정렬용)
+let _currentTableData = [], _currentTableType = '';
 
 async function updateView(){
   const vt=document.getElementById('view-type').value;
   const yr=document.getElementById('year-select').value;
-  const fromYr=document.getElementById('year-from')?.value||yr;
-  const toYr=document.getElementById('year-to')?.value||yr;
+  const fromYr=document.getElementById('year-from')?.value||'2013';
+  const toYr=document.getElementById('year-to')?.value||'2026';
+  const dateFrom=document.getElementById('date-from')?.value;
+  const dateTo=document.getElementById('date-to')?.value;
   loading(true);
   try{
     let data;
     if(vt==='yearly'){
       data=await fetchRange(fromYr,toYr);
       const rows=aggYearly(data); setMetrics(data);
+      _currentTableData=rows; _currentTableType='yearly';
       drawBar(rows.map(([y])=>y),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${fromYr}~${toYr} 연도별 매출`,'revenueChart');
       drawLine(rows.map(([y])=>y),rows.map(([,d])=>d.patients),'patient-chart-title',`${fromYr}~${toYr} 연도별 환자수`,'patientChart');
       drawNewPatientChart(rows.map(([y])=>y),rows.map(([,d])=>d.new_p),`${fromYr}~${toYr} 연도별 초진환자수`);
@@ -1083,23 +1148,60 @@ async function updateView(){
     } else if(vt==='monthly'){
       data=await fetchYear(yr);
       const rows=aggMonthly(data); setMetrics(data);
+      _currentTableData=rows; _currentTableType='monthly';
       drawBar(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.revenue),'revenue-chart-title',`${yr}년 월별 매출`,'revenueChart');
       drawLine(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.patients),'patient-chart-title',`${yr}년 월별 환자수`,'patientChart');
       drawNewPatientChart(rows.map(([m])=>m.slice(5)+'월'),rows.map(([,d])=>d.new_p),`${yr}년 월별 초진환자수`);
       renderMonthlyTable(rows);
     } else {
-      data=await fetchYear(yr); setMetrics(data);
-      const sorted=[...data].filter(r=>r.daily_revenue>0).sort((a,b)=>a.date>b.date?1:-1);
-      drawBar(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.daily_revenue||0),'revenue-chart-title',`${yr}년 일별 매출`,'revenueChart');
-      drawLine(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.total_patients||0),'patient-chart-title',`${yr}년 일별 환자수`,'patientChart');
-      drawNewPatientChart(sorted.slice(-30).map(r=>r.date.slice(5)),sorted.slice(-30).map(r=>r.new_patients||0),`${yr}년 일별 초진환자수`);
+      // 일별: 날짜 범위 검색
+      if(!dateFrom||!dateTo){alert('시작일과 종료일을 선택하세요.');loading(false);return;}
+      if(dateFrom>dateTo){alert('시작일이 종료일보다 늦습니다.');loading(false);return;}
+      const res=await fetch(`${SUPABASE_URL}/rest/v1/Han_statics?date=gte.${dateFrom}&date=lte.${dateTo}&select=*&order=date.asc&limit=1000`,{headers:HDR});
+      data=await res.json();
+      setMetrics(data);
+      _currentTableData=data; _currentTableType='daily';
+      const chartData=[...data].filter(r=>r.daily_revenue>0);
+      drawBar(chartData.map(r=>r.date.slice(5)),chartData.map(r=>r.daily_revenue||0),'revenue-chart-title',`${dateFrom}~${dateTo} 일별 매출`,'revenueChart');
+      drawLine(chartData.map(r=>r.date.slice(5)),chartData.map(r=>r.total_patients||0),'patient-chart-title',`${dateFrom}~${dateTo} 일별 환자수`,'patientChart');
+      drawNewPatientChart(chartData.map(r=>r.date.slice(5)),chartData.map(r=>r.new_patients||0),`${dateFrom}~${dateTo} 일별 초진환자수`);
       renderDailyTable(data);
     }
-    setStatus(`✓ ${data.length}개 레코드 로드됨`,'success');
+    setStatus(`✓ ${Array.isArray(data)?data.length:'?'}개 레코드 로드됨`,'success');
   }catch(e){setStatus('⚠ 한강통계 오류: '+e.message,'error');console.error(e);}
   finally{loading(false);}
 }
 function refreshStats(){ updateView(); }
+
+// 정렬 함수
+function sortTable(by){
+  if(!_currentTableData.length) return;
+  if(_currentTableType==='daily'){
+    const sorted=[..._currentTableData].sort((a,b)=>{
+      if(by==='revenue') return (b.daily_revenue||0)-(a.daily_revenue||0);
+      if(by==='patients') return (b.total_patients||0)-(a.total_patients||0);
+      if(by==='new_p') return (b.new_patients||0)-(a.new_patients||0);
+      return a.date>b.date?1:-1; // date
+    });
+    renderDailyTable(sorted, true);
+  } else if(_currentTableType==='monthly'){
+    const sorted=[..._currentTableData].sort((a,b)=>{
+      if(by==='revenue') return b[1].revenue-a[1].revenue;
+      if(by==='patients') return b[1].patients-a[1].patients;
+      if(by==='new_p') return b[1].new_p-a[1].new_p;
+      return a[0]>b[0]?1:-1;
+    });
+    renderMonthlyTable(sorted);
+  } else if(_currentTableType==='yearly'){
+    const sorted=[..._currentTableData].sort((a,b)=>{
+      if(by==='revenue') return b[1].revenue-a[1].revenue;
+      if(by==='patients') return b[1].patients-a[1].patients;
+      if(by==='new_p') return b[1].new_p-a[1].new_p;
+      return a[0]>b[0]?1:-1;
+    });
+    renderYearlyTable(sorted);
+  }
+}
 
 /* ══════════════════════════════════════════════
    ② 한강/사랑 통계 ← Household_statistics
@@ -1108,11 +1210,11 @@ function refreshStats(){ updateView(); }
 let hhRevChart, hhHanNetChart, hhSarangNetChart;
 async function initHousehold(){ await loadHousehold(); }
 async function loadHousehold(){
-  const fromYr=document.getElementById('hh-year-from')?.value||'2013';
-  const toYr=document.getElementById('hh-year-to')?.value||'2026';
+  const fromM=document.getElementById('hh-month-from')?.value||'2024-02';
+  const toM=document.getElementById('hh-month-to')?.value||'2026-12';
   loading(true);
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,han_revenue,han_expense,han_net,sarang_revenue,sarang_expense,sarang_net&year_month=gte.${fromYr}-01&year_month=lte.${toYr}-12&order=year_month.asc&limit=200`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,han_revenue,han_expense,han_net,sarang_revenue,sarang_expense,sarang_net&year_month=gte.${fromM}&year_month=lte.${toM}&order=year_month.asc&limit=200`,{headers:HDR});
     const raw=await res.json();
     if(!Array.isArray(raw)||raw.error) throw new Error('응답 오류: '+JSON.stringify(raw).slice(0,80));
     // 중간 객체로 변환 (index.html 방식)
@@ -1123,7 +1225,7 @@ async function loadHousehold(){
     }));
     if(!rows.length){
       document.getElementById('hh-tbody').innerHTML='<tr><td colspan="9" style="text-align:center;color:#888780;padding:20px;">데이터 없음</td></tr>';
-      setStatus(`⚠ ${fromYr}~${toYr} 데이터 없음`,'error'); loading(false); return;
+      setStatus(`⚠ ${fromM}~${toM} 데이터 없음`,'error'); loading(false); return;
     }
     const totHanRev=rows.reduce((s,r)=>s+r.hanRev,0), totHanExp=rows.reduce((s,r)=>s+r.hanExp,0), totHanNet=rows.reduce((s,r)=>s+r.hanNet,0);
     const totSarangRev=rows.reduce((s,r)=>s+r.sarangRev,0), totSarangExp=rows.reduce((s,r)=>s+r.sarangExp,0), totSarangNet=rows.reduce((s,r)=>s+r.sarangNet,0);
@@ -1159,7 +1261,7 @@ async function loadHousehold(){
         <td class="num" style="color:${net>=0?'#1a1a18':'#a32d2d'};font-weight:700;">${net.toLocaleString()}</td>
         <td class="num">${rate}%</td></tr>`;
     }).join('');
-    setStatus(`✓ 한강/사랑 통계 · ${rows.length}개월 (${fromYr}~${toYr})`,'success');
+    setStatus(`✓ 한강/사랑 통계 · ${rows.length}개월 (${fromM}~${toM})`,'success');
   }catch(e){setStatus('⚠ 한강/사랑통계 오류: '+e.message,'error');console.error(e);}
   finally{loading(false);}
 }
@@ -1170,11 +1272,13 @@ async function loadHousehold(){
 ══════════════════════════════════════════════ */
 let assetTrendChart;
 async function loadAssetHistory(){
+  const fromM=document.getElementById('asset-hist-from')?.value||'2024-02';
+  const toM=document.getElementById('asset-hist-to')?.value||'2026-12';
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,a_cash,b_longterm,c_pension,d_total,income_total,mission_total,reserve_total&order=year_month.asc&limit=100`,{headers:HDR});
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?select=year_month,a_cash,b_longterm,c_pension,d_total,han_net,sarang_net,income_total,mission_total,reserve_total,reserve_h,reserve_s,bank_total,stock_total,savings_total,deposit_total,yellow_total,guarantee_total,retirement_total,annuity_total&year_month=gte.${fromM}&year_month=lte.${toM}&order=year_month.asc&limit=200`,{headers:HDR});
     const data=await res.json();
     if(!Array.isArray(data)||!data.length){
-      document.getElementById('asset-history-tbody').innerHTML='<tr><td colspan="8" style="text-align:center;color:#888780;padding:16px;">데이터 없음 — 가계통계입력 탭에서 저장하세요</td></tr>';
+      document.getElementById('asset-history-tbody').innerHTML='<tr><td colspan="20" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>';
       setStatus('가계통계: 데이터 없음','error'); return;
     }
     if(assetTrendChart) assetTrendChart.destroy();
@@ -1184,16 +1288,28 @@ async function loadAssetHistory(){
       {label:'C.연금성',data:data.map(r=>Math.round((Number(r.c_pension)||0)/10000)),borderColor:'#ba7517',borderWidth:1.5,pointRadius:2,tension:0.3,borderDash:[4,3]},
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{size:12},padding:10}}},scales:{x:{ticks:{autoSkip:true,maxTicksLimit:16,font:{size:10}}},y:{ticks:{callback:v=>v+'만'}}}}});
     document.getElementById('asset-history-tbody').innerHTML=data.slice().reverse().map(r=>`<tr>
-      <td>${r.year_month}</td>
+      <td style="white-space:nowrap;">${r.year_month}</td>
       <td class="num" style="color:#185fa5;">${fmtW(r.a_cash)}</td>
       <td class="num" style="color:#3b6d11;">${fmtW(r.b_longterm)}</td>
       <td class="num" style="color:#ba7517;">${fmtW(r.c_pension)}</td>
       <td class="num" style="font-weight:600;">${fmtW(r.d_total)}</td>
+      <td class="num">${fmtW(r.han_net)}</td>
+      <td class="num">${fmtW(r.sarang_net)}</td>
       <td class="num">${fmtW(r.income_total)}</td>
       <td class="num">${fmtW(r.mission_total)}</td>
       <td class="num">${fmtW(r.reserve_total)}</td>
+      <td class="num">${fmtW(r.reserve_h)}</td>
+      <td class="num">${fmtW(r.reserve_s)}</td>
+      <td class="num">${fmtW(r.bank_total)}</td>
+      <td class="num">${fmtW(r.stock_total)}</td>
+      <td class="num">${fmtW(r.savings_total)}</td>
+      <td class="num">${fmtW(r.deposit_total)}</td>
+      <td class="num">${fmtW(r.yellow_total)}</td>
+      <td class="num">${fmtW(r.guarantee_total)}</td>
+      <td class="num">${fmtW(r.retirement_total)}</td>
+      <td class="num">${fmtW(r.annuity_total)}</td>
     </tr>`).join('');
-    setStatus(`✓ 가계통계 로드 완료 · ${data.length}개월`,'success');
+    setStatus(`✓ 가계통계 로드 완료 · ${data.length}개월 (${fromM}~${toM})`,'success');
   }catch(e){setStatus('⚠ 가계통계 오류: '+e.message,'error');console.error(e);}
 }
 
