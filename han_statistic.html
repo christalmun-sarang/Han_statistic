@@ -964,26 +964,44 @@ function showSubpage(name,el){
   if(name==='gahye')  initGahye();
   if(name==='daily')  loadRecent();
 }
+let _activeGahyeSection = 'jo11';
 function showGahyeSection(name,el){
+  _activeGahyeSection = name;
   document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
   const sec=document.getElementById('gahye-section-'+name);
   if(sec) sec.style.display='';
-  el.classList.add('active');
+  if(el) el.classList.add('active');
   document.getElementById('asset-controls-inline').style.display='flex';
-  // 섹션별 계산 갱신
-  const month=document.getElementById('asset-month')?.value;
-  if(month){
-    if(name==='jo11')      calcJo11();
-    if(name==='reserve')   calcReserve();
-    if(name==='yellow')    calcYellow();
-    if(name==='guarantee') calcGuarantee();
-    if(name==='retire')    calcRetire();
-    if(name==='annuity')   calcAnnuity();
-    if(name==='bank')      recalcBank();
-    if(name==='savings')   renderSavingsRows();
-  }
+  // 섹션별 렌더/계산 갱신
+  if(name==='jo11')      calcJo11();
+  if(name==='reserve')   calcReserve();
+  if(name==='yellow')    calcYellow();
+  if(name==='guarantee') { renderGuaranteeRows(); calcGuarantee(); }
+  if(name==='retire')    { renderRetireRows(); calcRetire(); }
+  if(name==='annuity')   { renderAnnuityRows(); calcAnnuity(); }
+  if(name==='bank')      { renderBankRows(); recalcBank(); }
+  if(name==='savings')   renderSavingsRows();
 }
+// 현재 활성 섹션 재표시 (데이터 로드 후 호출)
+function refreshActiveGahyeSection(){
+  const name = _activeGahyeSection || 'jo11';
+  document.querySelectorAll('.gahye-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
+  const sec=document.getElementById('gahye-section-'+name);
+  if(sec) sec.style.display='';
+  const btn=document.getElementById('gahye-sub-'+name);
+  if(btn) btn.classList.add('active');
+  // 갱신
+  if(name==='jo11')      calcJo11();
+  if(name==='reserve')   calcReserve();
+  if(name==='yellow')    calcYellow();
+  if(name==='guarantee') { renderGuaranteeRows(); calcGuarantee(); }
+  if(name==='retire')    { renderRetireRows(); calcRetire(); }
+  if(name==='annuity')   { renderAnnuityRows(); calcAnnuity(); }
+  if(name==='bank')      { renderBankRows(); recalcBank(); }
+}
+
 let _assetInited=false;
 function initGahye(){
   document.getElementById('asset-controls-inline').style.display='flex';
@@ -991,7 +1009,7 @@ function initGahye(){
   const f=document.getElementById('gahye-section-jo11'); if(f) f.style.display='';
   document.querySelectorAll('#subpage-gahye .subtab').forEach(t=>t.classList.remove('active'));
   const fb=document.getElementById('gahye-sub-jo11'); if(fb) fb.classList.add('active');
-  initAssets(); // 항상 초기화 (월 변경 등 반영)
+  if(!_assetInited){ _assetInited=true; initAssets(); }
 }
 
 /* ══ 일별 데이터 (Han_statics) ══ */
@@ -1657,11 +1675,6 @@ function recalcAssets(){
 
 /* 통장 */
 function getBankTotal(){ return bankRows.reduce((s,r)=>s+(r.amount||0),0); }
-function recalcBank(){
-  const t=getBankTotal();
-  const el=document.getElementById('at-bank'); if(el) el.textContent=fmtW(t);
-  recalcAssets();
-}
 function addBankRow(data){ bankRows.push(data||{bank:'',amount:0,date:''}); renderBankRows(); }
 function renderBankRows(){
   const c=document.getElementById('bank-rows'); c.innerHTML='';
@@ -1674,7 +1687,7 @@ function renderBankRows(){
       <button onclick="bankRows.splice(${idx},1);renderBankRows()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;">✕</button>`;
     c.appendChild(d);
   });
-  recalcBank();
+  document.getElementById('at-bank').textContent=fmtW(getBankTotal()); recalcAssets();
 }
 
 /* 적금 */
@@ -1782,7 +1795,6 @@ async function loadMonthlyIncome(month){
   }catch(e){console.error('loadMonthlyIncome:',e);}
 }
 
-let _lastAssetMonth = '';
 async function initAssets(){
   const t=new Date();
   const ym=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}`;
@@ -1872,7 +1884,7 @@ async function loadAssetMonth(){
         setN('retire-h-monthly',rhMo); setN('retire-s-monthly',rsMo);
         prevMissionTotal=Number(r.mission_total)||0;
         showMsg('asset-msg','이전달 참고값 적용됨',true);
-      } else { showMsg('asset-msg','신규 월',true); }
+      } else { showMsg('asset-msg','✓ 신규 월 — 이전달 기준 초기값 적용됨',true); }
     }
     renderBankRows(); renderSavingsRows(); renderUsageRows('mission');
     renderHanReserveUsage(); renderSarangReserveUsage();
@@ -1880,13 +1892,21 @@ async function loadAssetMonth(){
     await loadMonthlyIncome(month);
   }catch(e){showMsg('asset-msg','오류: '+e.message,false);console.error(e);}
   finally{loading(false);}
-  // 새 섹션 초기화 (loadAssetMonth 완료 후 별도 실행)
-  try{ await initJo11Section(month); }catch(e){console.error('jo11:',e);}
-  try{ await initReserveSection(); }catch(e){console.error('reserve:',e);}
-  try{ await initYellowSection(month); }catch(e){console.error('yellow:',e);}
-  try{ await initGuaranteeSection(); }catch(e){console.error('guarantee:',e);}
-  try{ await initRetireSection(month); }catch(e){console.error('retire:',e);}
-  try{ await initAnnuitySection(month); }catch(e){console.error('annuity:',e);}
+  // 새 섹션 초기화 — try/catch 독립으로 한 개 실패해도 나머지 실행
+  const _m = document.getElementById('asset-month')?.value;
+  if(_m){
+    (async()=>{
+      try{ await initJo11Section(_m); }catch(e){console.error('jo11:',e);}
+      try{ await initReserveSection(); }catch(e){console.error('reserve:',e);}
+      try{ await initYellowSection(_m); }catch(e){console.error('yellow:',e);}
+      try{ await initGuaranteeSection(); }catch(e){console.error('guarantee:',e);}
+      try{ await initRetireSection(_m); }catch(e){console.error('retire:',e);}
+      try{ await initAnnuitySection(_m); }catch(e){console.error('annuity:',e);}
+      // 모든 init 완료 후 현재 탭 화면 갱신
+      refreshActiveGahyeSection();
+      showMsg('asset-msg', `✓ ${_m} 불러오기 완료`, true);
+    })();
+  }
 }
 
 async function saveAssets(){
@@ -1956,10 +1976,16 @@ async function initJo11Section(month){
     const prevEl = document.getElementById('jo11-prev-mission');
     if(prevEl) prevEl.textContent = _jo11PrevMission.toLocaleString();
 
-    // 이번달 income_total
+    // 이번달 income_total (없으면 han_net + sarang_net 합산)
     const r2 = await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=income_total,han_net,sarang_net&limit=1`,{headers:HDR});
     const d2 = await r2.json();
-    _jo11Income = Number(d2[0]?.income_total) || (Number(d2[0]?.han_net)||0) + (Number(d2[0]?.sarang_net)||0);
+    const hanNet = Number(d2[0]?.han_net)||0;
+    const sarangNet = Number(d2[0]?.sarang_net)||0;
+    _jo11Income = Number(d2[0]?.income_total) || hanNet + sarangNet || 0;
+    // 화면 업데이트 (is-han, is-sarang, is-total)
+    const hEl2=document.getElementById('is-han'); if(hEl2) hEl2.textContent=fmtW(hanNet);
+    const sEl2=document.getElementById('is-sarang'); if(sEl2) sEl2.textContent=fmtW(sarangNet);
+    const tEl2=document.getElementById('is-total'); if(tEl2) tEl2.textContent=fmtW(_jo11Income);
     const incEl = document.getElementById('jo11-income');
     if(incEl) incEl.textContent = _jo11Income.toLocaleString();
 
