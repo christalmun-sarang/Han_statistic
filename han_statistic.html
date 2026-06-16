@@ -1654,10 +1654,10 @@ function recalcAssets(){
   const bank=bankGross-_missionTotalForBank-_reserveTotalForBank;
   const stock=getAssetTotal('stock'),savings=getSavingsTotal(),dep=getAssetTotal('deposit');
   const yH=Math.round(getAssetTotal('yellow')/2); const yS=yH;
-  const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
-  const retireTotal=retireRows.reduce((s,r)=>s+(r.total||0),0);
+  const guar=getAssetTotal('guarantee');
+  const retireTotal=getAssetTotal('retire');
   const rH=Math.round(retireTotal/2), rS=Math.round(retireTotal/2);
-  const ann=annuityRows.reduce((s,r)=>s+(r.total||0),0);
+  const ann=getAssetTotal('annuity');
   const A=bank+stock+savings+dep, B=(yH+yS)+guar, C=(rH+rS)+ann, D=A+B+C;
   document.getElementById('at-bank').textContent=fmtW(bank);
   document.getElementById('at-stock').textContent=fmtW(stock);
@@ -1691,17 +1691,20 @@ function recalcBank(){
   const el=document.getElementById('at-bank'); if(el) el.textContent=fmtW(t);
   recalcAssets();
 }
-function addBankRow(data){ bankRows.push(data||{bank:'',amount:0,date:''}); renderBankRows(); }
+function addBankRow(data){ bankRows.push(data||{name:'',amount:0,date:'',note:''}); renderBankRows(); }
 function renderBankRows(){
-  const c=document.getElementById('bank-rows'); c.innerHTML='';
+  const tbody=document.getElementById('bank-rows');
+  if(!tbody)return;
+  tbody.innerHTML='';
   bankRows.forEach((r,idx)=>{
-    const d=document.createElement('div');
-    d.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr 28px;gap:6px;align-items:center;margin-bottom:6px;';
-    d.innerHTML=`<input type="text" placeholder="은행명" value="${r.bank||''}" oninput="bankRows[${idx}].bank=this.value;recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;">
-      <input type="number" placeholder="금액" value="${r.amount||''}" oninput="bankRows[${idx}].amount=parseInt(this.value)||0;recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:6px 10px;font-size:13px;text-align:right;">
-      <input type="date" value="${r.date||''}" oninput="bankRows[${idx}].date=this.value" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:5px 8px;font-size:12px;">
-      <button onclick="bankRows.splice(${idx},1);renderBankRows()" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;">✕</button>`;
-    c.appendChild(d);
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      `<td><input type="text" value="${r.name||r.bank||''}" oninput="bankRows[${idx}].name=this.value;bankRows[${idx}].bank=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100%;font-size:13px;" placeholder="은행명"></td>`+
+      `<td><input type="number" value="${r.amount||''}" oninput="bankRows[${idx}].amount=parseInt(this.value)||0;calcAssetTotal('bank')" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;font-size:13px;" placeholder="0"></td>`+
+      `<td><input type="date" value="${r.date||''}" oninput="bankRows[${idx}].date=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;font-size:12px;"></td>`+
+      `<td><input type="text" value="${r.note||''}" oninput="bankRows[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;" placeholder="비고"></td>`+
+      `<td><button onclick="bankRows.splice(${idx},1);renderBankRows();calcAssetTotal('bank')" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0 4px;">&#10005;</button></td>`;
+    tbody.appendChild(tr);
   });
   recalcBank();
 }
@@ -1839,7 +1842,7 @@ async function loadAssetMonth(){
       const mm=r.mission_m?(typeof r.mission_m==='string'?JSON.parse(r.mission_m):r.mission_m):{};
       const rhm=r.reserve_h_m?(typeof r.reserve_h_m==='string'?JSON.parse(r.reserve_h_m):r.reserve_h_m):{};
       const rsm=r.reserve_s_m?(typeof r.reserve_s_m==='string'?JSON.parse(r.reserve_s_m):r.reserve_s_m):{};
-      bankRows=(bm.rows||[]).map(function(r){return{name:r.name||r.bank||'',amount:r.amount||0,date:r.date||'',note:r.note||''};}); renderAssetRows('bank'); savingsRows=sm.rows||[]; missionUsage=mm.usage||[];
+      bankRows=(bm.rows||[]).map(function(r){return{name:r.name||r.bank||'',bank:r.name||r.bank||'',amount:r.amount||0,date:r.date||'',note:r.note||''};}); renderBankRows(); savingsRows=sm.rows||[]; missionUsage=mm.usage||[];
       hanReserveUsage=rhm.usage||[]; sarangReserveUsage=rsm.usage||[];
       if(rhm.reserveHan!=null) setN('reserve-han',rhm.reserveHan);
       if(rsm.reserveSarang!=null) setN('reserve-sarang',rsm.reserveSarang);
@@ -1941,10 +1944,10 @@ async function saveAssets(){
   const bank=bankGross-_missionTotalForBank-_reserveTotalForBank;
   const stock=getAssetTotal('stock'),savings=getSavingsTotal(),dep=getAssetTotal('deposit');
   const yH=Math.round(getAssetTotal('yellow')/2); const yS=yH;
-  const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
-  const retireTotal=retireRows.reduce((s,r)=>s+(r.total||0),0);
+  const guar=getAssetTotal('guarantee');
+  const retireTotal=getAssetTotal('retire');
   const rH=Math.round(retireTotal/2), rS=Math.round(retireTotal/2);
-  const ann=annuityRows.reduce((s,r)=>s+(r.total||0),0);
+  const ann=getAssetTotal('annuity');
   const A=bank+stock+savings+dep, B=(yH+yS)+guar, C=(rH+rS)+ann;
   // income: DB에서 직접 조회 (fmtW 축약값 파싱 오류 방지)
   let hanNet=0, sarangNet=0, incTotal=0;
@@ -1975,7 +1978,7 @@ async function saveAssets(){
     mission_total:missionTotal_, reserve_total:hRem+sRem,
     reserve_h:rHVal, reserve_s:rSVal,
     bank_total:bank, stock_total:stock, savings_total:savings, deposit_total:dep,
-    yellow_total:yH+yS, guarantee_total:guar, retirement_total:rH+rS, annuity_total:ann,
+    yellow_total:yH+yS, guarantee_total:guar, retirement_total:retireTotal, annuity_total:ann,
     memo:document.getElementById('a-memo').value||null,
     bank_m:JSON.stringify({rows:bankRows}),
     stock_m:JSON.stringify({rows:stockRows}),
@@ -1987,13 +1990,8 @@ async function saveAssets(){
     reserve_s_m:JSON.stringify({usage:sarangReserveUsage,reserveSarang:rSVal,sarangReserveRemain:sRem}),
 
     retirement_m:JSON.stringify({rows:retireRows}),
-
-
     quarantee_m:JSON.stringify({rows:guaranteeRows}),
     annuity_m:JSON.stringify({rows:annuityRows}),
-    mission_m:JSON.stringify({used:parseInt(document.getElementById('jo11-mission-used')?.value||0)||0,note:document.getElementById('jo11-note')?.value||'',prevMission:_jo11PrevMission,income:_jo11Income}),
-    reserve_h_m:JSON.stringify({reserveHan:parseInt(document.getElementById('reserve-han')?.value||0)||0,used:parseInt(document.getElementById('res-h-used')?.value||0)||0,hanReserveRemain:_resPrevH+(parseInt(document.getElementById('reserve-han')?.value||0)||0)-(parseInt(document.getElementById('res-h-used')?.value||0)||0),note:document.getElementById('res-h-note')?.value||''}),
-    reserve_s_m:JSON.stringify({reserveSarang:parseInt(document.getElementById('reserve-sarang')?.value||0)||0,used:parseInt(document.getElementById('res-s-used')?.value||0)||0,sarangReserveRemain:_resPrevS+(parseInt(document.getElementById('reserve-sarang')?.value||0)||0)-(parseInt(document.getElementById('res-s-used')?.value||0)||0),note:document.getElementById('res-s-note')?.value||''}),
   };
   await upsertHS(month,payload,'asset-msg',`가계통계 ${month}`);
   await loadAssetHistory();
