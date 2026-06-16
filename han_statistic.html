@@ -1022,9 +1022,9 @@ async function loadRecent(){
     tbody.innerHTML=data.map(r=>`<tr>
       <td>${r.date||''}</td>
       <td style="text-align:left;">${r.day_of_week==='일'?'<span class="badge badge-sun">일</span>':(r.day_of_week||'')}</td>
-      <td>${r.total_patients??'-'}</td>
-      <td>${r.new_patients??'-'}</td>
-      <td>${r.return_patients??'-'}</td>
+      <td>${r.total_patients||'-'}</td>
+      <td>${r.new_patients||'-'}</td>
+      <td>${r.return_patients||'-'}</td>
       <td>${r.daily_revenue!=null?r.daily_revenue.toLocaleString():'-'}</td>
       <td>${r.cash!=null?r.cash.toLocaleString():'-'}</td>
       <td>${r.card!=null?r.card.toLocaleString():'-'}</td>
@@ -1088,8 +1088,8 @@ async function loadHanMonth(){
       const pd=await r2.json();
       if(pd.length&&pd[0].h_items){
         const p=typeof pd[0].h_items==='string'?JSON.parse(pd[0].h_items):pd[0].h_items;
-        hanRevItems=HAN_REV_DEFAULT.map(di=>{const m=(p.rev||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
-        hanExpItems=HAN_EXP_DEFAULT.map(di=>{const m=(p.exp||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
+        hanRevItems=HAN_REV_DEFAULT.map(di=>{const m=(p.rev||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount||null};});
+        hanExpItems=HAN_EXP_DEFAULT.map(di=>{const m=(p.exp||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount||null};});
       } else { hanRevItems=HAN_REV_DEFAULT.map(i=>({...i,amount:null})); hanExpItems=HAN_EXP_DEFAULT.map(i=>({...i,amount:null})); }
       showMsg('han-msg','이전달 고정항목 적용됨',true);
     }
@@ -1117,8 +1117,8 @@ async function loadSarangMonth(){
       const pd=await r2.json();
       if(pd.length&&pd[0].s_items){
         const p=typeof pd[0].s_items==='string'?JSON.parse(pd[0].s_items):pd[0].s_items;
-        sarangRevItems=SARANG_REV_DEFAULT.map(di=>{const m=(p.rev||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
-        sarangExpItems=SARANG_EXP_DEFAULT.map(di=>{const m=(p.exp||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount??null};});
+        sarangRevItems=SARANG_REV_DEFAULT.map(di=>{const m=(p.rev||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount||null};});
+        sarangExpItems=SARANG_EXP_DEFAULT.map(di=>{const m=(p.exp||[]).find(pi=>pi.name===di.name&&pi.type==='고정');return{...di,amount:m?.amount||null};});
       } else { sarangRevItems=SARANG_REV_DEFAULT.map(i=>({...i,amount:null})); sarangExpItems=SARANG_EXP_DEFAULT.map(i=>({...i,amount:null})); }
       showMsg('sarang-msg','이전달 고정항목 적용됨',true);
     }
@@ -1170,7 +1170,7 @@ function renderHistoryTable(tbodyId,data,rk,ek,nk){
   const tbody=document.getElementById(tbodyId);
   if(!Array.isArray(data)||!data.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#888780;padding:16px;">데이터 없음</td></tr>';return;}
   tbody.innerHTML=data.map(r=>{
-    const rev=Number(r[rk])||0,exp=Number(r[ek])||0,net=Number(r[nk])??rev-exp;
+    const rev=Number(r[rk])||0,exp=Number(r[ek])||0,net=Number(r[nk])||rev-exp;
     const rate=rev?Math.round(net/rev*100):0;
     return`<tr><td>${r.year_month}</td><td>${rev.toLocaleString()}</td><td>${exp.toLocaleString()}</td><td style="color:${net>=0?'#185fa5':'#a32d2d'}">${net.toLocaleString()}</td><td>${rate}%</td></tr>`;
   }).join('');
@@ -1801,13 +1801,13 @@ async function loadAssetMonth(){
       setN('a-guarantee',Number(r.guarantee_total)||0); setN('a-annuity',Number(r.annuity_total)||0);
       document.getElementById('a-memo').value=r.memo||'';
       const ym_=r.yellow_m?(typeof r.yellow_m==='string'?JSON.parse(r.yellow_m):r.yellow_m):{};
-      setN('a-yellow-h',ym_.h??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0));
-      setN('a-yellow-s',ym_.s??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0));
+      setN('a-yellow-h',ym_.h||(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0));
+      setN('a-yellow-s',ym_.s||(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0));
       if(ym_.hMonthly) setN('yellow-h-monthly',ym_.hMonthly);
       if(ym_.sMonthly) setN('yellow-s-monthly',ym_.sMonthly);
       const rtm=r.retirement_m?(typeof r.retirement_m==='string'?JSON.parse(r.retirement_m):r.retirement_m):{};
-      setN('a-retire-h',rtm.h??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0));
-      setN('a-retire-s',rtm.s??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0));
+      setN('a-retire-h',rtm.h||(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0));
+      setN('a-retire-s',rtm.s||(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0));
       if(rtm.hMonthly) setN('retire-h-monthly',rtm.hMonthly);
       if(rtm.sMonthly) setN('retire-s-monthly',rtm.sMonthly);
       const dm=r.deposit_m?(typeof r.deposit_m==='string'?JSON.parse(r.deposit_m):r.deposit_m):{};
@@ -1823,8 +1823,8 @@ async function loadAssetMonth(){
       const prevBase=await prevRes.json();
       if(prevBase.length){
         prevMissionTotal=Number(prevBase[0].mission_total)||0;
-        try{const ph=prevBase[0].reserve_h_m?(typeof prevBase[0].reserve_h_m==='string'?JSON.parse(prevBase[0].reserve_h_m):prevBase[0].reserve_h_m):{};prevHanReserve=ph.hanReserveRemain??0;}catch(e2){prevHanReserve=0;}
-        try{const ps=prevBase[0].reserve_s_m?(typeof prevBase[0].reserve_s_m==='string'?JSON.parse(prevBase[0].reserve_s_m):prevBase[0].reserve_s_m):{};prevSarangReserve=ps.sarangReserveRemain??0;}catch(e2){prevSarangReserve=0;}
+        try{const ph=prevBase[0].reserve_h_m?(typeof prevBase[0].reserve_h_m==='string'?JSON.parse(prevBase[0].reserve_h_m):prevBase[0].reserve_h_m):{};prevHanReserve=ph.hanReserveRemain||0;}catch(e2){prevHanReserve=0;}
+        try{const ps=prevBase[0].reserve_s_m?(typeof prevBase[0].reserve_s_m==='string'?JSON.parse(prevBase[0].reserve_s_m):prevBase[0].reserve_s_m):{};prevSarangReserve=ps.sarangReserveRemain||0;}catch(e2){prevSarangReserve=0;}
       }
       const hPI=document.getElementById('han-reserve-prev'); if(hPI)hPI.value=prevHanReserve||0;
       const sPI=document.getElementById('sarang-reserve-prev'); if(sPI)sPI.value=prevSarangReserve||0;
@@ -1841,14 +1841,14 @@ async function loadAssetMonth(){
         setN('a-stock',Number(r.stock_total)||0); setN('a-deposit',Number(r.deposit_total)||0);
         setN('a-guarantee',Number(r.guarantee_total)||0); setN('a-annuity',Number(r.annuity_total)||0);
         const ym2=r.yellow_m?(typeof r.yellow_m==='string'?JSON.parse(r.yellow_m):r.yellow_m):{};
-        const yh=ym2.h??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0);
-        const ys=ym2.s??(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0);
+        const yh=ym2.h||(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0);
+        const ys=ym2.s||(Number(r.yellow_total)?Math.round(Number(r.yellow_total)/2):0);
         const hMo=ym2.hMonthly||250000, sMo=ym2.sMonthly||250000;
         setN('a-yellow-h',yh+hMo); setN('a-yellow-s',ys+sMo);
         setN('yellow-h-monthly',hMo); setN('yellow-s-monthly',sMo);
         const rtm=r.retirement_m?(typeof r.retirement_m==='string'?JSON.parse(r.retirement_m):r.retirement_m):{};
-        const rh=rtm.h??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0);
-        const rs=rtm.s??(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0);
+        const rh=rtm.h||(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0);
+        const rs=rtm.s||(Number(r.retirement_total)?Math.round(Number(r.retirement_total)/2):0);
         const rhMo=rtm.hMonthly||340000, rsMo=rtm.sMonthly||340000;
         setN('a-retire-h',rh+rhMo); setN('a-retire-s',rs+rsMo);
         setN('retire-h-monthly',rhMo); setN('retire-s-monthly',rsMo);
@@ -1988,10 +1988,10 @@ async function initReserveSection(){
     if(d.length){
       // 이전달 최종 잔액 (reserve_h_m.hanReserveRemain 우선, 없으면 reserve_h)
       try{const rhm=d[0].reserve_h_m?(typeof d[0].reserve_h_m==='string'?JSON.parse(d[0].reserve_h_m):d[0].reserve_h_m):{};
-        _resPrevH=rhm.hanReserveRemain??Number(d[0].reserve_h)||0;}
+        _resPrevH=(rhm.hanReserveRemain!=null?rhm.hanReserveRemain:Number(d[0].reserve_h)||0);}
       catch(e2){_resPrevH=Number(d[0].reserve_h)||0;}
       try{const rsm=d[0].reserve_s_m?(typeof d[0].reserve_s_m==='string'?JSON.parse(d[0].reserve_s_m):d[0].reserve_s_m):{};
-        _resPrevS=rsm.sarangReserveRemain??Number(d[0].reserve_s)||0;}
+        _resPrevS=(rsm.sarangReserveRemain!=null?rsm.sarangReserveRemain:Number(d[0].reserve_s)||0);}
       catch(e2){_resPrevS=Number(d[0].reserve_s)||0;}
     }
     const e1=document.getElementById('res-h-prev'); if(e1) e1.textContent=_resPrevH.toLocaleString();
