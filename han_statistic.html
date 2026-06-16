@@ -542,7 +542,7 @@ tr:hover td { background: #f5f5f0; }
 
     <!-- ①통장 섹션 -->
     <div id="gahye-section-bank" class="gahye-section">
-    <div class="main" style="padding-top:20px;">
+    <div class="main" style="padding-top:12px;">
       <div class="asset-abcd">
         <div class="abcd-card a"><div class="aclabel">A. 현금 (1~4 합)</div><div class="acvalue" id="ac-a">-</div></div>
         <div class="abcd-card b"><div class="aclabel">B. 장기현금 (5~6 합)</div><div class="acvalue" id="ac-b">-</div></div>
@@ -550,9 +550,19 @@ tr:hover td { background: #f5f5f0; }
         <div class="abcd-card d"><div class="aclabel">D. 총합 (A+B+C)</div><div class="acvalue" id="ac-d" style="font-size:22px;font-weight:600;">-</div></div>
       </div>
       <div class="asset-section">
-        <h3>① 통장합 <span class="total-val" id="at-bank">0</span></h3>
-        <p style="font-size:11px;color:#888780;margin-bottom:10px;">※ 은행별로 추가 후 합산됩니다</p>
-        <div id="bank-rows"></div>
+        <h3>① 통장합 <span class="total-val" id="at-bank">0</span>
+          <span style="font-size:12px;font-weight:400;color:#888780;margin-left:12px;">
+            실통장합 <span id="bank-gross" style="color:#185fa5;">-</span>
+            − 선교헌금 <span id="bank-minus-mission" style="color:#a32d2d;">-</span>
+            − 예비비 <span id="bank-minus-reserve" style="color:#a32d2d;">-</span>
+            = <span id="bank-net" style="color:#185fa5;font-weight:600;">-</span>
+          </span>
+        </h3>
+        <p class="gi-note">※ 통장 전체금액 입력 → 선교헌금합·예비비합 자동 차감 → 실자산(bank_total)으로 저장</p>
+        <table class="gi-table">
+          <thead><tr><th>명칭</th><th>금액</th><th>확인날짜</th><th>비고</th><th></th></tr></thead>
+          <tbody id="bank-rows"></tbody>
+        </table>
         <button class="add-btn" onclick="addBankRow()">+ 은행 추가</button>
       </div>
     </div>
@@ -560,13 +570,15 @@ tr:hover td { background: #f5f5f0; }
 
     <!-- ②주식 섹션 -->
     <div id="gahye-section-stock" class="gahye-section">
-    <div class="main" style="padding-top:20px;">
+    <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>② 주식합 <span class="total-val" id="at-stock">0</span></h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-          <input type="number" id="a-stock" min="0" placeholder="금액 입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-          <input type="text" id="a-stock-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
-        </div>
+        <table class="gi-table">
+          <thead><tr><th>명칭</th><th>금액</th><th>확인날짜</th><th>비고</th><th></th></tr></thead>
+          <tbody id="stock-rows"></tbody>
+        </table>
+        <button class="add-btn" onclick="addAssetRow('stock')">+ 항목 추가</button>
+        <input type="hidden" id="a-stock"><input type="hidden" id="a-stock-note">
       </div>
     </div>
     </div><!-- /gahye-section-stock -->
@@ -585,13 +597,15 @@ tr:hover td { background: #f5f5f0; }
 
     <!-- ④정기예금 섹션 -->
     <div id="gahye-section-deposit" class="gahye-section">
-    <div class="main" style="padding-top:20px;">
+    <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>④ 정기예금합 <span class="total-val" id="at-deposit">0</span></h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;margin-bottom:6px;">
-          <input type="number" id="a-deposit" min="0" placeholder="금액 직접입력" oninput="recalcAssets()" style="border:0.5px solid #b4b2a9;border-radius:8px;padding:7px 12px;font-size:14px;text-align:right;">
-          <input type="text" id="a-deposit-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:8px;padding:7px 12px;font-size:13px;background:#fafaf8;">
-        </div>
+        <table class="gi-table">
+          <thead><tr><th>명칭</th><th>금액</th><th>확인날짜</th><th>비고</th><th></th></tr></thead>
+          <tbody id="deposit-rows"></tbody>
+        </table>
+        <button class="add-btn" onclick="addAssetRow('deposit')">+ 항목 추가</button>
+        <input type="hidden" id="a-deposit"><input type="hidden" id="a-deposit-note">
       </div>
     </div>
     </div><!-- /gahye-section-deposit -->
@@ -601,36 +615,21 @@ tr:hover td { background: #f5f5f0; }
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑤ 노란우산합 <span class="total-val" id="at-yellow">0</span></h3>
-        <p class="gi-note">이전달 yellow_total 불러와서 한강/사랑 이월분 자동분배. 월납입액은 직접 입력.</p>
+        <p class="gi-note">이전달 yellow_total 자동 불러옴. 항목별 추가/삭제 가능.</p>
         <table class="gi-table">
-          <thead>
-            <tr>
-              <th>년월</th><th>구분</th>
-              <th>이월금액<br>yellow_total</th>
-              <th>한강이월</th><th>사랑이월</th>
-              <th>월입력(h)</th><th>월입력(s)</th>
-              <th>노란우산합</th><th>비고</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="label" id="yellow-month-label">-</td>
-              <td class="label">장기현금</td>
-              <td class="num gi-auto"><span id="yellow-prev-total">-</span></td>
-              <td class="num gi-calc"><span id="yellow-h-prev">-</span></td>
-              <td class="num gi-calc"><span id="yellow-s-prev">-</span></td>
-              <td><input type="number" id="yellow-h-monthly" value="250000" oninput="calcYellow()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100px;text-align:right;"></td>
-              <td><input type="number" id="yellow-s-monthly" value="250000" oninput="calcYellow()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100px;text-align:right;"></td>
-              <td class="num gi-result"><span id="yellow-total-final">-</span></td>
-              <td><input type="text" id="yellow-note" placeholder="비고" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;"></td>
-            </tr>
-          </tbody>
+          <thead><tr><th>명칭</th><th>금액</th><th>확인날짜</th><th>비고</th><th></th></tr></thead>
+          <tbody id="yellow-rows"></tbody>
         </table>
-        <div style="font-size:11px;color:#888780;margin-top:6px;">
-          · 한강이월 = yellow_total / 2 &nbsp;|&nbsp; 노란우산합 = 한강이월 + 사랑이월 + 월입력(h) + 월입력(s)
-        </div>
-        <!-- 하위 호환 -->
+        <button class="add-btn" onclick="addAssetRow('yellow')">+ 항목 추가</button>
         <input type="hidden" id="a-yellow-h"><input type="hidden" id="a-yellow-s">
+        <input type="hidden" id="yellow-h-monthly" value="250000">
+        <input type="hidden" id="yellow-s-monthly" value="250000">
+        <input type="hidden" id="yellow-note">
+        <span id="yellow-month-label" style="display:none"></span>
+        <span id="yellow-prev-total" style="display:none"></span>
+        <span id="yellow-h-prev" style="display:none"></span>
+        <span id="yellow-s-prev" style="display:none"></span>
+        <span id="yellow-total-final" style="display:none"></span>
       </div>
     </div>
     </div><!-- /gahye-section-yellow -->
@@ -640,19 +639,14 @@ tr:hover td { background: #f5f5f0; }
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑥ 보증금합 <span class="total-val" id="at-guarantee">0</span></h3>
-        <p class="gi-note">항목 추가/삭제로 직접 관리. 총합이 guarantee_total로 저장됩니다.</p>
+        <p class="gi-note">항목 추가/삭제 가능. 이전달 값 자동 이어받기.</p>
         <table class="gi-table">
-          <thead>
-            <tr><th>항목명</th><th>총합</th><th>병원함</th><th>하은성집</th><th>비고</th><th></th></tr>
-          </thead>
+          <thead><tr><th>명칭</th><th>금액</th><th>확인날짜</th><th>비고</th><th></th></tr></thead>
           <tbody id="guarantee-rows"></tbody>
         </table>
-        <button class="add-btn" onclick="addGuaranteeRow()" style="margin-top:6px;">+ 항목 추가</button>
-        <div style="margin-top:10px;padding:10px 14px;background:#e6f1fb;border-radius:8px;font-size:14px;font-weight:600;color:#185fa5;">
-          합계: <span id="guarantee-total-disp">0</span>원
-        </div>
-        <input type="hidden" id="a-guarantee">
-        <input type="hidden" id="a-guarantee-note">
+        <button class="add-btn" onclick="addAssetRow('guarantee')" style="margin-top:6px;">+ 항목 추가</button>
+        <input type="hidden" id="a-guarantee"><input type="hidden" id="a-guarantee-note">
+        <span id="guarantee-total-disp" style="display:none"></span>
       </div>
     </div>
     </div><!-- /gahye-section-guarantee -->
@@ -662,26 +656,15 @@ tr:hover td { background: #f5f5f0; }
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑦ 퇴직연금합 <span class="total-val" id="at-retirement">0</span></h3>
-        <p class="gi-note">이전달 retirement_total 자동 불러옴. 항목 추가/삭제 가능. 월입력 직접 입력.</p>
-        <table class="gi-table" id="retire-table">
-          <thead>
-            <tr>
-              <th>년월</th><th>구분</th>
-              <th>퇴직연금합</th>
-              <th>국민퇴직연금(h)</th><th>국민퇴직연금(s)</th>
-              <th>월입력(h)</th><th>월입력(s)</th>
-              <th>비고</th><th></th>
-            </tr>
-          </thead>
+        <p class="gi-note">이전달 retirement_total 자동 불러옴. 항목 추가/삭제 가능.</p>
+        <table class="gi-table">
+          <thead><tr><th>명칭</th><th>금액</th><th>확인날짜</th><th>비고</th><th></th></tr></thead>
           <tbody id="retire-rows"></tbody>
         </table>
-        <button class="add-btn" onclick="addRetireRow()" style="margin-top:6px;">+ 항목 추가</button>
-        <div style="margin-top:10px;padding:10px 14px;background:#fdf3e3;border-radius:8px;font-size:14px;font-weight:600;color:#ba7517;">
-          퇴직연금합: <span id="retire-total-disp">0</span>원
-        </div>
-        <!-- 하위 호환 -->
+        <button class="add-btn" onclick="addAssetRow('retire')" style="margin-top:6px;">+ 항목 추가</button>
         <input type="hidden" id="a-retire-h"><input type="hidden" id="a-retire-s">
         <input type="hidden" id="retire-h-monthly" value="340000"><input type="hidden" id="retire-s-monthly" value="340000">
+        <span id="retire-total-disp" style="display:none"></span>
       </div>
     </div>
     </div><!-- /gahye-section-retire -->
@@ -691,25 +674,14 @@ tr:hover td { background: #f5f5f0; }
     <div class="main" style="padding-top:16px;">
       <div class="asset-section">
         <h3>⑧ 연금보험합 <span class="total-val" id="at-annuity">0</span></h3>
-        <p class="gi-note">이전달 annuity_total 자동 불러옴. 항목 추가/삭제 가능. 월입력 직접 입력.</p>
+        <p class="gi-note">이전달 annuity_total 자동 불러옴. 항목 추가/삭제 가능.</p>
         <table class="gi-table">
-          <thead>
-            <tr>
-              <th>년월</th><th>구분</th><th>총합</th>
-              <th>교보연금저축(h)</th><th>교보연금저축(s)</th>
-              <th>월입력(h)</th><th>월입력(s)</th><th>비고</th>
-              <th>수협연금보험(h)</th><th>수협연금보험(s)</th><th>비고</th>
-              <th>농협종신(h)</th><th>농협종신(s)</th>
-              <th>월입력(h)</th><th>월입력(s)</th><th>비고</th><th></th>
-            </tr>
-          </thead>
+          <thead><tr><th>명칭</th><th>금액</th><th>확인날짜</th><th>비고</th><th></th></tr></thead>
           <tbody id="annuity-rows"></tbody>
         </table>
-        <button class="add-btn" onclick="addAnnuityRow()" style="margin-top:6px;">+ 항목 추가</button>
-        <div style="margin-top:10px;padding:10px 14px;background:#fdf3e3;border-radius:8px;font-size:14px;font-weight:600;color:#ba7517;">
-          연금보험합: <span id="annuity-total-disp">0</span>원
-        </div>
+        <button class="add-btn" onclick="addAssetRow('annuity')" style="margin-top:6px;">+ 항목 추가</button>
         <input type="hidden" id="a-annuity"><input type="hidden" id="a-annuity-note">
+        <span id="annuity-total-disp" style="display:none"></span>
       </div>
       <div class="asset-section">
         <h3>메모</h3>
@@ -1628,11 +1600,59 @@ async function loadAssetHistory(){
 /* ══════════════════════════════════════════════
    ④ 가계통계입력 ← Household_statistics
 ══════════════════════════════════════════════ */
-let bankRows=[], savingsRows=[], missionUsage=[], hanReserveUsage=[], sarangReserveUsage=[];
+let bankRows=[], stockRows=[], depositRows=[], yellowRows=[], guaranteeRows=[], retireRows=[], annuityRows=[];
+let savingsRows=[], missionUsage=[], hanReserveUsage=[], sarangReserveUsage=[];
+
+/* == 공통 자산 렌더러 == */
+const ASSET_IDS={bank:'at-bank',stock:'at-stock',deposit:'at-deposit',yellow:'at-yellow',guarantee:'at-guarantee',retire:'at-retirement',annuity:'at-annuity'};
+function _getRows(k){return k==='bank'?bankRows:k==='stock'?stockRows:k==='deposit'?depositRows:k==='yellow'?yellowRows:k==='guarantee'?guaranteeRows:k==='retire'?retireRows:annuityRows;}
+function getAssetRows(k){return _getRows(k);}
+function getAssetTotal(k){return _getRows(k).reduce((s,r)=>s+(r.amount||0),0);}
+function addAssetRow(key,data){_getRows(key).push(data||{name:'',amount:0,date:'',note:''});renderAssetRows(key);}
+function renderAssetRows(key){
+  const rows=_getRows(key);
+  const tbody=document.getElementById(key+'-rows');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  rows.forEach((r,idx)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><input type="text" value="${r.name||''}" oninput="_getRows('${key}')[${idx}].name=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100%;font-size:13px;" placeholder="명칭"></td>`+
+      `<td><input type="number" value="${r.amount||''}" oninput="_getRows('${key}')[${idx}].amount=parseInt(this.value)||0;calcAssetTotal('${key}')" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;font-size:13px;" placeholder="0"></td>`+
+      `<td><input type="date" value="${r.date||''}" oninput="_getRows('${key}')[${idx}].date=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;font-size:12px;"></td>`+
+      `<td><input type="text" value="${r.note||''}" oninput="_getRows('${key}')[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;" placeholder="비고"></td>`+
+      `<td><button onclick="_getRows('${key}').splice(${idx},1);renderAssetRows('${key}');calcAssetTotal('${key}')" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0 4px;">&#10005;</button></td>`;
+    tbody.appendChild(tr);
+  });
+  calcAssetTotal(key);
+}
+function calcAssetTotal(key){
+  const total=getAssetTotal(key);
+  const el=document.getElementById(ASSET_IDS[key]);if(el)el.textContent=fmtW(total);
+  if(key==='bank')updateBankNet(total);
+  if(key==='stock')setN('a-stock',total);
+  if(key==='deposit')setN('a-deposit',total);
+  if(key==='yellow'){setN('a-yellow-h',Math.round(total/2));setN('a-yellow-s',Math.round(total/2));}
+  if(key==='guarantee')setN('a-guarantee',total);
+  if(key==='retire'){setN('a-retire-h',Math.round(total/2));setN('a-retire-s',Math.round(total/2));}
+  if(key==='annuity')setN('a-annuity',total);
+  recalcAssets();
+}
+let _missionTotalForBank=0,_reserveTotalForBank=0;
+function updateBankNet(gross){
+  const g=gross!=null?gross:getAssetTotal('bank');
+  const net=g-_missionTotalForBank-_reserveTotalForBank;
+  const e=(id)=>document.getElementById(id);
+  if(e('bank-gross'))e('bank-gross').textContent=fmtW(g);
+  if(e('bank-minus-mission'))e('bank-minus-mission').textContent=fmtW(_missionTotalForBank);
+  if(e('bank-minus-reserve'))e('bank-minus-reserve').textContent=fmtW(_reserveTotalForBank);
+  if(e('bank-net'))e('bank-net').textContent=fmtW(net);
+}
 let prevMissionTotal=0, prevHanReserve=0, prevSarangReserve=0;
 
 function recalcAssets(){
-  const bank=getBankTotal(), stock=getN('a-stock'), savings=getSavingsTotal(), dep=getN('a-deposit');
+  const bankGross=getAssetTotal('bank');
+  const bank=bankGross-_missionTotalForBank-_reserveTotalForBank;
+  const stock=getAssetTotal('stock'),savings=getSavingsTotal(),dep=getAssetTotal('deposit');
   const yH=Math.round((_yellowPrevTotal/2)+getN('yellow-h-monthly'));
   const yS=Math.round((_yellowPrevTotal/2)+getN('yellow-s-monthly'));
   const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
@@ -1820,7 +1840,7 @@ async function loadAssetMonth(){
       const mm=r.mission_m?(typeof r.mission_m==='string'?JSON.parse(r.mission_m):r.mission_m):{};
       const rhm=r.reserve_h_m?(typeof r.reserve_h_m==='string'?JSON.parse(r.reserve_h_m):r.reserve_h_m):{};
       const rsm=r.reserve_s_m?(typeof r.reserve_s_m==='string'?JSON.parse(r.reserve_s_m):r.reserve_s_m):{};
-      bankRows=bm.rows||[]; savingsRows=sm.rows||[]; missionUsage=mm.usage||[];
+      bankRows=(bm.rows||[]).map(function(r){return{name:r.name||r.bank||'',amount:r.amount||0,date:r.date||'',note:r.note||''};}); savingsRows=sm.rows||[]; missionUsage=mm.usage||[];
       hanReserveUsage=rhm.usage||[]; sarangReserveUsage=rsm.usage||[];
       if(rhm.reserveHan!=null) setN('reserve-han',rhm.reserveHan);
       if(rsm.reserveSarang!=null) setN('reserve-sarang',rsm.reserveSarang);
@@ -1894,6 +1914,8 @@ async function loadAssetMonth(){
   if(_m){
     (async()=>{
       try{ await initJo11Section(_m); }catch(e){console.error('jo11:',e);}
+  try{ await initStockSection(_m); }catch(e){}
+  try{ await initDepositSection(_m); }catch(e){};
       try{ await initReserveSection(); }catch(e){console.error('reserve:',e);}
       try{ await initYellowSection(_m); }catch(e){console.error('yellow:',e);}
       try{ await initGuaranteeSection(); }catch(e){console.error('guarantee:',e);}
@@ -1916,7 +1938,9 @@ async function loadAssetMonth(){
 
 async function saveAssets(){
   const month=document.getElementById('asset-month').value; if(!month){showMsg('asset-msg','월을 선택하세요.',false);return;}
-  const bank=getBankTotal(), stock=getN('a-stock'), savings=getSavingsTotal(), dep=getN('a-deposit');
+  const bankGross=getAssetTotal('bank');
+  const bank=bankGross-_missionTotalForBank-_reserveTotalForBank;
+  const stock=getAssetTotal('stock'),savings=getSavingsTotal(),dep=getAssetTotal('deposit');
   const yH=Math.round((_yellowPrevTotal/2)+getN('yellow-h-monthly'));
   const yS=Math.round((_yellowPrevTotal/2)+getN('yellow-s-monthly'));
   const guar=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
@@ -1956,14 +1980,17 @@ async function saveAssets(){
     yellow_total:yH+yS, guarantee_total:guar, retirement_total:rH+rS, annuity_total:ann,
     memo:document.getElementById('a-memo').value||null,
     bank_m:JSON.stringify({rows:bankRows}),
+    stock_m:JSON.stringify({rows:stockRows}),
+    deposit_m:JSON.stringify({rows:depositRows}),
+    yellow_m:JSON.stringify({rows:yellowRows}),
     saving_m:JSON.stringify({rows:savingsRows}),
     mission_m:JSON.stringify({usage:missionUsage,total:missionTotal_,used:mU,remain:missionTotal_-mU}),
     reserve_h_m:JSON.stringify({usage:hanReserveUsage,reserveHan:rHVal,hanReserveRemain:hRem}),
     reserve_s_m:JSON.stringify({usage:sarangReserveUsage,reserveSarang:rSVal,sarangReserveRemain:sRem}),
-    yellow_m:JSON.stringify({h:yH,s:yS,hMonthly:getN('yellow-h-monthly'),sMonthly:getN('yellow-s-monthly'),note:document.getElementById('yellow-note')?.value||''}),
+
     retirement_m:JSON.stringify({rows:retireRows}),
-    deposit_m:JSON.stringify({note:document.getElementById('a-deposit-note')?.value||''}),
-    stock_m:JSON.stringify({note:document.getElementById('a-stock-note')?.value||''}),
+
+
     quarantee_m:JSON.stringify({rows:guaranteeRows}),
     annuity_m:JSON.stringify({rows:annuityRows}),
     mission_m:JSON.stringify({used:parseInt(document.getElementById('jo11-mission-used')?.value||0)||0,note:document.getElementById('jo11-note')?.value||'',prevMission:_jo11PrevMission,income:_jo11Income}),
@@ -2031,7 +2058,8 @@ function calcJo11(){
   s('jo11-mission-total', total);
   // 하위호환
   const h=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v.toLocaleString();};
-  h('is-jo11', jo11); h('is-mission-this', missionThis); h('is-mission', total);
+  h('is-jo11',jo11);h('is-mission-this',missionThis);h('is-mission',total);
+  _missionTotalForBank=total;updateBankNet();
 }
 
 /* ══════════════════════════════════════════════
@@ -2087,6 +2115,7 @@ function calcReserve(){
   const s=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v.toLocaleString();};
   s('res-h-final',fH); s('res-s-final',fS);
   s('res-total-final',fH+fS);
+  _reserveTotalForBank=fH+fS;updateBankNet();
   // 하위호환
   s('han-reserve-remain',fH); s('sarang-reserve-remain',fS); s('reserve-remain',fH+fS); s('is-reserve',fH+fS);
 }
@@ -2095,303 +2124,49 @@ function calcReserve(){
    노란우산 계산
 ══════════════════════════════════════════════ */
 let _yellowPrevTotal=0;
-
+async function initStockSection(month){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=stock_m,stock_total&limit=1`,{headers:HDR});
+    const d=await r.json();
+    if(d[0]&&d[0].stock_m){const sm=typeof d[0].stock_m==='string'?JSON.parse(d[0].stock_m):d[0].stock_m;if(sm.rows&&sm.rows.length){stockRows=sm.rows;renderAssetRows('stock');return;}}
+    const pm=prevM(month);
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=stock_m,stock_total&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2[0]&&d2[0].stock_m){const sm=typeof d2[0].stock_m==='string'?JSON.parse(d2[0].stock_m):d2[0].stock_m;if(sm.rows&&sm.rows.length){stockRows=sm.rows.map(function(r){return Object.assign({},r,{date:''});});renderAssetRows('stock');return;}}
+    const prev=Number(d2[0]&&d2[0].stock_total)||0;
+    if(!stockRows.length&&prev)stockRows=[{name:'주식',amount:prev,date:'',note:'이전달'}];
+  }catch(e){}
+  renderAssetRows('stock');
+}
+async function initDepositSection(month){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=deposit_m,deposit_total&limit=1`,{headers:HDR});
+    const d=await r.json();
+    if(d[0]&&d[0].deposit_m){const dm=typeof d[0].deposit_m==='string'?JSON.parse(d[0].deposit_m):d[0].deposit_m;if(dm.rows&&dm.rows.length){depositRows=dm.rows;renderAssetRows('deposit');return;}}
+    const pm=prevM(month);
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=deposit_m,deposit_total&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2[0]&&d2[0].deposit_m){const dm=typeof d2[0].deposit_m==='string'?JSON.parse(d2[0].deposit_m):d2[0].deposit_m;if(dm.rows&&dm.rows.length){depositRows=dm.rows.map(function(r){return Object.assign({},r,{date:''});});renderAssetRows('deposit');return;}}
+    const prev=Number(d2[0]&&d2[0].deposit_total)||0;
+    if(!depositRows.length&&prev)depositRows=[{name:'정기예금',amount:prev,date:'',note:'이전달'}];
+  }catch(e){}
+  renderAssetRows('deposit');
+}
 async function initYellowSection(month){
-  const pm=prevM(month);
-  const lbl=document.getElementById('yellow-month-label'); if(lbl) lbl.textContent=month;
   try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=yellow_total,yellow_m&limit=1`,{headers:HDR});
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=yellow_m,yellow_total&limit=1`,{headers:HDR});
     const d=await r.json();
-    _yellowPrevTotal=Number(d[0]?.yellow_total)||0;
-    const el=document.getElementById('yellow-prev-total'); if(el) el.textContent=_yellowPrevTotal.toLocaleString();
-    const hPrev=Math.round(_yellowPrevTotal/2), sPrev=Math.round(_yellowPrevTotal/2);
-    const e1=document.getElementById('yellow-h-prev'); if(e1) e1.textContent=hPrev.toLocaleString();
-    const e2=document.getElementById('yellow-s-prev'); if(e2) e2.textContent=sPrev.toLocaleString();
-    // 이번달 저장값
-    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=yellow_m&limit=1`,{headers:HDR});
+    if(d[0]&&d[0].yellow_m){const ym=typeof d[0].yellow_m==='string'?JSON.parse(d[0].yellow_m):d[0].yellow_m;if(ym.rows&&ym.rows.length){yellowRows=ym.rows;renderAssetRows('yellow');return;}}
+    const pm=prevM(month);
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=yellow_m,yellow_total&limit=1`,{headers:HDR});
     const d2=await r2.json();
-    if(d2[0]?.yellow_m){
-      const ym=typeof d2[0].yellow_m==='string'?JSON.parse(d2[0].yellow_m):d2[0].yellow_m;
-      if(ym.hMonthly!=null) setN('yellow-h-monthly',ym.hMonthly);
-      if(ym.sMonthly!=null) setN('yellow-s-monthly',ym.sMonthly);
-      if(ym.note){const el=document.getElementById('yellow-note');if(el)el.value=ym.note;}
-    }
+    _yellowPrevTotal=Number(d2[0]&&d2[0].yellow_total)||0;
+    if(d2[0]&&d2[0].yellow_m){const ym=typeof d2[0].yellow_m==='string'?JSON.parse(d2[0].yellow_m):d2[0].yellow_m;if(ym.rows&&ym.rows.length){yellowRows=ym.rows.map(function(r){return Object.assign({},r,{date:''});});renderAssetRows('yellow');return;}}
+    if(!yellowRows.length)yellowRows=[{name:'노란우산(한강)',amount:Math.round(_yellowPrevTotal/2)+250000,date:'',note:''},{name:'노란우산(사랑)',amount:Math.round(_yellowPrevTotal/2)+250000,date:'',note:''}];
   }catch(e){console.error('initYellow:',e);}
-  calcYellow();
+  renderAssetRows('yellow');
 }
-
-function calcYellow(){
-  const hPrev=Math.round(_yellowPrevTotal/2), sPrev=Math.round(_yellowPrevTotal/2);
-  const hM=parseInt(document.getElementById('yellow-h-monthly')?.value||0)||0;
-  const sM=parseInt(document.getElementById('yellow-s-monthly')?.value||0)||0;
-  const total=hPrev+sPrev+hM+sM;
-  const el=document.getElementById('yellow-total-final'); if(el) el.textContent=total.toLocaleString();
-  document.getElementById('at-yellow').textContent=fmtW(total);
-  // hidden inputs for recalcAssets
-  setN('a-yellow-h', hPrev+hM); setN('a-yellow-s', sPrev+sM);
-  recalcAssets();
-}
-
-/* ══════════════════════════════════════════════
-   보증금 항목 관리
-══════════════════════════════════════════════ */
-let guaranteeRows=[];
-
-function addGuaranteeRow(data){
-  guaranteeRows.push(data||{name:'장기현금',total:0,hospital:0,house:0,note:''});
-  renderGuaranteeRows();
-}
-function renderGuaranteeRows(){
-  const tbody=document.getElementById('guarantee-rows'); if(!tbody) return;
-  tbody.innerHTML='';
-  guaranteeRows.forEach((r,idx)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><input type="text" value="${r.name||''}" oninput="guaranteeRows[${idx}].name=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:100%;font-size:13px;"></td>
-      <td class="num" style="font-weight:600;color:#185fa5;">${(r.total||0).toLocaleString()}</td>
-      <td><input type="number" value="${r.hospital||''}" oninput="guaranteeRows[${idx}].hospital=parseInt(this.value)||0;guaranteeRows[${idx}].total=(guaranteeRows[${idx}].hospital||0)+(guaranteeRows[${idx}].house||0);renderGuaranteeRows();calcGuarantee()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:120px;text-align:right;"></td>
-      <td><input type="number" value="${r.house||''}" oninput="guaranteeRows[${idx}].house=parseInt(this.value)||0;guaranteeRows[${idx}].total=(guaranteeRows[${idx}].hospital||0)+(guaranteeRows[${idx}].house||0);renderGuaranteeRows();calcGuarantee()" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:5px 8px;width:130px;text-align:right;"></td>
-      <td><input type="text" value="${r.note||''}" oninput="guaranteeRows[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:5px 8px;width:100%;background:#fafaf8;font-size:12px;"></td>
-      <td><button onclick="guaranteeRows.splice(${idx},1);renderGuaranteeRows();calcGuarantee()" style="background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;">✕</button></td>`;
-    tbody.appendChild(tr);
-  });
-  calcGuarantee();
-}
-function calcGuarantee(){
-  const total=guaranteeRows.reduce((s,r)=>s+(r.total||0),0);
-  const el=document.getElementById('guarantee-total-disp'); if(el) el.textContent=total.toLocaleString();
-  document.getElementById('at-guarantee').textContent=fmtW(total);
-  setN('a-guarantee',total);
-  recalcAssets();
-}
-async function initGuaranteeSection(){
-  const month=document.getElementById('asset-month')?.value; if(!month) return;
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=quarantee_m,guarantee_total&limit=1`,{headers:HDR});
-    const d=await r.json();
-    if(d[0]?.quarantee_m){
-      const gm=typeof d[0].quarantee_m==='string'?JSON.parse(d[0].quarantee_m):d[0].quarantee_m;
-      if(gm.rows?.length) { guaranteeRows=gm.rows; renderGuaranteeRows(); return; }
-    }
-    // 이전달에서 이어받기
-    const pm=prevM(month);
-    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=quarantee_m,guarantee_total&limit=1`,{headers:HDR});
-    const d2=await r2.json();
-    if(d2[0]?.quarantee_m){
-      const gm=typeof d2[0].quarantee_m==='string'?JSON.parse(d2[0].quarantee_m):d2[0].quarantee_m;
-      if(gm.rows?.length) { guaranteeRows=gm.rows.map(r=>({...r})); renderGuaranteeRows(); return; }
-    }
-    // 기본값
-    if(!guaranteeRows.length) guaranteeRows=[{name:'장기현금',total:380000000,hospital:60000000,house:320000000,note:''}];
-  }catch(e){console.error('initGuarantee:',e);}
-  renderGuaranteeRows();
-}
-
-/* ══════════════════════════════════════════════
-   퇴직연금 항목 관리
-══════════════════════════════════════════════ */
-let retireRows=[];
-
-function addRetireRow(data){
-  retireRows.push(data||{ym:'',type:'연금',total:0,h:0,s:0,hMonthly:340000,sMonthly:340000,note:''});
-  renderRetireRows();
-}
-function renderRetireRows(){
-  const tbody=document.getElementById('retire-rows'); if(!tbody) return;
-  const month=document.getElementById('asset-month')?.value||'';
-  tbody.innerHTML='';
-  retireRows.forEach((r,idx)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td style="text-align:center;">${r.ym||month}</td>
-      <td><input type="text" value="${r.type||'연금'}" oninput="retireRows[${idx}].type=this.value" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:60px;font-size:12px;"></td>
-      <td class="num" style="font-weight:600;color:#ba7517;">${(r.total||0).toLocaleString()}</td>
-      <td><input type="number" value="${r.h||''}" oninput="retireRows[${idx}].h=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:120px;text-align:right;font-size:12px;"></td>
-      <td><input type="number" value="${r.s||''}" oninput="retireRows[${idx}].s=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:120px;text-align:right;font-size:12px;"></td>
-      <td><input type="number" value="${r.hMonthly||340000}" oninput="retireRows[${idx}].hMonthly=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:90px;text-align:right;font-size:12px;"></td>
-      <td><input type="number" value="${r.sMonthly||340000}" oninput="retireRows[${idx}].sMonthly=parseInt(this.value)||0;calcRetireTotals(${idx})" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 6px;width:90px;text-align:right;font-size:12px;"></td>
-      <td><input type="text" value="${r.note||''}" oninput="retireRows[${idx}].note=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:4px 6px;width:100%;background:#fafaf8;font-size:12px;"></td>
-      <td><button onclick="retireRows.splice(${idx},1);renderRetireRows();calcRetire()" style="background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;">✕</button></td>`;
-    tbody.appendChild(tr);
-  });
-  calcRetire();
-}
-function calcRetireTotals(idx){
-  const r=retireRows[idx];
-  r.total=(r.h||0)+(r.s||0)+(r.hMonthly||0)+(r.sMonthly||0);
-  renderRetireRows();
-}
-function calcRetire(){
-  const total=retireRows.reduce((s,r)=>s+(r.total||0),0);
-  const el=document.getElementById('retire-total-disp'); if(el) el.textContent=total.toLocaleString();
-  document.getElementById('at-retirement').textContent=fmtW(total);
-  setN('a-retire-h', Math.round(total/2)); setN('a-retire-s', Math.round(total/2));
-  recalcAssets();
-}
-async function initRetireSection(month){
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=retirement_m,retirement_total&limit=1`,{headers:HDR});
-    const d=await r.json();
-    if(d[0]?.retirement_m){
-      const rm=typeof d[0].retirement_m==='string'?JSON.parse(d[0].retirement_m):d[0].retirement_m;
-      if(rm.rows?.length){retireRows=rm.rows;renderRetireRows();return;}
-    }
-    const pm=prevM(month);
-    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=retirement_m,retirement_total&limit=1`,{headers:HDR});
-    const d2=await r2.json();
-    if(d2[0]?.retirement_m){
-      const rm=typeof d2[0].retirement_m==='string'?JSON.parse(d2[0].retirement_m):d2[0].retirement_m;
-      if(rm.rows?.length){retireRows=rm.rows.map(r=>({...r,ym:month}));renderRetireRows();return;}
-    }
-    const prevTotal=Number(d2[0]?.retirement_total)||0;
-    if(!retireRows.length) retireRows=[{ym:month,type:'연금',total:prevTotal+(340000*2),h:Math.round(prevTotal/2),s:Math.round(prevTotal/2),hMonthly:340000,sMonthly:340000,note:''}];
-  }catch(e){console.error('initRetire:',e);}
-  renderRetireRows();
-}
-
-/* ══════════════════════════════════════════════
-   연금보험 항목 관리
-══════════════════════════════════════════════ */
-let annuityRows=[];
-
-function addAnnuityRow(data){
-  annuityRows.push(data||{ym:'',type:'연금',total:0,kyoboH:0,kyoboS:0,kyoboHm:340000,kyoboSm:340000,kyoboNote:'',suhyupH:0,suhyupS:0,suhyupNote:'',nongH:0,nongS:0,nongHm:1064520,nongSm:1064520,nongNote:''});
-  renderAnnuityRows();
-}
-function renderAnnuityRows(){
-  const tbody=document.getElementById('annuity-rows'); if(!tbody) return;
-  const month=document.getElementById('asset-month')?.value||'';
-  tbody.innerHTML='';
-  annuityRows.forEach((r,idx)=>{
-    const calcTotal=()=>{
-      r.total=(r.kyoboH||0)+(r.kyoboS||0)+(r.kyoboHm||0)+(r.kyoboSm||0)+(r.suhyupH||0)+(r.suhyupS||0)+(r.nongH||0)+(r.nongS||0)+(r.nongHm||0)+(r.nongSm||0);
-      renderAnnuityRows(); calcAnnuity();
-    };
-    const inp=(val,key,w)=>`<input type="number" value="${val||''}" oninput="annuityRows[${idx}].${key}=parseInt(this.value)||0;" style="border:0.5px solid #b4b2a9;border-radius:6px;padding:4px 5px;width:${w||'100px'};text-align:right;font-size:11px;">`;
-    const inpT=(val,key)=>`<input type="text" value="${val||''}" oninput="annuityRows[${idx}].${key}=this.value" style="border:0.5px solid #ddddd5;border-radius:6px;padding:4px 5px;width:80px;background:#fafaf8;font-size:11px;">`;
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td style="text-align:center;font-size:12px;">${r.ym||month}</td>
-      <td style="font-size:12px;">${r.type||'연금'}</td>
-      <td class="num" style="font-weight:600;color:#ba7517;font-size:12px;">${(r.total||0).toLocaleString()}</td>
-      <td>${inp(r.kyoboH,'kyoboH','100px')}</td>
-      <td>${inp(r.kyoboS,'kyoboS','100px')}</td>
-      <td>${inp(r.kyoboHm,'kyoboHm','80px')}</td>
-      <td>${inp(r.kyoboSm,'kyoboSm','80px')}</td>
-      <td>${inpT(r.kyoboNote,'kyoboNote')}</td>
-      <td>${inp(r.suhyupH,'suhyupH','100px')}</td>
-      <td>${inp(r.suhyupS,'suhyupS','100px')}</td>
-      <td>${inpT(r.suhyupNote,'suhyupNote')}</td>
-      <td>${inp(r.nongH,'nongH','100px')}</td>
-      <td>${inp(r.nongS,'nongS','100px')}</td>
-      <td>${inp(r.nongHm,'nongHm','90px')}</td>
-      <td>${inp(r.nongSm,'nongSm','90px')}</td>
-      <td>${inpT(r.nongNote,'nongNote')}</td>
-      <td><button onclick="annuityRows.splice(${idx},1);renderAnnuityRows();calcAnnuity()" style="background:none;border:none;color:#ccc;font-size:14px;cursor:pointer;">✕</button></td>`;
-    // 각 input에 oninput으로 calcTotal 추가
-    tr.querySelectorAll('input[type=number]').forEach(inp=>{
-      const orig=inp.getAttribute('oninput')||'';
-      inp.setAttribute('oninput', orig+`;annuityRows[${idx}].total=(annuityRows[${idx}].kyoboH||0)+(annuityRows[${idx}].kyoboS||0)+(annuityRows[${idx}].kyoboHm||0)+(annuityRows[${idx}].kyoboSm||0)+(annuityRows[${idx}].suhyupH||0)+(annuityRows[${idx}].suhyupS||0)+(annuityRows[${idx}].nongH||0)+(annuityRows[${idx}].nongS||0)+(annuityRows[${idx}].nongHm||0)+(annuityRows[${idx}].nongSm||0);calcAnnuity()`);
-    });
-    tbody.appendChild(tr);
-  });
-  calcAnnuity();
-}
-function calcAnnuity(){
-  const total=annuityRows.reduce((s,r)=>s+(r.total||0),0);
-  const el=document.getElementById('annuity-total-disp'); if(el) el.textContent=total.toLocaleString();
-  document.getElementById('at-annuity').textContent=fmtW(total);
-  setN('a-annuity',total);
-  recalcAssets();
-}
-async function initAnnuitySection(month){
-  try{
-    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
-    const d=await r.json();
-    if(d[0]?.annuity_m){
-      const am=typeof d[0].annuity_m==='string'?JSON.parse(d[0].annuity_m):d[0].annuity_m;
-      if(am.rows?.length){annuityRows=am.rows;renderAnnuityRows();return;}
-    }
-    const pm=prevM(month);
-    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
-    const d2=await r2.json();
-    if(d2[0]?.annuity_m){
-      const am=typeof d2[0].annuity_m==='string'?JSON.parse(d2[0].annuity_m):d2[0].annuity_m;
-      if(am.rows?.length){annuityRows=am.rows.map(r=>({...r,ym:month}));renderAnnuityRows();return;}
-    }
-    const prevTotal=Number(d2[0]?.annuity_total)||0;
-    if(!annuityRows.length) annuityRows=[{ym:month,type:'연금',total:prevTotal,kyoboH:0,kyoboS:0,kyoboHm:340000,kyoboSm:340000,kyoboNote:'1503~',suhyupH:0,suhyupS:0,suhyupNote:'',nongH:0,nongS:0,nongHm:1064520,nongSm:1064520,nongNote:'2503~30'}];
-  }catch(e){console.error('initAnnuity:',e);}
-  renderAnnuityRows();
-}
-
-
-async function finalSave(){
-  const month=document.getElementById('asset-month').value;
-  if(!month){alert('월을 먼저 선택하세요.');return;}
-  if(!confirm(`${month} 가계통계를 최종저장할까요?`))return;
-  await saveAssets();
-  const msgEl=document.getElementById('final-save-msg');
-  if(msgEl){msgEl.textContent=`✓ ${month} 최종저장 완료!`;setTimeout(()=>msgEl.textContent='',5000);}
-}
-
-/* ══ 검색 설정 localStorage 저장/복원 ══ */
-function saveSettings(){
-  const s = {
-    viewType: document.getElementById('view-type')?.value,
-    yearSelect: document.getElementById('year-select')?.value,
-    yearFrom: document.getElementById('year-from')?.value,
-    yearTo: document.getElementById('year-to')?.value,
-    dateFrom: document.getElementById('date-from')?.value,
-    dateTo: document.getElementById('date-to')?.value,
-    hhMonthFrom: document.getElementById('hh-month-from')?.value,
-    hhMonthTo: document.getElementById('hh-month-to')?.value,
-    assetHistFrom: document.getElementById('asset-hist-from')?.value,
-    assetHistTo: document.getElementById('asset-hist-to')?.value,
-  };
-  try { localStorage.setItem('han_stat_settings', JSON.stringify(s)); } catch(e){}
-}
-function _debugGahye(){
-  const name = _activeGahyeSection || 'jo11';
-  console.log('[debug] activeSection:', name);
-  console.log('[debug] jo11Income:', _jo11Income, 'prevMission:', _jo11PrevMission);
-  console.log('[debug] guaranteeRows:', guaranteeRows.length, 'retireRows:', retireRows.length);
-  // 강제로 현재 섹션 표시
-  document.querySelectorAll('.gahye-section').forEach(s=>{ s.style.display='none'; s.style.cssText='display:none!important'; });
-  const sec = document.getElementById('gahye-section-'+name);
-  if(sec){ sec.style.cssText='display:block!important'; console.log('[debug] sec found:', sec.id); }
-  else { console.log('[debug] sec NOT found for:', name); }
-  // 갱신
-  try{ calcJo11(); }catch(e){ console.error('calcJo11:',e); }
-  try{ calcReserve(); }catch(e){ console.error('calcReserve:',e); }
-  try{ calcYellow(); }catch(e){ console.error('calcYellow:',e); }
-  try{ renderGuaranteeRows(); calcGuarantee(); }catch(e){ console.error('guarantee:',e); }
-  try{ renderRetireRows(); calcRetire(); }catch(e){ console.error('retire:',e); }
-  try{ renderAnnuityRows(); calcAnnuity(); }catch(e){ console.error('annuity:',e); }
-  try{ renderBankRows(); recalcBank(); }catch(e){ console.error('bank:',e); }
-  alert('화면 갱신 완료 (콘솔에서 [debug] 확인)');
-}
-function loadSettings(){
-  try {
-    const s = JSON.parse(localStorage.getItem('han_stat_settings')||'{}');
-    if(s.viewType) document.getElementById('view-type').value=s.viewType;
-    if(s.yearSelect) document.getElementById('year-select').value=s.yearSelect;
-    if(s.yearFrom) document.getElementById('year-from').value=s.yearFrom;
-    if(s.yearTo) document.getElementById('year-to').value=s.yearTo;
-    if(s.dateFrom) document.getElementById('date-from').value=s.dateFrom;
-    if(s.dateTo) document.getElementById('date-to').value=s.dateTo;
-    if(s.hhMonthFrom) document.getElementById('hh-month-from').value=s.hhMonthFrom;
-    if(s.hhMonthTo) document.getElementById('hh-month-to').value=s.hhMonthTo;
-    if(s.assetHistFrom) document.getElementById('asset-hist-from').value=s.assetHistFrom;
-    if(s.assetHistTo) document.getElementById('asset-hist-to').value=s.assetHistTo;
-    onViewTypeChange();
-  } catch(e){}
-}
-// 조회 버튼 클릭 시 설정 저장
-document.querySelectorAll('.controls button:not(.secondary)').forEach(btn=>{
-  const orig = btn.onclick;
-  btn.addEventListener('click', saveSettings);
-});
+function calcYellow(){calcAssetTotal('yellow');}
 
 /* 초기 로드 */
 loadSettings();
@@ -2399,4 +2174,34 @@ loadRecent();
 </script>
 
 </body>
-</html>
+</html>/* ══ 연금보험 (공통 렌더러 사용) ══ */
+function addAnnuityRow(data){ addAssetRow('annuity', data ? {name:data.name||'연금보험',amount:data.total||data.amount||0,date:data.date||data.ym||'',note:data.note||''} : {name:'연금보험',amount:0,date:'',note:''}); }
+function renderAnnuityRows(){ renderAssetRows('annuity'); }
+function calcAnnuity(){ calcAssetTotal('annuity'); }
+async function initAnnuitySection(month){
+  try{
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${month}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
+    const d=await r.json();
+    if(d[0]?.annuity_m){
+      const am=typeof d[0].annuity_m==='string'?JSON.parse(d[0].annuity_m):d[0].annuity_m;
+      if(am.rows?.length){
+        annuityRows=am.rows.map(r=>({name:r.name||'연금보험',amount:r.total||r.amount||0,date:r.date||'',note:r.note||''}));
+        renderAssetRows('annuity'); return;
+      }
+    }
+    const pm=prevM(month);
+    const r2=await fetch(`${SUPABASE_URL}/rest/v1/${HS}?year_month=eq.${pm}&select=annuity_m,annuity_total&limit=1`,{headers:HDR});
+    const d2=await r2.json();
+    if(d2[0]?.annuity_m){
+      const am=typeof d2[0].annuity_m==='string'?JSON.parse(d2[0].annuity_m):d2[0].annuity_m;
+      if(am.rows?.length){
+        annuityRows=am.rows.map(r=>({name:r.name||'연금보험',amount:r.total||r.amount||0,date:'',note:r.note||''}));
+        renderAssetRows('annuity'); return;
+      }
+    }
+    const prevTotal=Number(d2[0]?.annuity_total)||0;
+    if(!annuityRows.length) annuityRows=[{name:'연금보험',amount:prevTotal,date:'',note:'이전달'}];
+  }catch(e){console.error('initAnnuity:',e);}
+  renderAssetRows('annuity');
+}
+
